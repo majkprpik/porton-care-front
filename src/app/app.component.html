@@ -14,7 +14,7 @@
       <ul>
         <li><a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a></li>
         <li><a routerLink="/daily-sheet" routerLinkActive="active" (click)="closeMenu()">Daily Sheet</a></li>
-        <li><a routerLink="/team/1" routerLinkActive="active" (click)="closeMenu()">Team View</a></li>
+        <li><a routerLink="/teams" routerLinkActive="active" (click)="closeMenu()">Team View</a></li>
         <li class="user-info">
           <span class="username">{{ username }}</span>
           <button class="logout-btn" (click)="logout()">Logout</button>
@@ -26,4 +26,8 @@
 
 <main class="main-content" [class.with-header]="username">
   <router-outlet></router-outlet>
+
+  <button class="fab" (click)="openRepairReport()">
+    <mat-icon>build</mat-icon>
+  </button>
 </main>

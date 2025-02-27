@@ -2,15 +2,20 @@
   <form class="login-form" (ngSubmit)="onLogin()">
     <h2>Welcome</h2>
     <div class="form-group">
-      <label for="username">Username</label>
+      <label for="email">Email</label>
       <input 
-        type="text" 
-        id="username" 
-        [(ngModel)]="username" 
-        name="username"
-        placeholder="Enter your username"
+        type="email" 
+        id="email" 
+        [(ngModel)]="email" 
+        name="email"
+        placeholder="Enter your email"
         required>
     </div>
-    <button type="submit">Enter</button>
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+    <button type="submit" [disabled]="loading">
+      {{ loading ? 'Logging in...' : 'Enter' }}
+    </button>
   </form>
 </div> 

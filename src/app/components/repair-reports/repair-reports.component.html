@@ -1,0 +1,46 @@
+<div class="container mt-4">
+  <h2>Repair Reports</h2>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let report of reports">
+          <td>{{report.createdAt | date:'short'}}</td>
+          <td>{{report.location}}</td>
+          <td>{{report.description}}</td>
+          <td>
+            <span class="badge" [ngClass]="{'bg-danger': report.status === RepairStatus.OPENED,
+                                          'bg-warning': report.status === RepairStatus.SEEN,
+                                          'bg-success': report.status === RepairStatus.REPAIRED,
+                                          'bg-info': report.status === RepairStatus.NEEDS_TIME || 
+                                                    report.status === RepairStatus.NEEDS_CONSULTING}">
+              {{report.status}}
+            </span>
+          </td>
+          <td>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Update Status
+              </button>
+              <ul class="dropdown-menu">
+                <li *ngFor="let status of RepairStatus | keyvalue">
+                  <a class="dropdown-item" (click)="updateStatus(report, status.value)">
+                    {{status.value}}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div> 
