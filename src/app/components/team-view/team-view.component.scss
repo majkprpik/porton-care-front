@@ -1,0 +1,22 @@
+.teams-list {
+  padding: 20px;
+
+  .team-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .team-link {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+} 

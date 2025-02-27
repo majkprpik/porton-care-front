@@ -1,20 +1,82 @@
 <div class="daily-sheet-container">
-  <h2>Create Daily Sheet</h2>
-  <form class="daily-sheet-form">
-    <div class="form-group">
-      <label for="date">Date</label>
-      <input type="date" id="date">
+  <!-- Left side - Mobile Homes -->
+  <div class="homes-section">
+    <h3>Mobile Homes</h3>
+    <div class="homes-list"
+         cdkDropList
+         id="homes-list"
+         [cdkDropListData]="mobileHomes"
+         [cdkDropListConnectedTo]="getTeamHomeDropLists()"
+         (cdkDropListDropped)="onDrop($event)">
+      <app-mobile-home-card
+        *ngFor="let home of mobileHomes"
+        [status]="home.status"
+        [homeNumber]="home.number"
+        cdkDrag>
+      </app-mobile-home-card>
     </div>
-    <div class="form-group">
-      <label for="team">Team</label>
-      <select id="team">
-        <option value="">Select Team</option>
-      </select>
+  </div>
+
+  <!-- Middle - Teams -->
+  <div class="teams-section">
+    <h3>Teams</h3>
+    <button class="new-team-btn" (click)="createNewTeam()">Create New Team</button>
+    <button class="lock-teams-btn" (click)="lockTeams()">Lock Teams</button>
+    
+    <div class="teams-container">
+      <div class="team-box" *ngFor="let team of assignedTeams">
+        <h4>Team {{team.id}}</h4>
+        <div class="team-content">
+          <div class="team-members"
+               cdkDropList
+               [id]="'team-' + team.id + '-members'"
+               [cdkDropListData]="team.members"
+               [cdkDropListConnectedTo]="['staff-list']"
+               (cdkDropListDropped)="onDrop($event)">
+            <div class="member-card" *ngFor="let member of team.members" cdkDrag>
+              {{member.name}}
+            </div>
+            <div class="placeholder" *ngIf="team.members.length === 0">
+              Drop staff here
+            </div>
+          </div>
+
+          <div class="team-homes"
+               cdkDropList
+               [id]="'team-' + team.id + '-homes'"
+               [cdkDropListData]="team.homes"
+               [cdkDropListConnectedTo]="['homes-list']"
+               (cdkDropListDropped)="onDrop($event)">
+            <app-mobile-home-card
+              *ngFor="let home of team.homes"
+              [status]="home.status"
+              [homeNumber]="home.number"
+              cdkDrag>
+            </app-mobile-home-card>
+            <div class="placeholder" *ngIf="team.homes.length === 0">
+              Drop homes here
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="form-group">
-      <label for="notes">Notes</label>
-      <textarea id="notes" rows="4"></textarea>
+  </div>
+
+  <!-- Right side - Cleaning Staff -->
+  <div class="staff-section">
+    <h3>Cleaning Staff</h3>
+    <div class="staff-list"
+         cdkDropList
+         id="staff-list"
+         [cdkDropListData]="cleaningStaff"
+         [cdkDropListConnectedTo]="getTeamMemberDropLists()"
+         (cdkDropListDropped)="onDrop($event)">
+      <div class="staff-card" 
+           *ngFor="let person of cleaningStaff" 
+           cdkDrag
+           [class.unavailable]="!person.available">
+        {{person.name}}
+      </div>
     </div>
-    <button type="submit">Create Sheet</button>
-  </form>
+  </div>
 </div> 

@@ -1,0 +1,26 @@
+<div class="modal-header">
+  <h4 class="modal-title">Report Repair Need</h4>
+  <!-- <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button> -->
+</div>
+<div class="modal-body">
+  <form #reportForm="ngForm">
+    <div class="mb-3">
+      <label for="location" class="form-label">Location</label>
+      <select class="form-select" id="location" [(ngModel)]="report.location" name="location" required>
+        <option value="">Select location</option>
+        <option *ngFor="let location of locations" [value]="location">{{location}}</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" [(ngModel)]="report.description" 
+                name="description" required rows="3" 
+                placeholder="Describe the issue..."></textarea>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <!-- <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Cancel</button> -->
+  <button type="button" class="btn btn-primary" (click)="onSubmit()" 
+          [disabled]="!report.description || !report.location">Submit</button>
+</div> 

@@ -1,20 +1,24 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { TeamsService } from '../../services/teams.service';
+import { LockedTeam } from '../../interfaces/team.interface';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-team-view',
   templateUrl: './team-view.component.html',
-//   styleUrls: ['./team-view.component.css']
+  styleUrls: ['./team-view.component.scss'],
+  standalone: true,
+  imports: [CommonModule, RouterModule]
 })
 export class TeamViewComponent implements OnInit {
-  teamId: string = '';
+  teams: LockedTeam[] = [];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private teamsService: TeamsService) {}
 
   ngOnInit() {
-    // Get the team ID from the route parameters
-    this.route.params.subscribe(params => {
-      this.teamId = params['id'];
+    this.teamsService.lockedTeams$.subscribe(teams => {
+      this.teams = teams;
     });
   }
 } 

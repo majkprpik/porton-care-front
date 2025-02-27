@@ -77,4 +77,18 @@ $primary-shadow: rgba(0, 123, 255, 0.25);
       }
     }
   }
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+button {
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
 } 

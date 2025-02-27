@@ -1,0 +1,53 @@
+<div class="team-detail" *ngIf="team">
+    <h2>Team {{team.id}}</h2>
+    
+    <div class="team-members">
+      <h3>Team Members</h3>
+      <ul>
+        <li *ngFor="let member of team.members">
+          {{member.name}}
+        </li>
+      </ul>
+    </div>
+  
+    <div class="team-homes">
+      <h3>Homes to Clean</h3>
+      <div class="homes-grid">
+        <div *ngFor="let home of team.homes" class="home-card" [ngClass]="home.status">
+          <div class="home-number">{{home.number}}</div>
+          <div class="home-actions">
+            <!-- Show Start Cleaning button when home is dirty -->
+            <button *ngIf="home.status === CleaningState.DIRTY"
+                    (click)="startCleaning(home)"
+                    class="btn-start">
+              Start Cleaning
+            </button>
+
+            <!-- Show Stop Cleaning button when cleaning is in progress -->
+            <button *ngIf="home.status === CleaningState.CLEANING"
+                    (click)="stopCleaning(home)"
+                    class="btn-stop">
+              Stop Cleaning
+            </button>
+
+            <!-- Show Full Cleaned button when partially cleaned -->
+            <button *ngIf="home.status === CleaningState.PARTIALLY_CLEANED"
+                    (click)="markFullyCleaned(home)"
+                    class="btn-complete">
+              Full Cleaned!
+            </button>
+
+            <!-- Show status when fully cleaned -->
+            <span *ngIf="home.status === CleaningState.FULLY_CLEANED" 
+                  class="status-complete">
+              Completed
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div *ngIf="!team">
+    <p>Team not found</p>
+  </div>

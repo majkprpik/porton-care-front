@@ -9,6 +9,12 @@ $header-height: 64px;
 $shadow: rgba(0, 0, 0, 0.1);
 $mobile-breakpoint: 768px;
 
+body {
+  margin: 0;
+  padding: 0;
+  // font-family: 'Arial', sans-serif;
+}
+
 .main-header {
   background-color: $white;
   box-shadow: 0 2px 4px $shadow;
@@ -158,5 +164,29 @@ $mobile-breakpoint: 768px;
 
   .main-content {
     padding: 1rem;
+  }
+}
+
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #007bff;
+  border: none;
+  color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.1);
+    background: #0056b3;
+  }
+
+  i {
+    font-size: 24px;
   }
 }

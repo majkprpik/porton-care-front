@@ -1,0 +1,22 @@
+import { Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { AuthGuard } from './guards/auth.guard';
+import { TeamDetailComponent } from './components/team-detail/team-detail.component';
+import { RepairReportComponent } from './components/repair-report/repair-report.component';
+import { RepairReportsComponent } from './components/repair-reports/repair-reports.component';
+import { TeamViewComponent } from './components/team-view/team-view.component';
+import { DailySheetComponent } from './components/daily-sheet/daily-sheet.component';
+
+
+export const routes: Routes = [
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  { path: 'daily-sheet', component: DailySheetComponent, canActivate: [AuthGuard] },
+  { path: 'teams', component: TeamViewComponent, canActivate: [AuthGuard] },
+  { path: 'team/:id', component: TeamDetailComponent },
+  { path: 'repair-reports', component: RepairReportsComponent },
+  { path: 'report-repair', component: RepairReportComponent },
+  { path: '**', redirectTo: '/dashboard' },
+];
