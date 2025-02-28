@@ -75,7 +75,7 @@ VALUES (
   '2025-02-24 14:20:22.147367+00'
 );
 
-insert into profiles (id, role, first_name, last_name ,created_at) values ('167833b7-90f8-4d82-b6f4-fe525bee1b33', 'reception', 'Vedran', 'prpic' ,'2025-02-24 17:51:03.794344');
+-- insert into profiles (id, role, first_name, last_name ,created_at) values ('167833b7-90f8-4d82-b6f4-fe525bee1b33', 'reception', 'Vedran', 'prpic' ,'2025-02-24 17:51:03.794344');
 
 insert into public.events (event_id, date, is_locked)
 values
