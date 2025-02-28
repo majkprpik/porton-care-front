@@ -80,7 +80,7 @@ insert into profiles (id, role, first_name, last_name ,created_at) values ('1678
 insert into public.events (event_id, date, is_locked)
 values
   ('13d5771e-5298-4442-858a-2da3d922b99a', CURRENT_DATE + TIME '08:00:00', false),
-  ('7b439e92-5fd4-4898-9565-2fa3a52f563a', CURRENT_DATE + TIME '08:00:00', false);
+  ('7b439e92-5fd4-4898-9565-2fa3a52f563a', CURRENT_DATE + TIME '08:00:00', true);
 
 insert into venue_event (venue_id, event_id) 
 values 
