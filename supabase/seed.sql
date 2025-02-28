@@ -40,5 +40,41 @@ values
   ('77d916a8-424b-4b3c-84cc-ac43dc082ad1', 'ce467ca7-62d2-4f75-9752-8b50e56381aa', '044b841b-1797-4ec1-a9ab-00af6f1281a0', CURRENT_DATE + TIME '08:00:00', ''),
   ('450ed88f-ecc5-4e91-b209-b653022e9708', 'ce467ca7-62d2-4f75-9752-8b50e56381aa', '044b841b-1797-4ec1-a9ab-00af6f1281a0', CURRENT_DATE + TIME '08:00:00', ''),
   ('4fc943df-0cbb-4e69-9294-ff9f51cfa363', 'ce467ca7-62d2-4f75-9752-8b50e56381aa', '044b841b-1797-4ec1-a9ab-00af6f1281a0', CURRENT_DATE + TIME '08:00:00', '');
-
   
+INSERT INTO auth.users (
+  id, instance_id, aud, role, email, encrypted_password, 
+  email_confirmed_at, last_sign_in_at, raw_app_meta_data, 
+  raw_user_meta_data, created_at, updated_at, is_sso_user, is_anonymous
+) 
+VALUES (
+  '167833b7-90f8-4d82-b6f4-fe525bee1b33', 
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated', 'authenticated', 'vedran@joinup.hr', 
+  '$2a$10$z.yVNwXjkEQEYLrUnYHApOBl89LTMO6H4BPM3LJCBv2nm4XHbL8LG', 
+  '2025-02-24 14:20:22.155029+00',
+  '2025-02-28 07:29:48.279648+00', 
+  '{"provider": "email", "providers": ["email"]}'::jsonb, 
+  '{"email_verified": true}'::jsonb, 
+  '2025-02-24 14:20:22.127756+00', 
+  '2025-02-28 07:29:48.282047+00', 
+  false, 
+  false
+);
+
+INSERT INTO auth.identities (
+  id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
+) 
+VALUES (
+  '0bd2caeb-a504-4ac2-9c63-c62207b6b34f', 
+  '167833b7-90f8-4d82-b6f4-fe525bee1b33', 
+  '167833b7-90f8-4d82-b6f4-fe525bee1b33',
+  '{"sub": "167833b7-90f8-4d82-b6f4-fe525bee1b33", "email": "vedran@joinup.hr", "email_verified": false, "phone_verified": false}'::jsonb,
+  'email', 
+  '2025-02-24 14:20:22.147303+00', 
+  '2025-02-24 14:20:22.147367+00', 
+  '2025-02-24 14:20:22.147367+00'
+);
+
+insert into profiles (id, role, first_name, last_name ,created_at) values ('167833b7-90f8-4d82-b6f4-fe525bee1b33', 'reception', 'Vedran', 'prpic' ,'2025-02-24 17:51:03.794344');
+
+
