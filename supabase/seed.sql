@@ -77,4 +77,19 @@ VALUES (
 
 insert into profiles (id, role, first_name, last_name ,created_at) values ('167833b7-90f8-4d82-b6f4-fe525bee1b33', 'reception', 'Vedran', 'prpic' ,'2025-02-24 17:51:03.794344');
 
+insert into public.events (event_id, date, is_locked)
+values
+  ('13d5771e-5298-4442-858a-2da3d922b99a', CURRENT_DATE + TIME '08:00:00', false),
+  ('7b439e92-5fd4-4898-9565-2fa3a52f563a', CURRENT_DATE + TIME '08:00:00', false);
 
+insert into venue_event (venue_id, event_id) 
+values 
+('d1b313f5-7ed7-4ea9-b0c9-5dc9c071efa4', '13d5771e-5298-4442-858a-2da3d922b99a'),
+('ce467ca7-62d2-4f75-9752-8b50e56381aa', '13d5771e-5298-4442-858a-2da3d922b99a'),
+('ce467ca7-62d2-4f75-9752-8b50e56381aa', '7b439e92-5fd4-4898-9565-2fa3a52f563a'),
+('d1b313f5-7ed7-4ea9-b0c9-5dc9c071efa4', '7b439e92-5fd4-4898-9565-2fa3a52f563a');
+
+insert into event_user (profile_id, event_id) 
+values 
+('167833b7-90f8-4d82-b6f4-fe525bee1b33', '13d5771e-5298-4442-858a-2da3d922b99a'),
+('167833b7-90f8-4d82-b6f4-fe525bee1b33', '7b439e92-5fd4-4898-9565-2fa3a52f563a');
