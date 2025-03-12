@@ -16,4 +16,16 @@
       <!-- Activity items will go here -->
     </ul>
   </div>
+</div>
+
+<div class="mobile-home-card" 
+     *ngFor="let home of mobileHomes"
+     [ngClass]="{
+       'free': home.status === MobileHomeStatus.READY && !hasTasks(home),
+       'occupied': home.status === MobileHomeStatus.OCCUPIED,
+       'in-progress': home.status === MobileHomeStatus.IN_PROGRESS,
+       'urgent': home.status === MobileHomeStatus.URGENT,
+       'pending': home.status === MobileHomeStatus.PENDING
+     }">
+  <!-- Your existing card content -->
 </div> 

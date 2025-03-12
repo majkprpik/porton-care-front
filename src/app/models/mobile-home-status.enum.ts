@@ -3,5 +3,6 @@ export enum MobileHomeStatus {
   IN_PROGRESS = 'yellow',  // Cleaning/maintenance in progress
   URGENT = 'red',       // Requires immediate attention
   OCCUPIED = 'black',   // Currently occupied
-  PENDING = 'orange'    // Waiting for inspection/approval
+  PENDING = 'orange',    // Waiting for inspection/approval
+  FREE = 'white'
 } 
