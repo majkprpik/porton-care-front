@@ -1,11 +1,11 @@
 -- Delete existing data
 DELETE FROM porton.house_availabilities;
-DELETE FROM porton.houses;
-DELETE FROM porton.house_types;
 DELETE FROM porton.house_availability_types;
 DELETE FROM porton.tasks;
 DELETE FROM porton.task_types;
 DELETE FROM porton.task_progress_types;
+DELETE FROM porton.houses;
+DELETE FROM porton.house_types;
 
 -- Insert House Types
 INSERT INTO porton.house_types (house_type_name) VALUES
@@ -17,66 +17,65 @@ INSERT INTO porton.house_types (house_type_name) VALUES
 -- Insert Couple Houses with house_name
 INSERT INTO porton.houses (house_number, house_name, house_type_id) 
 VALUES 
-(641, 'House 641', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(642, 'House 642', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(643, 'House 643', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(644, 'House 644', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(645, 'House 645', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(646, 'House 646', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(647, 'House 647', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(648, 'House 648', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(649, 'House 649', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(650, 'House 650', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple'));
+(641, '641', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(642, '642', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(643, '643', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(644, '644', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(645, '645', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(646, '646', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(647, '647', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(648, '648', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(649, '649', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
+(650, '650', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple'));
 
 -- Insert Family1 Houses with house_name
 INSERT INTO porton.houses (house_number, house_name, house_type_id) 
 VALUES 
-(205, 'House 205', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(206, 'House 206', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(301, 'House 301', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(418, 'House 418', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(514, 'House 514', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(515, 'House 515', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(516, 'House 516', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(517, 'House 517', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(518, 'House 518', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(519, 'House 519', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(520, 'House 520', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(521, 'House 521', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(522, 'House 522', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(523, 'House 523', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1'));
+(205, '205', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(206, '206', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(301, '301', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(418, '418', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(514, '514', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(515, '515', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(516, '516', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(517, '517', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(518, '518', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(519, '519', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(520, '520', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(521, '521', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(522, '522', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
+(523, '523', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1'));
 
 -- Insert Family2 Houses with house_name
 INSERT INTO porton.houses (house_number, house_name, house_type_id) 
 VALUES 
-(201, 'House 201', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(202, 'House 202', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(203, 'House 203', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(204, 'House 204', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(401, 'House 401', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(402, 'House 402', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(403, 'House 403', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(404, 'House 404', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(405, 'House 405', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(406, 'House 406', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(407, 'House 407', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(408, 'House 408', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(409, 'House 409', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(410, 'House 410', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(411, 'House 411', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(412, 'House 412', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(413, 'House 413', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(414, 'House 414', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(415, 'House 415', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(416, 'House 416', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(417, 'House 417', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2'));
+(201, '201', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(202, '202', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(203, '203', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(204, '204', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(401, '401', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(402, '402', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(403, '403', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(404, '404', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(405, '405', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(406, '406', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(407, '407', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(408, '408', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(409, '409', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(410, '410', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(411, '411', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(412, '412', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(413, '413', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(414, '414', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(415, '415', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(416, '416', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
+(417, '417', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2'));
 
 
 INSERT INTO porton.house_availability_types (house_availability_type_name) 
 VALUES 
 ('Occupied'),
 ('Free');
-
 DO $$ 
 DECLARE 
     house_rec RECORD;
@@ -108,11 +107,19 @@ BEGIN
             -- Decide whether this period is occupied or free
             IF RANDOM() > 0.3 THEN -- 70% chance to be "Occupied", 30% "Free"
                 current_type_id := occupied_type_id;
-                occupation_days := FLOOR(RANDOM() * 20) + 1; -- Occupied 1-20 days
+                
+                -- Weighted random selection for occupation length
+                occupation_days := 
+                    CASE 
+                        WHEN RANDOM() < 0.6 THEN FLOOR(RANDOM() * 3) + 1  -- 60% → 1-3 days
+                        WHEN RANDOM() < 0.9 THEN FLOOR(RANDOM() * 4) + 3  -- 30% → 3-7 days
+                        ELSE FLOOR(RANDOM() * 13) + 7  -- 10% → 7-20 days
+                    END;
+
                 end_date := start_date + (occupation_days || ' days')::INTERVAL;
             ELSE
                 current_type_id := free_type_id;
-                free_days := FLOOR(RANDOM() * 5) + 1; -- Free 1-5 days
+                free_days := FLOOR(RANDOM() * 5) + 1; -- Free 0-5 days
                 end_date := start_date + (free_days || ' days')::INTERVAL;
             END IF;
 

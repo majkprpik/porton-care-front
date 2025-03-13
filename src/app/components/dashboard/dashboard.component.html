@@ -1,3 +1,28 @@
+<div class="dashboard-header">
+  <h1>Houses Dashboard</h1>
+  <div class="stats-container">
+    <div class="stat-card">
+      <span class="stat-value">{{mobileHomes.length}}</span>
+      <span class="stat-label">Total Houses</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{getFreeHousesCount()}}</span>
+      <span class="stat-label">Free Houses</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{getOccupiedHousesCount()}}</span>
+      <span class="stat-label">Occupied Houses</span>
+    </div>
+  </div>
+</div>
+
+<div class="houses-container">
+  <app-mobile-home-card 
+    *ngFor="let house of mobileHomes" 
+    [house]="house">
+  </app-mobile-home-card>
+</div>
+
 <div class="dashboard-container">
   <h2>Dashboard</h2>
   <div class="dashboard-stats">
@@ -17,15 +42,3 @@
     </ul>
   </div>
 </div>
-
-<div class="mobile-home-card" 
-     *ngFor="let home of mobileHomes"
-     [ngClass]="{
-       'free': home.status === MobileHomeStatus.READY && !hasTasks(home),
-       'occupied': home.status === MobileHomeStatus.OCCUPIED,
-       'in-progress': home.status === MobileHomeStatus.IN_PROGRESS,
-       'urgent': home.status === MobileHomeStatus.URGENT,
-       'pending': home.status === MobileHomeStatus.PENDING
-     }">
-  <!-- Your existing card content -->
-</div> 

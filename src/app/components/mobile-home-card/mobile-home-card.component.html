@@ -1,3 +1,6 @@
-<div class="mobile-home-card" [ngStyle]="{'background-color': status}">
-  {{homeNumber}}
+<div class="mobile-home-card" [ngClass]="getCardClass()">
+  <!-- black text -->
+  <div class="house-name">
+    {{house.housename}}
+  </div>
 </div> 

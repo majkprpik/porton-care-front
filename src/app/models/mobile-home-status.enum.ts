@@ -4,5 +4,5 @@ export enum MobileHomeStatus {
   URGENT = 'red',       // Requires immediate attention
   OCCUPIED = 'black',   // Currently occupied
   PENDING = 'orange',    // Waiting for inspection/approval
-  FREE = 'white'
+  FREE = 'green'
 } 

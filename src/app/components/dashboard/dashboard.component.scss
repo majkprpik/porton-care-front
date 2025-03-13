@@ -1,0 +1,55 @@
+.dashboard-header {
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-header h1 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 24px;
+}
+
+.stats-container {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  min-width: 120px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2196F3;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #757575;
+  margin-top: 4px;
+}
+
+.houses-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+} 

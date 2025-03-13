@@ -7,6 +7,8 @@ export interface MobileHome {
   availabilityid: number;
   availabilityname: string;
   housetasks: HouseTask[];
+  status?: MobileHomeStatus;
+  number?: string;
   
   // Additional properties from the view
   venueStatuses?: VenueStatus[];
