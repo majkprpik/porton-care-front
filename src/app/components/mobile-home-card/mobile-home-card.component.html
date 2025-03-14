@@ -1,6 +1,6 @@
 <div class="mobile-home-card" [ngClass]="{'occupied': mobileHome.availabilityname === 'Occupied', 'free': mobileHome.availabilityname === 'Free'}">
   <div class="home-header">
-    <h3>{{ mobileHome.name }}</h3>
+    
     <div class="task-indicators">
       <span *ngFor="let indicator of taskIndicators" class="task-indicator">{{ indicator }}</span>
     </div>
@@ -8,7 +8,7 @@
   <div class="home-details">
     <!-- black text -->
     <div class="house-name">
-      {{house.housename}}
+      {{mobileHome.housename}}
     </div>
   </div>
-</div> 
+</div>

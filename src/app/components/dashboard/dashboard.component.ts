@@ -27,21 +27,26 @@ export class DashboardComponent implements OnInit {
     const indicators: string[] = [];
     
     // Add indicators based on home properties
-    // These are examples - adjust according to your actual data model
-    if (home.needsCleaning) {
-      indicators.push('C'); // C for Cleaning
-    }
-    if (home.needsMaintenance) {
-      indicators.push('M'); // M for Maintenance
-    }
-    if (home.needsInspection) {
-      indicators.push('I'); // I for Inspection
-    }
-    if (home.checkoutToday) {
-      indicators.push('O'); // O for Checkout
-    }
-    if (home.checkinToday) {
-      indicators.push('N'); // N for New guests/Check-in
+    if (home.housetasks && home.housetasks.length > 0) {
+      // Check for specific task types
+      home.housetasks.forEach(task => {
+        // Using taskTypeName to determine the type of task
+        if (task.taskTypeName.toLowerCase().includes('cleaning')) {
+          indicators.push('C'); // C for Cleaning
+        }
+        if (task.taskTypeName.toLowerCase().includes('maintenance')) {
+          indicators.push('M'); // M for Maintenance
+        }
+        if (task.taskTypeName.toLowerCase().includes('inspection')) {
+          indicators.push('I'); // I for Inspection
+        }
+        if (task.taskTypeName.toLowerCase().includes('checkout')) {
+          indicators.push('O'); // O for Checkout
+        }
+        if (task.taskTypeName.toLowerCase().includes('checkin')) {
+          indicators.push('N'); // N for New guests/Check-in
+        }
+      });
     }
     
     return indicators;
