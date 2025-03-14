@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MobileHomeStatus, MobileHome, HouseTask } from '../../models/mobile-home.interface';
 import { MobileHomesService } from '../../services/mobile-homes.service';
@@ -11,17 +11,22 @@ import { MobileHomesService } from '../../services/mobile-homes.service';
   standalone: true,
   imports: [CommonModule]
 })
-export class MobileHomeCardComponent {
-  @Input() house: MobileHome = {} as MobileHome;
+export class MobileHomeCardComponent implements OnInit {
+  @Input() mobileHome!: MobileHome;
+  @Input() taskIndicators: string[] = [];
   @Input() status: MobileHomeStatus | undefined = MobileHomeStatus.FREE;
   @Input() homeNumber: string | undefined = '';
   
   constructor(private homesService: MobileHomesService) {}
   
+  ngOnInit() {
+    // ... existing code ...
+  }
+  
   getCardClass(): string {
-    if (this.house.availabilityname === 'Free' && !this.hasActiveTasks()) {
+    if (this.mobileHome.availabilityname === 'Free' && !this.hasActiveTasks()) {
       return 'free';
-    } else if (this.house.availabilityname === 'Occupied') {
+    } else if (this.mobileHome.availabilityname === 'Occupied') {
       return 'occupied';
     }
     // Add other status classes as needed
@@ -29,10 +34,10 @@ export class MobileHomeCardComponent {
   }
   
   hasActiveTasks(): boolean {
-    return this.homesService.hasActiveTasks(this.house);
+    return this.homesService.hasActiveTasks(this.mobileHome);
   }
   
   getPendingTasks(): HouseTask[] {
-    return this.homesService.getPendingTasks(this.house);
+    return this.homesService.getPendingTasks(this.mobileHome);
   }
 }

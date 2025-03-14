@@ -76,70 +76,72 @@ INSERT INTO porton.house_availability_types (house_availability_type_name)
 VALUES 
 ('Occupied'),
 ('Free');
+
+
 DO $$ 
 DECLARE 
     house_rec RECORD;
     start_date TIMESTAMP;
     end_date TIMESTAMP;
-    free_days INT;
     occupation_days INT;
+    free_days INT;
     occupied_type_id INT;
     free_type_id INT;
-    current_type_id INT;
 BEGIN
-    -- Get the 'occupied' type ID
+    -- Get the 'Occupied' and 'Free' type IDs
     SELECT house_availability_type_id INTO occupied_type_id 
     FROM porton.house_availability_types 
     WHERE house_availability_type_name = 'Occupied';
 
-    -- Get the 'free' type ID
     SELECT house_availability_type_id INTO free_type_id 
     FROM porton.house_availability_types 
     WHERE house_availability_type_name = 'Free';
 
+    -- 🚨 Ensure we have valid type IDs
+    IF occupied_type_id IS NULL OR free_type_id IS NULL THEN
+        RAISE EXCEPTION 'Error: One or both house_availability_type_id values are NULL (Occupied: %, Free: %)', occupied_type_id, free_type_id;
+    END IF;
+
     -- Loop through all houses
     FOR house_rec IN (SELECT house_id FROM porton.houses) LOOP
-        -- Set the start date to January 1st of this year at 2 PM
-        start_date := DATE_TRUNC('year', NOW()) + INTERVAL '2 hours';
+        -- Set initial start date to January 1st of this year
+        start_date := DATE_TRUNC('year', NOW());
 
-        -- Generate random availabilities for the whole year
+        -- Generate availabilities for the whole year
         WHILE start_date < DATE_TRUNC('year', NOW()) + INTERVAL '1 year' LOOP
-            -- Decide whether this period is occupied or free
-            IF RANDOM() > 0.3 THEN -- 70% chance to be "Occupied", 30% "Free"
-                current_type_id := occupied_type_id;
-                
-                -- Weighted random selection for occupation length
-                occupation_days := 
-                    CASE 
-                        WHEN RANDOM() < 0.6 THEN FLOOR(RANDOM() * 3) + 1  -- 60% → 1-3 days
-                        WHEN RANDOM() < 0.9 THEN FLOOR(RANDOM() * 4) + 3  -- 30% → 3-7 days
-                        ELSE FLOOR(RANDOM() * 13) + 7  -- 10% → 7-20 days
-                    END;
+            -- 🎯 Generate realistic stay durations
+            occupation_days := 
+                CASE 
+                    WHEN RANDOM() < 0.3 THEN FLOOR(RANDOM() * 2) + 1  -- 30% → 1-2 days (rare)
+                    WHEN RANDOM() < 0.7 THEN FLOOR(RANDOM() * 4) + 3  -- 40% → 3-6 days (common)
+                    ELSE FLOOR(RANDOM() * 7) + 7  -- 30% → 7-13 days (less frequent)
+                END;
 
-                end_date := start_date + (occupation_days || ' days')::INTERVAL;
-            ELSE
-                current_type_id := free_type_id;
-                free_days := FLOOR(RANDOM() * 5) + 1; -- Free 0-5 days
-                end_date := start_date + (free_days || ' days')::INTERVAL;
-            END IF;
+            -- 🚨 Ensure `end_date` is **always** after `start_date`
+            end_date := start_date + (occupation_days || ' days')::INTERVAL;
 
-            -- Set check-in at 2 PM and check-out at 10 AM if occupied
-            IF current_type_id = occupied_type_id THEN
-                start_date := start_date + INTERVAL '14 hours'; -- 2 PM
-                end_date := end_date + INTERVAL '10 hours'; -- 10 AM next day
-            END IF;
-
-            -- Insert availability period (Occupied or Free)
+            -- ✅ Insert Occupied period
             INSERT INTO porton.house_availabilities 
             (house_id, house_availability_type_id, house_availability_start_date, house_availability_end_date)
             VALUES 
-            (house_rec.house_id, current_type_id, start_date, end_date);
+            (house_rec.house_id, occupied_type_id, start_date, end_date);
 
-            -- Move start date to the next period
-            start_date := end_date;
+            -- 🎯 Generate random free period (1-5 days)
+            free_days := FLOOR(RANDOM() * 5) + 1; -- Always at least 1 day free
+
+            -- ✅ Insert Free period (to ensure a gap)
+            INSERT INTO porton.house_availabilities 
+            (house_id, house_availability_type_id, house_availability_start_date, house_availability_end_date)
+            VALUES 
+            (house_rec.house_id, free_type_id, end_date, end_date + (free_days || ' days')::INTERVAL);
+
+            -- 🚨 Ensure the **next occupation starts AFTER the free period**
+            start_date := end_date + (free_days || ' days')::INTERVAL;
         END LOOP;
     END LOOP;
 END $$;
+
+
 
 
 INSERT INTO porton.task_types (task_type_name) 
@@ -160,48 +162,37 @@ VALUES
 
 DO $$ 
 DECLARE task_status_id INT;
+DECLARE today DATE := CURRENT_DATE;
+DECLARE yesterday DATE := CURRENT_DATE - INTERVAL '1 day';
 BEGIN
     -- Get the task progress type ID for "Nije dodijeljeno"
     SELECT task_progress_type_id INTO task_status_id 
     FROM porton.task_progress_types 
     WHERE task_progress_type_name = 'Nije dodijeljeno';
 
-    -- 1️⃣ Assign "Punjenje", "Čišćenje kućice", and "Čišćenje terase" 
-    -- to houses where guests **left yesterday**
+    -- 1️⃣ Assign "Punjenje", "Čišćenje kućice", "Čišćenje terase" 
+    -- If guests left TODAY (meaning they stayed until YESTERDAY) OR new guests are arriving today
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
     SELECT 
-        task_type_id, 
+        tt.task_type_id, 
         task_status_id, 
         ha.house_id, 
-        NOW() 
+        NOW()
     FROM porton.house_availabilities ha
     CROSS JOIN porton.task_types tt
-    WHERE ha.house_availability_end_date::DATE = '2025-03-10' -- Yesterday
-    AND tt.task_type_name IN ('Punjenje', 'Čišćenje kućice', 'Čišćenje terase');
+    WHERE (
+        ha.house_availability_end_date::DATE = yesterday  -- Left today (stayed until yesterday)
+        OR ha.house_availability_start_date::DATE = today -- Arriving today
+    )
+    AND tt.task_type_name IN ('Punjenje', 'Čišćenje kućice', 'Čišćenje terase')
+    AND NOT EXISTS (  -- Prevent duplicate tasks
+        SELECT 1 FROM porton.tasks t 
+        WHERE t.house_id = ha.house_id 
+        AND t.task_type_id = tt.task_type_id
+        AND t.start_time::DATE = today
+    );
 
-    -- 2️⃣ Assign "Čišćenje terase" to houses where guests **arrive today**
-    INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT 
-        (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Čišćenje terase'),
-        task_status_id, 
-        ha.house_id, 
-        NOW()
-    FROM porton.house_availabilities ha
-    WHERE ha.house_availability_start_date::DATE = '2025-03-11'; -- Today
-
-    -- 3️⃣ Assign "Mijenjanje posteljine" to houses occupied **more than 4 days** 
-    -- but **not their last day**
-    INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT 
-        (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje posteljine'),
-        task_status_id, 
-        ha.house_id, 
-        NOW()
-    FROM porton.house_availabilities ha
-    WHERE ha.house_availability_start_date <= '2025-03-07' -- Occupied for 4+ days
-    AND ha.house_availability_end_date > '2025-03-11'; -- Not their last day
-
-    -- 4️⃣ Assign "Mijenjanje ručnika" to houses occupied **more than 2 days**
+    -- 2️⃣ Assign "Mijenjanje ručnika" for houses occupied **more than 2 days** 
     -- but **not their last day**
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
     SELECT 
@@ -210,6 +201,30 @@ BEGIN
         ha.house_id, 
         NOW()
     FROM porton.house_availabilities ha
-    WHERE ha.house_availability_start_date <= '2025-03-09' -- Occupied for 2+ days
-    AND ha.house_availability_end_date > '2025-03-11'; -- Not their last day
+    WHERE ha.house_availability_start_date <= today - INTERVAL '2 days' -- Occupied for more than 2 days
+    AND ha.house_availability_end_date > today  -- Not their last day
+    AND NOT EXISTS (  -- Prevent duplicate tasks
+        SELECT 1 FROM porton.tasks t 
+        WHERE t.house_id = ha.house_id 
+        AND t.task_type_id = (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje ručnika')
+        AND t.start_time::DATE = today
+    );
+
+    -- 3️⃣ Assign "Mijenjanje posteljine" for houses occupied **more than 4 days** 
+    -- but **not their last day**
+    INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
+    SELECT 
+        (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje posteljine'),
+        task_status_id, 
+        ha.house_id, 
+        NOW()
+    FROM porton.house_availabilities ha
+    WHERE ha.house_availability_start_date <= today - INTERVAL '4 days' -- Occupied for more than 4 days
+    AND ha.house_availability_end_date > today  -- Not their last day
+    AND NOT EXISTS (  -- Prevent duplicate tasks
+        SELECT 1 FROM porton.tasks t 
+        WHERE t.house_id = ha.house_id 
+        AND t.task_type_id = (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje posteljine')
+        AND t.start_time::DATE = today
+    );
 END $$;

@@ -42,3 +42,28 @@
     </ul>
   </div>
 </div>
+
+<div class="dashboard-container">
+  <div class="stats-container">
+    <div class="stat-card">
+      <span class="stat-value">{{mobileHomes.length}}</span>
+      <span class="stat-label">Total Houses</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{getFreeHousesCount()}}</span>
+      <span class="stat-label">Free Houses</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{getOccupiedHousesCount()}}</span>
+      <span class="stat-label">Occupied Houses</span>
+    </div>
+  </div>
+
+  <div class="mobile-homes-grid">
+    <app-mobile-home-card 
+      *ngFor="let home of mobileHomes" 
+      [mobileHome]="home"
+      [taskIndicators]="getTaskIndicators(home)">
+    </app-mobile-home-card>
+  </div>
+</div>

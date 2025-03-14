@@ -12,6 +12,35 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+
+  .home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    h3 {
+      margin: 0;
+    }
+
+    .task-indicators {
+      display: flex;
+      gap: 5px;
+    }
+
+    .task-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #f0f0f0;
+      color: #333;
+      font-weight: bold;
+      font-size: 12px;
+    }
+  }
 }
 
 .house-name {

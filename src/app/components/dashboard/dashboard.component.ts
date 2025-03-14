@@ -23,6 +23,30 @@ export class DashboardComponent implements OnInit {
     return this.mobileHomes.filter(home => home.availabilityname === 'Occupied').length;
   }
 
+  getTaskIndicators(home: MobileHome): string[] {
+    const indicators: string[] = [];
+    
+    // Add indicators based on home properties
+    // These are examples - adjust according to your actual data model
+    if (home.needsCleaning) {
+      indicators.push('C'); // C for Cleaning
+    }
+    if (home.needsMaintenance) {
+      indicators.push('M'); // M for Maintenance
+    }
+    if (home.needsInspection) {
+      indicators.push('I'); // I for Inspection
+    }
+    if (home.checkoutToday) {
+      indicators.push('O'); // O for Checkout
+    }
+    if (home.checkinToday) {
+      indicators.push('N'); // N for New guests/Check-in
+    }
+    
+    return indicators;
+  }
+
   constructor(private mobileHomesService: MobileHomesService) {}
 
   ngOnInit() {
