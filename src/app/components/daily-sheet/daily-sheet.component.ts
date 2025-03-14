@@ -10,6 +10,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { MobileHomeCardComponent } from '../mobile-home-card/mobile-home-card.component';
 import { Subscription } from 'rxjs';
+import { MatIcon } from '@angular/material/icon';
 
 interface Team {
   id: string;
@@ -21,7 +22,7 @@ interface Team {
 @Component({
   selector: 'app-daily-sheet',
   standalone: true,
-  imports: [DragDropModule, CommonModule, MobileHomeCardComponent],
+  imports: [DragDropModule, CommonModule, MobileHomeCardComponent, MatIcon],
   templateUrl: './daily-sheet.component.html',
   styleUrls: ['./daily-sheet.component.scss']
 })
@@ -424,5 +425,17 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error loading default teams:', error);
     }
+  }
+
+  unlockAllTeams(){
+    console.log('All teams are unlocked')
+  }
+
+  unlockTeam(teamId: string){
+    console.log('Team ' + teamId + ' unlocked');
+  }
+
+  lockTeam(teamId: string){
+    console.log('Team ' + teamId + ' locked')
   }
 } 

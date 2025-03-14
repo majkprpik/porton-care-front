@@ -29,9 +29,14 @@
       <button class="new-team-btn" (click)="createNewTeam()">
         Create New Team
       </button>
-      <button class="lock-teams-btn" (click)="lockTeams()">Lock Teams</button>
+      <button class="lock-teams-btn" (click)="lockTeams()">
+        Lock All Teams
+      </button>
       <button class="load-default-btn" (click)="loadDefaultTeams()" *ngIf="assignedTeams.length === 0">
         Load Default Teams
+      </button>
+      <button class="unlock-teams-btn" (click)="unlockAllTeams()">
+        Unlock All Teams
       </button>
     </div>
 
@@ -41,7 +46,13 @@
       </div>
       
       <div class="team-box" *ngFor="let team of assignedTeams" [class.locked-team]="isTeamLocked(team.id)">
-        <h4>Team {{ team.id }} <span *ngIf="isTeamLocked(team.id)" class="locked-indicator">🔒 Locked</span></h4>
+        <div class="header-container">
+          <h4>Team {{ team.id }} <span *ngIf="isTeamLocked(team.id)" class="locked-indicator">🔒 Locked</span></h4>
+          <button (click)="isTeamLocked(team.id) ? unlockTeam(team.id) : lockTeam(team.id)">
+            <mat-icon *ngIf="!isTeamLocked(team.id)">lock_open</mat-icon>
+            <mat-icon *ngIf="isTeamLocked(team.id)">lock</mat-icon>
+          </button>
+        </div>
         <div class="team-content">
           <div
             class="team-homes"
