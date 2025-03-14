@@ -21,6 +21,23 @@
   }
 }
 
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.no-teams-message {
+  background: #f0f0f0;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: #666;
+  font-style: italic;
+}
+
 .homes-list,
 .staff-list {
   min-height: 100px;
@@ -40,6 +57,24 @@
   h4 {
     margin-bottom: 12px;
     color: #2196f3;
+  }
+  
+  &.locked-team {
+    background: #f8f8f8;
+    border: 2px solid #e0e0e0;
+    
+    .team-members,
+    .team-homes {
+      background: #eaeaea;
+      border: 1px solid #ccc;
+      cursor: not-allowed;
+    }
+    
+    .member-card,
+    app-mobile-home-card {
+      cursor: default;
+      opacity: 0.8;
+    }
   }
 }
 
@@ -95,14 +130,16 @@
   border-radius: 4px;
 }
 
-.new-team-btn {
-  margin-bottom: 16px;
+.new-team-btn, .lock-teams-btn, .load-default-btn {
   padding: 8px 16px;
-  background: #2196f3;
-  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.new-team-btn {
+  background: #2196f3;
+  color: black;
 
   &:hover {
     background: #1976d2;
@@ -110,16 +147,20 @@
 }
 
 .lock-teams-btn {
-  margin-left: 10px;
-  padding: 8px 16px;
   background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  color: black;
 
   &:hover {
     background-color: #45a049;
+  }
+}
+
+.load-default-btn {
+  background-color: #ff9800;
+  color: black;
+
+  &:hover {
+    background-color: #f57c00;
   }
 }
 
@@ -139,4 +180,13 @@
 
 .cdk-drop-list-dragging .cdk-drag {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.locked-indicator {
+  font-size: 0.9em;
+  color: #757575;
+  background-color: #e0e0e0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
 } 

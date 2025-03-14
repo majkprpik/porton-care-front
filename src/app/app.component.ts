@@ -18,7 +18,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'TeamTracker';
+  title = 'PortonCare';
   isMenuOpen = false;
   username: string | null = null;
 

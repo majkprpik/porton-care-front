@@ -17,11 +17,28 @@
 </div>
 
 <div class="houses-container">
-  <app-mobile-home-card 
-    *ngFor="let house of mobileHomes" 
-    [mobileHome]="house"
-    [taskIndicators]="getTaskIndicators(house)">
-  </app-mobile-home-card>
+  <div class="house-filters-container">
+    <h3>Show houses:</h3>
+    <div class="house-filters">
+      <button (click)="toggleFreeHouses()" [ngStyle]="{'background-color': showFreeHouses ? 'rgb(68, 219, 68)' : 'lightgray'}">Free</button>
+      <button (click)="toggleFreeHousesWithTasks()" [ngStyle]="{'background-color': showFreeHousesWithTasks ? 'white' : 'lightgray'}">Free with tasks</button>
+      <button (click)="toggleOccupiedHouses()" [ngStyle]="{'background-color': showOccupiedHouses ? 'lightcoral' : 'lightgray'}">Occupied</button>
+    </div>
+  </div>
+  <div class="sort-container">
+    <select name="house-sort" id="house-sort" [(ngModel)]="sortBy">
+      <option value="" disabled selected>Sort by</option>
+      <option value="house-number">House number</option>
+      <option value="availability">Availability</option>
+    </select>
+  </div>
+  <div class="houses-wrapper">
+    <app-mobile-home-card 
+      *ngFor="let house of mobileHomes | homesFilterPipe: showFreeHouses: showFreeHousesWithTasks: showOccupiedHouses: sortBy" 
+      [mobileHome]="house"
+      [taskIndicators]="getTaskIndicators(house)">
+    </app-mobile-home-card>
+  </div>
 </div>
 
 <div class="dashboard-container">

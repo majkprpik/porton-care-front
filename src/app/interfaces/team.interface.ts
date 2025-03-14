@@ -13,4 +13,5 @@ export interface LockedTeam {
   name: string;
   members: Staff[];
   homes: Home[];
+  isLocked?: boolean;
 } 

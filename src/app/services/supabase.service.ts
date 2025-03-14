@@ -21,8 +21,19 @@ export class SupabaseService {
 
   // Example: Fetch data from a table
   async getData(table: string) {
+    // Check if table includes schema
+    let schema = 'public';
+    let tableName = table;
+    
+    if (table.includes('.')) {
+      const parts = table.split('.');
+      schema = parts[0];
+      tableName = parts[1];
+    }
+    
     const { data, error } = await this.supabase
-      .from(table)
+      .schema(schema)
+      .from(tableName)
       .select('*');
 
     if (error) {
@@ -35,9 +46,21 @@ export class SupabaseService {
 
   // Example: Insert data into a table
   async insertData(table: string, newData: any) {
+    // Check if table includes schema
+    let schema = 'public';
+    let tableName = table;
+    
+    if (table.includes('.')) {
+      const parts = table.split('.');
+      schema = parts[0];
+      tableName = parts[1];
+    }
+    
     const { data, error } = await this.supabase
-      .from(table)
-      .insert([newData]);
+      .schema(schema)
+      .from(tableName)
+      .insert([newData])
+      .select();
 
     if (error) {
       console.error('Error inserting data:', error.message);

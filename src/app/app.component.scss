@@ -25,7 +25,7 @@ body {
   z-index: 1000;
 
   .header-content {
-    max-width: 1200px;
+    // max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
     height: $header-height;
@@ -111,7 +111,7 @@ body {
 .main-content {
   margin-top: $header-height;
   padding: 2rem;
-  max-width: 1200px;
+  // max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
 }
