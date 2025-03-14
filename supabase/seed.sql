@@ -159,6 +159,7 @@ VALUES
 ('U progresu'),       -- Task is in progress
 ('Završeno');         -- Task is completed
 
+
 DO $$ 
 DECLARE task_status_id INT;
 DECLARE today DATE := CURRENT_DATE;
@@ -170,9 +171,9 @@ BEGIN
     WHERE task_progress_type_name = 'Nije dodijeljeno';
 
     -- 1️⃣ Assign "Punjenje", "Čišćenje kućice", "Čišćenje terase" 
-    -- If guests left TODAY (meaning they stayed until YESTERDAY) OR new guests are arriving today
+    -- If guests left YESTERDAY OR new guests are arriving today
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT 
+    SELECT DISTINCT ON (ha.house_id, tt.task_type_id)  -- Prevents duplicate inserts for the same house/task
         tt.task_type_id, 
         task_status_id, 
         ha.house_id, 
@@ -194,7 +195,7 @@ BEGIN
     -- 2️⃣ Assign "Mijenjanje ručnika" for houses occupied **more than 2 days** 
     -- but **not their last day**
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT 
+    SELECT DISTINCT ON (ha.house_id)  -- Ensures one task per house
         (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje ručnika'),
         task_status_id, 
         ha.house_id, 
@@ -212,7 +213,7 @@ BEGIN
     -- 3️⃣ Assign "Mijenjanje posteljine" for houses occupied **more than 4 days** 
     -- but **not their last day**
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT 
+    SELECT DISTINCT ON (ha.house_id)  -- Ensures one task per house
         (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje posteljine'),
         task_status_id, 
         ha.house_id, 
