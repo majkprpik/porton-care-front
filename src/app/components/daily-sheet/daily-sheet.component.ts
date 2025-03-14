@@ -296,6 +296,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       console.warn('Team was not saved to Supabase due to an error, using local version only');
       this.teamCounter++;
     }
+
+    this.loadExistingTeams();
   }
 
   getConnectedLists(teamId: string): string[] {
