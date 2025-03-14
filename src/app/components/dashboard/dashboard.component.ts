@@ -4,16 +4,22 @@ import { MobileHome } from '../../models/mobile-home.interface';
 import { CommonModule } from '@angular/common';
 import { MobileHomeCardComponent } from '../mobile-home-card/mobile-home-card.component';
 import { MatCardModule } from '@angular/material/card';
+import { HomesFilterPipe } from '../../pipes/homes-filter.pipe';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss', 
   standalone: true,
-  imports: [CommonModule, MobileHomeCardComponent, MatCardModule]
+  imports: [CommonModule, MobileHomeCardComponent, MatCardModule, HomesFilterPipe, FormsModule]
 })
 export class DashboardComponent implements OnInit {
   mobileHomes: MobileHome[] = [];
+  showFreeHouses = true;
+  showFreeHousesWithTasks = true;
+  showOccupiedHouses = true;
+  sortBy = '';
   
   getFreeHousesCount(): number {
     return this.mobileHomes.filter(home => home.availabilityname === 'Free').length;
@@ -73,5 +79,17 @@ export class DashboardComponent implements OnInit {
         console.log('Fetched homes:', homes);
         this.mobileHomes = homes;
       });
+  }
+
+  toggleFreeHouses(){
+    this.showFreeHouses = !this.showFreeHouses;
+  }
+
+  toggleFreeHousesWithTasks(){
+    this.showFreeHousesWithTasks = !this.showFreeHousesWithTasks;
+  }
+
+  toggleOccupiedHouses(){
+    this.showOccupiedHouses = !this.showOccupiedHouses;
   }
 } 
