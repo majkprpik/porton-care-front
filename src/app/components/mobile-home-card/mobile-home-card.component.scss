@@ -12,6 +12,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  position: relative;
 
   .home-header {
     display: flex;
@@ -41,6 +42,18 @@
       font-size: 12px;
     }
   }
+
+  .house-tasks{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    margin-top: 2px;
+    font-size: 12px;
+    position: absolute;
+    color: black;
+    top: 0;
+    left: 5px;
+  }
 }
 
 .house-name {
@@ -52,9 +65,13 @@
   // border-left: 4px solid #4CAF50; /* Green border accent */
 }
 
+.mobile-home-card.free-with-tasks{
+  background-color: white;
+}
+
 /* Status colors */
 .mobile-home-card.occupied { 
-  background-color: #f7e6e6; /* Light red background */
+  background-color: lightcoral; /* Light red background */
   // border-left: 4px solid #f44336; /* Red border accent */     
 }
 

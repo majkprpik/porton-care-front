@@ -40,4 +40,28 @@ export class MobileHomeCardComponent implements OnInit {
   getPendingTasks(): HouseTask[] {
     return this.homesService.getPendingTasks(this.mobileHome);
   }
+
+  ifNeedsInitialSetup(houseTasks: HouseTask[]){
+    return houseTasks.some(houseTask => houseTask.taskTypeName.includes('Punjenje'));
+  }
+
+  ifNeedsCleaning(houseTasks: HouseTask[]){
+    return houseTasks.some(houseTask => houseTask.taskTypeName.includes('Čišćenje kućice'));
+  }
+
+  ifNeedsPorchCleaning(houseTasks: HouseTask[]){
+    return houseTasks.some(houseTask => houseTask.taskTypeName.includes('Čišćenje terase'));
+  }
+
+  ifNeedsRepair(houseTasks: HouseTask[]){
+    return houseTasks.some(houseTask => houseTask.taskTypeName.includes('Popravak'));
+  }
+
+  ifNeedsTowelChange(houseTasks: HouseTask[]){
+    return houseTasks.some(houseTask => houseTask.taskTypeName.includes('Mijenjanje ručnika'));
+  }
+
+  ifNeedsSheetChange(houseTasks: HouseTask[]){
+    return houseTasks.some(houseTask => houseTask.taskTypeName.includes('Mijenjanje posteljine'));
+  }
 }

@@ -1,4 +1,8 @@
-<div class="mobile-home-card" [ngClass]="{'occupied': mobileHome.availabilityname === 'Occupied', 'free': mobileHome.availabilityname === 'Free'}">
+<div class="mobile-home-card" [ngClass]="{
+    'occupied': mobileHome.availabilityname === 'Occupied', 
+    'free-with-tasks': mobileHome.availabilityname === 'Free' && mobileHome.housetasks.length > 0,
+    'free': mobileHome.availabilityname === 'Free' && mobileHome.housetasks.length === 0,
+  }">
   <div class="home-header">
     
     <div class="task-indicators">
@@ -6,6 +10,14 @@
     </div>
   </div>
   <div class="home-details">
+    <div class="house-tasks">
+      <span class="house-task" *ngIf="ifNeedsInitialSetup(mobileHome.housetasks)">P</span>
+      <span class="house-task" *ngIf="ifNeedsCleaning(mobileHome.housetasks)">ČK</span>
+      <span class="house-task" *ngIf="ifNeedsPorchCleaning(mobileHome.housetasks)">ČT</span>
+      <span class="house-task" *ngIf="ifNeedsRepair(mobileHome.housetasks)">P</span>
+      <span class="house-task" *ngIf="ifNeedsTowelChange(mobileHome.housetasks)">MP</span>
+      <span class="house-task" *ngIf="ifNeedsSheetChange(mobileHome.housetasks)">MR</span>
+    </div>
     <!-- black text -->
     <div class="house-name">
       {{mobileHome.housename}}

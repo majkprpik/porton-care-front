@@ -8,12 +8,12 @@
          [cdkDropListData]="mobileHomes"
          [cdkDropListConnectedTo]="getTeamHomeDropLists()"
          (cdkDropListDropped)="onDrop($event)">
-      <app-mobile-home-card
+      <!-- <app-mobile-home-card
         *ngFor="let home of mobileHomes"
         [status]="home.status"
         [homeNumber]="home.number"
         cdkDrag>
-      </app-mobile-home-card>
+      </app-mobile-home-card> -->
     </div>
   </div>
 
@@ -47,12 +47,12 @@
                [cdkDropListData]="team.homes"
                [cdkDropListConnectedTo]="['homes-list']"
                (cdkDropListDropped)="onDrop($event)">
-            <app-mobile-home-card
+            <!-- <app-mobile-home-card
               *ngFor="let home of team.homes"
               [status]="home.status"
               [homeNumber]="home.number"
               cdkDrag>
-            </app-mobile-home-card>
+            </app-mobile-home-card> -->
             <div class="placeholder" *ngIf="team.homes.length === 0">
               Drop homes here
             </div>
