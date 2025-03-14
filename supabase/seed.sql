@@ -228,3 +228,7 @@ BEGIN
         AND t.start_time::DATE = today
     );
 END $$;
+
+-- ovo je portrebno ako izbaci gresku code:"PGRST106", message : "The schema must be one of the following: public, graphql_public"
+ALTER ROLE authenticator SET pgrst.db_schemas TO 'public, graphql_public, porton';
+NOTIFY pgrst;
