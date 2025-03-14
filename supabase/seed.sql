@@ -77,7 +77,6 @@ VALUES
 ('Occupied'),
 ('Free');
 
-
 DO $$ 
 DECLARE 
     house_rec RECORD;
@@ -112,12 +111,12 @@ BEGIN
             -- 🎯 Generate realistic stay durations
             occupation_days := 
                 CASE 
-                    WHEN RANDOM() < 0.3 THEN FLOOR(RANDOM() * 2) + 1  -- 30% → 1-2 days (rare)
-                    WHEN RANDOM() < 0.7 THEN FLOOR(RANDOM() * 4) + 3  -- 40% → 3-6 days (common)
-                    ELSE FLOOR(RANDOM() * 7) + 7  -- 30% → 7-13 days (less frequent)
+                    WHEN RANDOM() < 0.3 THEN FLOOR(RANDOM() * 2) + 1  -- 30% → 1-2 days
+                    WHEN RANDOM() < 0.7 THEN FLOOR(RANDOM() * 4) + 3  -- 40% → 3-6 days
+                    ELSE FLOOR(RANDOM() * 7) + 7  -- 30% → 7-13 days
                 END;
 
-            -- 🚨 Ensure `end_date` is **always** after `start_date`
+            -- Ensure `end_date` is **always** after `start_date`
             end_date := start_date + (occupation_days || ' days')::INTERVAL;
 
             -- ✅ Insert Occupied period
@@ -126,17 +125,17 @@ BEGIN
             VALUES 
             (house_rec.house_id, occupied_type_id, start_date, end_date);
 
-            -- 🎯 Generate random free period (1-5 days)
-            free_days := FLOOR(RANDOM() * 5) + 1; -- Always at least 1 day free
+            -- 🚨 Ensure at least **1 full free day before the next reservation**
+            free_days := FLOOR(RANDOM() * 5) + 1; -- 1 to 5 days
 
-            -- ✅ Insert Free period (to ensure a gap)
+            -- ✅ Insert Free period
             INSERT INTO porton.house_availabilities 
             (house_id, house_availability_type_id, house_availability_start_date, house_availability_end_date)
             VALUES 
-            (house_rec.house_id, free_type_id, end_date, end_date + (free_days || ' days')::INTERVAL);
+            (house_rec.house_id, free_type_id, end_date + INTERVAL '1 day', end_date + (free_days || ' days')::INTERVAL);
 
             -- 🚨 Ensure the **next occupation starts AFTER the free period**
-            start_date := end_date + (free_days || ' days')::INTERVAL;
+            start_date := end_date + (free_days + 1 || ' days')::INTERVAL;
         END LOOP;
     END LOOP;
 END $$;
