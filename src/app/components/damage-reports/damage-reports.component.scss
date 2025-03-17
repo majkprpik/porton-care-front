@@ -60,21 +60,7 @@
                 border-top: 1px solid black;
                 padding-top: 10px;
 
-                .images-tab{
-                    width: 50%;
-                    height: 50px;
-                    border-radius: 10px;
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: center;
-
-                    &:hover{
-                        background-color: rgb(212, 113, 113);
-                    }
-                }
-
-                .comments-tab{
+                .images-tab, .comments-tab, .team-tab{
                     width: 50%;
                     height: 50px;
                     border-radius: 10px;
@@ -89,14 +75,13 @@
                 }
             }
 
-            
             .images{
                 display: flex;
                 flex-direction: row;
                 width: 100%;
                 gap: 10px;
                 overflow-x: auto;
-                max-height: 350px;
+                height: 240px;
 
                 img{
                     border-radius: 10px;
@@ -169,7 +154,7 @@
                             border-radius: 10px;
                             white-space: pre-line;
                             max-height: 190px;
-                            max-width: 350px;
+                            width: 100%;
                             overflow-y: auto;
                             word-wrap: break-word; 
                             overflow-wrap: break-word; 
@@ -191,6 +176,10 @@
                         }
                     }
                 }
+            }
+
+            .team{
+                height: 240px;
             }
         }
     }

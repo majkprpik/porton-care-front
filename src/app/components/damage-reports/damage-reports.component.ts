@@ -14,7 +14,6 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class DamageReportsComponent {
   homesForRepair: MobileHome[] = [];
-  imagesOrCommentsSelected = 'images';
   selectedTabs: { [key: number]: string } = {};
   comments: { [taskId: number]: string } = {};
   showTextbox: { [taskId: number]: boolean } = {};
@@ -40,12 +39,8 @@ export class DamageReportsComponent {
     });
   }
 
-  setImagesSelected(taskId: number) {
-    this.selectedTabs[taskId] = 'images';
-  }
-
-  setCommentsSelected(taskId: number) {
-      this.selectedTabs[taskId] = 'comments';
+  setSelectedTab(taskId: number, selectedTab: string){
+    this.selectedTabs[taskId] = selectedTab;
   }
 
   submitComment(houseTask: any){

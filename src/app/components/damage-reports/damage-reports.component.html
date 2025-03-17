@@ -9,15 +9,20 @@
                 {{ formatDescriptionForTask(houseTask.description) }}
             </span>
             <div class="tabs">
-                <div (click)="setImagesSelected(homeForRepair.housetasks[0].taskId)" 
+                <div (click)="setSelectedTab(homeForRepair.housetasks[0].taskId, 'images')" 
                     class="images-tab" 
                     [ngStyle]="{'background-color': selectedTabs[homeForRepair.housetasks[0].taskId] === 'images' ? 'rgb(199, 104, 104)' : 'lightcoral'}">
                     Images
                 </div>
-                <div (click)="setCommentsSelected(homeForRepair.housetasks[0].taskId)" 
+                <div (click)="setSelectedTab(homeForRepair.housetasks[0].taskId, 'comments')" 
                     class="comments-tab" 
                     [ngStyle]="{'background-color': selectedTabs[homeForRepair.housetasks[0].taskId] === 'comments' ? 'rgb(199, 104, 104)' : 'lightcoral'}">
                     Comments
+                </div>
+                <div
+                    (click)="setSelectedTab(homeForRepair.housetasks[0].taskId, 'team')"
+                    class="team-tab">
+                    Team
                 </div>
             </div>
 
@@ -49,6 +54,10 @@
                         Add new comment...
                     </button>
                 </div>
+            </div>
+
+            <div class="team" *ngIf="selectedTabs[homeForRepair.housetasks[0].taskId] === 'team'">
+
             </div>
         </div>
     </div>
