@@ -5,35 +5,67 @@ import { CleaningStaffService } from '../../services/cleaning-staff.service';
 import { MobileHome } from '../../models/mobile-home.interface';
 import { CleaningPerson } from '../../models/cleaning-person.interface';
 import { TeamsService } from '../../services/teams.service';
-import { LockedTeam, Staff, Home } from '../../interfaces/team.interface';
+import { LockedTeam, Staff, Home, Task } from '../../interfaces/team.interface';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { MobileHomeCardComponent } from '../mobile-home-card/mobile-home-card.component';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
+import { HouseTask } from '../../models/mobile-home.interface';
+
+// Create a new interface for task cards
+interface TaskCard {
+  id: string;
+  houseId: number;
+  houseName: string;
+  houseNumber: string;
+  taskId: number;
+  taskType: string;
+  taskTypeName: string;
+  taskProgressType: string;
+  startTime: string;
+  endTime: string | null;
+  status: string;
+  mobileHome: MobileHome; // Reference to the parent mobile home
+}
 
 interface Team {
   id: string;
   name: string;
   members: CleaningPerson[];
-  homes: MobileHome[];
+  tasks: TaskCard[]; // Changed from homes to tasks
+  isLocked?: boolean;
 }
 
 @Component({
   selector: 'app-daily-sheet',
   standalone: true,
-  imports: [DragDropModule, CommonModule, MobileHomeCardComponent, MatIcon],
+  imports: [DragDropModule, CommonModule],
   templateUrl: './daily-sheet.component.html',
   styleUrls: ['./daily-sheet.component.scss']
 })
 export class DailySheetComponent implements OnInit, OnDestroy {
-  mobileHomes: MobileHome[] = [];
+  taskCards: TaskCard[] = [];
   cleaningStaff: CleaningPerson[] = [];
   assignedTeams: Team[] = [];
   lockedTeamIds: string[] = []; // Track which teams are locked
   private teamCounter = 1;
   private teamsSubscription: Subscription | null = null;
   private loadedTeamIds: Set<string> = new Set(); // Track which team IDs have been loaded
+
+  // Computed property to get available staff (not assigned to any team)
+  get availableStaff(): CleaningPerson[] {
+    // Get all staff IDs that are already assigned to teams
+    const assignedStaffIds = new Set<string>();
+    this.assignedTeams.forEach(team => {
+      team.members.forEach(member => {
+        assignedStaffIds.add(member.id);
+      });
+    });
+    
+    // Return only staff members that are not in the assigned set
+    return this.cleaningStaff.filter(staff => !assignedStaffIds.has(staff.id));
+  }
 
   constructor(
     private mobileHomesService: MobileHomesService,
@@ -58,16 +90,49 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     
     try {
       const homes = await this.mobileHomesService.getHomesForDate(today);
-      this.mobileHomes = homes.filter(home => 
+      // Filter homes with tasks
+      const homesWithTasks = homes.filter(home => 
         home.housetasks && home.housetasks.length > 0
       );
+      
+      // Create task cards for each task in each home
+      this.taskCards = [];
+      homesWithTasks.forEach(home => {
+        if (home.housetasks) {
+          home.housetasks.forEach((task, index) => {
+            this.taskCards.push({
+              id: `${home.house_id}-${task.taskId}`,
+              houseId: home.house_id,
+              houseName: home.housename || '',
+              houseNumber: home.number || home.housename || '',
+              taskId: task.taskId,
+              taskType: task.taskTypeId.toString(),
+              taskTypeName: task.taskTypeName,
+              taskProgressType: task.taskProgressTypeName,
+              startTime: task.startTime,
+              endTime: task.endTime,
+              status: home.status?.toString() || home.availabilityname || '',
+              mobileHome: home
+            });
+          });
+        }
+      });
     } catch (error) {
       console.error('Error loading mobile homes:', error);
-      this.mobileHomes = [];
+      this.taskCards = [];
     }
 
-    this.cleaningStaffService.getMockCleaningStaff()
-      .subscribe(staff => this.cleaningStaff = staff);
+    // Use the new getCleaningStaff method with fallback to mock data
+    this.cleaningStaffService.getCleaningStaff()
+      .subscribe(
+        staff => this.cleaningStaff = staff,
+        error => {
+          console.error('Error loading cleaning staff:', error);
+          // Fallback to mock data if there's an error
+          this.cleaningStaffService.getMockCleaningStaff()
+            .subscribe(mockStaff => this.cleaningStaff = mockStaff);
+        }
+      );
   }
 
   private async loadExistingTeams() {
@@ -110,7 +175,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
             id: lockedTeam.id,
             name: lockedTeam.name,
             members: [],
-            homes: []
+            tasks: [], // Changed from homes to tasks
+            isLocked: lockedTeam.isLocked
           };
           
           // Track locked teams
@@ -136,17 +202,39 @@ export class DailySheetComponent implements OnInit, OnDestroy {
             }
           }
           
-          // Convert Home to MobileHome
-          if (lockedTeam.homes && lockedTeam.homes.length > 0) {
-            // Find the corresponding MobileHome objects from mobileHomes
-            for (const home of lockedTeam.homes) {
-              const mobileHome = this.mobileHomes.find(h => 
-                h.housename === home.number || h.number === home.number
-              );
-              if (mobileHome) {
-                team.homes.push(mobileHome);
+          // First try to convert Task to TaskCard if tasks are available
+          if (lockedTeam.tasks && lockedTeam.tasks.length > 0) {
+            for (const task of lockedTeam.tasks) {
+              // Look for task cards with matching task ID
+              const matchingTask = this.taskCards.find(t => t.taskId.toString() === task.id);
+              
+              if (matchingTask) {
+                // Add the matching task to the team
+                team.tasks.push(matchingTask);
+                
+                // Remove this task from the available task cards
+                this.taskCards = this.taskCards.filter(t => t.id !== matchingTask.id);
               }
-              // If not found, we don't add it since we need the full MobileHome object
+            }
+          }
+          // Fallback to homes if no tasks are available (backward compatibility)
+          else if (lockedTeam.homes && lockedTeam.homes.length > 0) {
+            // Convert Home to TaskCard
+            for (const home of lockedTeam.homes) {
+              // Look for task cards with matching house number
+              const matchingTasks = this.taskCards.filter(task => 
+                task.houseNumber === home.number
+              );
+              
+              if (matchingTasks.length > 0) {
+                // Add all matching tasks to the team
+                team.tasks.push(...matchingTasks);
+                
+                // Remove these tasks from the available task cards
+                this.taskCards = this.taskCards.filter(task => 
+                  !matchingTasks.some(mt => mt.id === task.id)
+                );
+              }
             }
           }
           
@@ -160,39 +248,43 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         // Set the assignedTeams and locked team IDs
         this.assignedTeams = componentTeams;
         this.lockedTeamIds = lockedIds;
+        
+        // Force update of availableStaff by triggering change detection
+        this.cleaningStaff = [...this.cleaningStaff];
       });
     } catch (error) {
       console.error('Error loading existing teams:', error);
     }
   }
 
-  getTaskIndicators(home: MobileHome): string[] {
-    const indicators: string[] = [];
-    
-    // Add indicators based on home properties
-    if (home.housetasks && home.housetasks.length > 0) {
-      // Check for specific task types
-      home.housetasks.forEach(task => {
-        // Using taskTypeName to determine the type of task
-        if (task.taskTypeName.toLowerCase().includes('cleaning')) {
-          indicators.push('C'); // C for Cleaning
-        }
-        if (task.taskTypeName.toLowerCase().includes('maintenance')) {
-          indicators.push('M'); // M for Maintenance
-        }
-        if (task.taskTypeName.toLowerCase().includes('inspection')) {
-          indicators.push('I'); // I for Inspection
-        }
-        if (task.taskTypeName.toLowerCase().includes('checkout')) { 
-          indicators.push('O'); // O for Checkout
-        }
-        if (task.taskTypeName.toLowerCase().includes('checkin')) {
-          indicators.push('N'); // N for New guests/Check-in
-        }
-      });
+  getTaskIndicator(task: TaskCard): string {
+    // Vraća kraticu za vrstu zadatka
+    if (task.taskTypeName.toLowerCase().includes('čišćenje') && task.taskTypeName.toLowerCase().includes('terase')) {
+      return 'ČT'; // Čišćenje terase
     }
-    
-    return indicators;
+    if (task.taskTypeName.toLowerCase().includes('čišćenje') && task.taskTypeName.toLowerCase().includes('kućice')) {
+      return 'ČK'; // Čišćenje kućice
+    }
+    if (task.taskTypeName.toLowerCase().includes('punjenje')) {
+      return 'P'; // Punjenje
+    }
+    if (task.taskTypeName.toLowerCase().includes('mijenjanje') && task.taskTypeName.toLowerCase().includes('ručnika')) {
+      return 'MR'; // Mijenjanje ručnika
+    }
+    if (task.taskTypeName.toLowerCase().includes('maintenance')) {
+      return 'M'; // Maintenance
+    }
+    if (task.taskTypeName.toLowerCase().includes('inspection')) {
+      return 'I'; // Inspection
+    }
+    if (task.taskTypeName.toLowerCase().includes('checkout')) { 
+      return 'CO'; // Checkout
+    }
+    if (task.taskTypeName.toLowerCase().includes('checkin')) {
+      return 'CI'; // Checkin
+    }
+    // Ako ne možemo prepoznati tip zadatka, vraćamo prva dva slova
+    return task.taskTypeName.substring(0, 2);
   }
 
   onDrop(event: CdkDragDrop<any[]>) {
@@ -200,10 +292,10 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     const containerId = event.container.id;
     const teamId = this.getTeamIdFromContainerId(containerId);
     
-    if (teamId && this.lockedTeamIds.includes(teamId)) {
-      console.warn('Cannot modify a locked team');
-      return; // Prevent changes to locked teams
-    }
+    // if (teamId && this.isTeamLocked(teamId)) {
+    //   console.warn('Cannot modify a locked team');
+    //   return; // Prevent changes to locked teams
+    // }
     
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -212,17 +304,44 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       const prevContainerId = event.previousContainer.id;
       const prevTeamId = this.getTeamIdFromContainerId(prevContainerId);
       
-      if (prevTeamId && this.lockedTeamIds.includes(prevTeamId)) {
+      if (prevTeamId && this.isTeamLocked(prevTeamId)) {
         console.warn('Cannot modify a locked team');
         return; // Prevent changes to locked teams
       }
       
+      // Handle the transfer
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
         event.currentIndex,
       );
+      
+      // Check if the item is a task and was dropped into a locked team
+      const isTaskContainer = containerId && containerId.includes('-tasks');
+      const isTeamLocked = teamId && this.isTeamLocked(teamId);
+      
+      if (isTaskContainer && teamId) {
+        const droppedTask = event.container.data[event.currentIndex];
+        
+        // If the task was dropped into a locked team, update its progress type to "Dodijeljeno"
+        if (isTeamLocked && droppedTask && droppedTask.taskId) {
+          this.mobileHomesService.updateTaskStatus(droppedTask.taskId, 'Dodijeljeno')
+            .then(() => {
+              // Update the local task card's progress type
+              droppedTask.taskProgressType = 'Dodijeljeno';
+              console.log(`Task ${droppedTask.taskId} marked as "Dodijeljeno"`);
+            })
+            .catch(error => {
+              console.error(`Error updating task ${droppedTask.taskId} status:`, error);
+            });
+        }
+      }
+      
+      // Force update of availableStaff by triggering change detection
+      // This is needed because the availableStaff getter won't automatically update
+      // when the underlying data changes
+      this.cleaningStaff = [...this.cleaningStaff];
     }
   }
 
@@ -247,7 +366,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       id: this.teamCounter.toString(),
       name: `Team ${this.teamCounter}`,
       members: [],
-      homes: []
+      tasks: [], // Changed from homes to tasks
+      isLocked: false
     };
     
     try {
@@ -269,7 +389,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
           id: savedTeam.id,
           name: savedTeam.name,
           members: [], // Start with empty arrays as the saved team should also have empty arrays
-          homes: []
+          tasks: [],    // Changed from homes to tasks
+          isLocked: false
         };
         
         // Add to our tracking set to prevent duplicates when the subscription updates
@@ -281,6 +402,9 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         // Update the team counter
         this.teamCounter = Math.max(this.teamCounter, parseInt(savedTeam.id) + 1);
         
+        // Force update of availableStaff by triggering change detection
+        this.cleaningStaff = [...this.cleaningStaff];
+        
         // Refresh teams from Supabase to ensure consistency
         // We don't need to await this as it will update via the subscription
         this.teamsService.refreshTeams();
@@ -289,6 +413,9 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         this.assignedTeams.push(newComponentTeam);
         console.warn('Team was not saved to Supabase, using local version only');
         this.teamCounter++;
+        
+        // Force update of availableStaff by triggering change detection
+        this.cleaningStaff = [...this.cleaningStaff];
       }
     } catch (error) {
       // Handle error and fallback to local-only
@@ -296,9 +423,10 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       this.assignedTeams.push(newComponentTeam);
       console.warn('Team was not saved to Supabase due to an error, using local version only');
       this.teamCounter++;
+      
+      // Force update of availableStaff by triggering change detection
+      this.cleaningStaff = [...this.cleaningStaff];
     }
-
-    this.loadExistingTeams();
   }
 
   getConnectedLists(teamId: string): string[] {
@@ -309,133 +437,130 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     return this.assignedTeams.map(t => `team-${t.id}-members`);
   }
 
-  getTeamHomeDropLists(): string[] {
-    return this.assignedTeams.map(t => `team-${t.id}-homes`);
+  getTeamTaskDropLists(): string[] {
+    return this.assignedTeams.map(t => `team-${t.id}-tasks`);
   }
 
   getTeamMemberDropLists(): string[] {
     return this.assignedTeams.map(team => `team-${team.id}-members`);
   }
 
-  async lockTeams() {
-    // Convert component Teams to LockedTeams
-    const teamsToLock: LockedTeam[] = this.assignedTeams.map(team => {
+  async publishTeams() {
+    // Create teams with tasks for Supabase
+    const teamsToPublish: LockedTeam[] = this.assignedTeams.map(team => {
       // Convert CleaningPerson[] to Staff[]
       const staffMembers: Staff[] = team.members.map(member => ({
         id: member.id,
         name: member.name
       }));
       
-      // Convert MobileHome[] to Home[]
-      const homes: Home[] = team.homes.map(home => ({
-        number: home.housename || home.number || '',
-        status: home.status?.toString() || home.availabilityname || ''
+      // Create task objects for each task in the team
+      const tasks: Task[] = team.tasks.map(task => ({
+        id: task.taskId.toString(),
+        number: task.houseNumber,
+        status: task.status
       }));
       
       return {
         id: team.id,
         name: team.name,
         members: staffMembers,
-        homes: homes,
-        isLocked: true // Set to true when locking teams
+        tasks: tasks, // Send tasks instead of homes
+        isLocked: true // Set to true to lock the team
       };
     });
     
-    // Save to Supabase
-    await this.teamsService.saveLockedTeams(teamsToLock);
-    
-    // Update local locked team IDs
-    this.lockedTeamIds = teamsToLock.map(team => team.id);
-    
-    // Refresh teams from Supabase to ensure consistency
-    await this.teamsService.refreshTeams();
-    
-    console.log('Teams locked and saved to Supabase');
+    try {
+      // Save to Supabase
+      await this.teamsService.saveLockedTeams(teamsToPublish);
+      
+      // Update local locked team IDs
+      this.lockedTeamIds = teamsToPublish.map(team => team.id);
+      
+      // Update local team isLocked status
+      this.assignedTeams.forEach(team => {
+        if (this.lockedTeamIds.includes(team.id)) {
+          team.isLocked = true;
+        }
+      });
+      
+      // Process all tasks in the published teams
+      const updateTaskPromises: Promise<void>[] = [];
+      
+      for (const team of teamsToPublish) {
+        // Get all tasks in the team
+        const teamObj = this.assignedTeams.find(t => t.id === team.id);
+        if (teamObj && teamObj.tasks) {
+          // Update each task's progress type to "Dodijeljeno"
+          for (const task of teamObj.tasks) {
+            // Update task progress type in Supabase
+            const updatePromise = this.mobileHomesService.updateTaskStatus(task.taskId, 'Dodijeljeno')
+              .then(() => {
+                // Update local task card's progress type
+                task.taskProgressType = 'Dodijeljeno';
+                console.log(`Task ${task.taskId} marked as "Dodijeljeno"`);
+              })
+              .catch(error => {
+                console.error(`Error updating task ${task.taskId} status:`, error);
+              });
+            
+            updateTaskPromises.push(updatePromise);
+          }
+        }
+      }
+      
+      // Wait for all task updates to complete
+      await Promise.all(updateTaskPromises);
+      
+      // Lock all houses in the teams (update house_availabilities)
+      for (const team of teamsToPublish) {
+        // Get unique house IDs from the tasks
+        const uniqueHouseIds = new Set<number>();
+        
+        if (team.tasks) {
+          team.tasks.forEach(task => {
+            const houseTask = this.taskCards.find(t => t.taskId === parseInt(task.id));
+            if (houseTask) {
+              uniqueHouseIds.add(houseTask.houseId);
+            }
+          });
+          
+          // Lock each house
+          for (const houseId of uniqueHouseIds) {
+            await this.mobileHomesService.lockHouse(houseId);
+          }
+        }
+      }
+      
+      // Force update of availableStaff by triggering change detection
+      this.cleaningStaff = [...this.cleaningStaff];
+      
+      // Refresh teams from Supabase to ensure consistency
+      await this.teamsService.refreshTeams();
+      
+      console.log('Teams published and saved to Supabase');
+      
+      // Show success message
+      alert('Successfully published teams and locked all houses!');
+    } catch (error) {
+      console.error('Error publishing teams:', error);
+      alert('Error publishing teams. Please try again.');
+    }
   }
 
   // Add a method to check if a team is locked
   isTeamLocked(teamId: string): boolean {
-    return this.lockedTeamIds.includes(teamId);
-  }
-
-  // Add a method to load default teams
-  async loadDefaultTeams() {
-    try {
-      // Load default teams from the service
-      const defaultTeams = this.teamsService.loadDefaultTeams();
-      
-      // Convert LockedTeam objects to the component's Team format
-      const componentTeams: Team[] = [];
-      
-      for (const lockedTeam of defaultTeams) {
-        // Create a new Team object
-        const team: Team = {
-          id: lockedTeam.id,
-          name: lockedTeam.name,
-          members: [],
-          homes: []
-        };
-        
-        // Convert Staff to CleaningPerson
-        if (lockedTeam.members && lockedTeam.members.length > 0) {
-          // Find the corresponding CleaningPerson objects from cleaningStaff
-          for (const member of lockedTeam.members) {
-            const cleaningPerson = this.cleaningStaff.find(staff => staff.id === member.id);
-            if (cleaningPerson) {
-              team.members.push(cleaningPerson);
-            } else {
-              // If not found, create a new CleaningPerson object
-              team.members.push({
-                id: member.id,
-                name: member.name,
-                available: true
-              });
-            }
-          }
-        }
-        
-        // Convert Home to MobileHome
-        if (lockedTeam.homes && lockedTeam.homes.length > 0) {
-          // Find the corresponding MobileHome objects from mobileHomes
-          for (const home of lockedTeam.homes) {
-            const mobileHome = this.mobileHomes.find(h => 
-              h.housename === home.number || h.number === home.number
-            );
-            if (mobileHome) {
-              team.homes.push(mobileHome);
-            }
-            // If not found, we don't add it since we need the full MobileHome object
-          }
-        }
-        
-        // Add to our tracking set to prevent duplicates
-        this.loadedTeamIds.add(lockedTeam.id);
-        
-        componentTeams.push(team);
-      }
-      
-      // Update the teamCounter to be greater than any existing team ID
-      const maxTeamId = Math.max(...componentTeams.map(team => parseInt(team.id) || 0), 0);
-      this.teamCounter = maxTeamId + 1;
-      
-      // Set the assignedTeams
-      this.assignedTeams = componentTeams;
-      
-      console.log('Default teams loaded');
-    } catch (error) {
-      console.error('Error loading default teams:', error);
+    // Check if the team ID is in the lockedTeamIds array
+    if (this.lockedTeamIds.includes(teamId)) {
+      return true;
     }
-  }
-
-  unlockAllTeams(){
-    console.log('All teams are unlocked')
-  }
-
-  unlockTeam(teamId: string){
-    console.log('Team ' + teamId + ' unlocked');
-  }
-
-  lockTeam(teamId: string){
-    console.log('Team ' + teamId + ' locked')
+    
+    // Also check if the team has the isLocked property set to true
+    const team = this.assignedTeams.find(t => t.id === teamId);
+    if (team && (team as any).isLocked === true) {
+      return true;
+    }
+    
+    return false;
   }
 } 

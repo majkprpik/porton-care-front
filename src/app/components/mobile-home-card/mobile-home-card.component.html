@@ -4,23 +4,40 @@
     'free': mobileHome.availabilityname === 'Free' && mobileHome.housetasks.length === 0,
   }">
   <div class="home-header">
-    
-    <div class="task-indicators">
-      <span *ngFor="let indicator of taskIndicators" class="task-indicator">{{ indicator }}</span>
+    <div class="house-number">{{ mobileHome.housename }}</div>
+  </div>
+  
+  <div class="tasks-container" *ngIf="mobileHome.housetasks.length > 0">
+    <div class="task-item" *ngFor="let task of mobileHome.housetasks">
+      <div class="task-info">
+        <div class="task-indicator">{{ getTaskIndicator(task) }}</div>
+        <div class="task-name">{{ task.taskTypeName }}</div>
+        <div class="task-progress">{{ task.taskProgressTypeName }}</div>
+      </div>
+      <div class="task-actions">
+        <button 
+          *ngIf="canStartTask(task)" 
+          class="action-btn start-btn" 
+          (click)="startTask(task)">
+          Start
+        </button>
+        <button 
+          *ngIf="canPauseTask(task)" 
+          class="action-btn pause-btn" 
+          (click)="pauseTask(task)">
+          Pause
+        </button>
+        <button 
+          *ngIf="canCompleteTask(task)" 
+          class="action-btn complete-btn" 
+          (click)="completeTask(task)">
+          Complete
+        </button>
+      </div>
     </div>
   </div>
-  <div class="home-details">
-    <div class="house-tasks">
-      <span class="house-task" *ngIf="ifNeedsInitialSetup(mobileHome.housetasks)">P</span>
-      <span class="house-task" *ngIf="ifNeedsCleaning(mobileHome.housetasks)">ČK</span>
-      <span class="house-task" *ngIf="ifNeedsPorchCleaning(mobileHome.housetasks)">ČT</span>
-      <span class="house-task" *ngIf="ifNeedsRepair(mobileHome.housetasks)">P</span>
-      <span class="house-task" *ngIf="ifNeedsTowelChange(mobileHome.housetasks)">MP</span>
-      <span class="house-task" *ngIf="ifNeedsSheetChange(mobileHome.housetasks)">MR</span>
-    </div>
-    <!-- black text -->
-    <div class="house-name">
-      {{mobileHome.housename}}
-    </div>
+  
+  <div class="no-tasks" *ngIf="mobileHome.housetasks.length === 0">
+    No tasks assigned
   </div>
 </div>

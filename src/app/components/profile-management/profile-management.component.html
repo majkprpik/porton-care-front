@@ -1,0 +1,106 @@
+<div class="profile-management-container">
+  <h1>Profile Management</h1>
+  
+  <!-- Search and Filter -->
+  <div class="search-container">
+    <mat-form-field appearance="outline">
+      <mat-label>Search</mat-label>
+      <input matInput (keyup)="onSearchChange($event)" placeholder="Search by name or role">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+  
+  <!-- Profiles Table -->
+  <div class="table-container mat-elevation-z8">
+    <form [formGroup]="editForm">
+      <table mat-table [dataSource]="getPaginatedData()" matSort (matSortChange)="onSort($event)">
+        
+        <!-- First Name Column -->
+        <ng-container matColumnDef="first_name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
+          <td mat-cell *matCellDef="let profile">
+            <ng-container *ngIf="!isEditing(profile)">{{ profile.first_name }}</ng-container>
+            <mat-form-field *ngIf="isEditing(profile)" appearance="outline" class="edit-field">
+              <input matInput formControlName="first_name">
+              <mat-error *ngIf="editForm.get('first_name')!.hasError('required')">
+                First name is required
+              </mat-error>
+            </mat-form-field>
+          </td>
+        </ng-container>
+        
+        <!-- Last Name Column -->
+        <ng-container matColumnDef="last_name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
+          <td mat-cell *matCellDef="let profile">
+            <ng-container *ngIf="!isEditing(profile)">{{ profile.last_name }}</ng-container>
+            <mat-form-field *ngIf="isEditing(profile)" appearance="outline" class="edit-field">
+              <input matInput formControlName="last_name">
+              <mat-error *ngIf="editForm.get('last_name')!.hasError('required')">
+                Last name is required
+              </mat-error>
+            </mat-form-field>
+          </td>
+        </ng-container>
+        
+        <!-- Role Column -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+          <td mat-cell *matCellDef="let profile">
+            <ng-container *ngIf="!isEditing(profile)">
+              <span class="role-badge" [ngClass]="profile.role">{{ profile.role }}</span>
+            </ng-container>
+            <mat-form-field *ngIf="isEditing(profile)" appearance="outline" class="edit-field">
+              <mat-select formControlName="role">
+                <mat-option *ngFor="let role of availableRoles" [value]="role">
+                  {{ role }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="editForm.get('role')!.hasError('required')">
+                Role is required
+              </mat-error>
+            </mat-form-field>
+          </td>
+        </ng-container>
+        
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let profile">
+            <ng-container *ngIf="!isEditing(profile)">
+              <button mat-icon-button color="primary" (click)="startEdit(profile)" aria-label="Edit profile">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </ng-container>
+            <ng-container *ngIf="isEditing(profile)">
+              <button mat-icon-button color="primary" (click)="saveProfile()" [disabled]="editForm.invalid" aria-label="Save profile">
+                <mat-icon>save</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="cancelEdit()" aria-label="Cancel edit">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </ng-container>
+          </td>
+        </ng-container>
+        
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        
+        <!-- No Data Row -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">No profiles found matching the filter</td>
+        </tr>
+      </table>
+    </form>
+    
+    <!-- Paginator -->
+    <mat-paginator 
+      [length]="filteredProfiles.length"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      aria-label="Select page">
+    </mat-paginator>
+  </div>
+</div> 

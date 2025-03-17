@@ -80,4 +80,145 @@ export class MobileHomesService {
 
     return of(mockHomes);
   }
+
+  /**
+   * Locks a house by updating its availability status to "Locked"
+   * @param houseId The ID of the house to lock
+   * @returns Promise that resolves when the house is locked
+   */
+  async lockHouse(houseId: number): Promise<void> {
+    try {
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+      
+      // First, check if there's an existing house_availability record for today
+      const { data: existingAvailability, error: checkError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_availabilities')
+        .select('*')
+        .eq('house_id', houseId)
+        .gte('date', `${today}T00:00:00`)
+        .lte('date', `${today}T23:59:59`)
+        .single();
+      
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+      
+      // Get the ID for "Locked" status from the availability_types table
+      const { data: lockedStatus, error: statusError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('availability_types')
+        .select('availability_type_id')
+        .eq('name', 'Locked')
+        .single();
+      
+      if (statusError) {
+        // If "Locked" status doesn't exist, use a default ID (you may need to adjust this)
+        console.warn('Could not find "Locked" status, using default ID 99');
+        const lockedStatusId = 99;
+        
+        if (existingAvailability) {
+          // Update existing availability
+          const { error: updateError } = await this.supabase.getClient()
+            .schema('porton')
+            .from('house_availabilities')
+            .update({ availability_type_id: lockedStatusId })
+            .eq('house_availability_id', existingAvailability.house_availability_id);
+          
+          if (updateError) throw updateError;
+        } else {
+          // Insert new availability
+          const { error: insertError } = await this.supabase.getClient()
+            .schema('porton')
+            .from('house_availabilities')
+            .insert({
+              house_id: houseId,
+              availability_type_id: lockedStatusId,
+              date: new Date().toISOString()
+            });
+          
+          if (insertError) throw insertError;
+        }
+      } else {
+        const lockedStatusId = lockedStatus.availability_type_id;
+        
+        if (existingAvailability) {
+          // Update existing availability
+          const { error: updateError } = await this.supabase.getClient()
+            .schema('porton')
+            .from('house_availabilities')
+            .update({ availability_type_id: lockedStatusId })
+            .eq('house_availability_id', existingAvailability.house_availability_id);
+          
+          if (updateError) throw updateError;
+        } else {
+          // Insert new availability
+          const { error: insertError } = await this.supabase.getClient()
+            .schema('porton')
+            .from('house_availabilities')
+            .insert({
+              house_id: houseId,
+              availability_type_id: lockedStatusId,
+              date: new Date().toISOString()
+            });
+          
+          if (insertError) throw insertError;
+        }
+      }
+      
+      console.log(`House ${houseId} locked successfully`);
+    } catch (error) {
+      console.error(`Error locking house ${houseId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates the status of a task
+   * @param taskId The ID of the task to update
+   * @param newStatus The new status to set (e.g., 'U tijeku', 'Dodijeljeno', 'Završeno')
+   * @returns Promise that resolves when the task is updated
+   */
+  async updateTaskStatus(taskId: number, newStatus: string): Promise<void> {
+    try {
+      // First, get the task progress type ID for the new status
+      const { data: progressType, error: progressTypeError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('task_progress_types')
+        .select('task_progress_type_id')
+        .eq('task_progress_type_name', newStatus)
+        .single();
+      
+      if (progressTypeError) {
+        console.error('Error finding task progress type:', progressTypeError);
+        throw progressTypeError;
+      }
+      
+      const progressTypeId = progressType.task_progress_type_id;
+      
+      // Update the task with the new progress type
+      const { error: updateError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('tasks')
+        .update({ 
+          task_progress_type_id: progressTypeId,
+          // If starting a task, set the start time
+          ...(newStatus === 'u progresu' && { start_time: new Date().toISOString() }),
+          // If completing a task, set the end time
+          ...(newStatus === 'Završeno' && { end_time: new Date().toISOString() })
+        })
+        .eq('task_id', taskId);
+      
+      if (updateError) {
+        console.error('Error updating task status:', updateError);
+        throw updateError;
+      }
+      
+      console.log(`Task ${taskId} updated to status: ${newStatus}`);
+    } catch (error) {
+      console.error(`Error updating task ${taskId}:`, error);
+      throw error;
+    }
+  }
 } 

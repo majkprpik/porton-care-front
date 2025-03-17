@@ -41,6 +41,63 @@ export class MobileHomeCardComponent implements OnInit {
     return this.homesService.getPendingTasks(this.mobileHome);
   }
 
+  // Task indicator methods
+  getTaskIndicator(task: HouseTask): string {
+    // Return abbreviation for task type
+    if (task.taskTypeName.toLowerCase().includes('čišćenje') && task.taskTypeName.toLowerCase().includes('terase')) {
+      return 'ČT'; // Čišćenje terase
+    }
+    if (task.taskTypeName.toLowerCase().includes('čišćenje') && task.taskTypeName.toLowerCase().includes('kućice')) {
+      return 'ČK'; // Čišćenje kućice
+    }
+    if (task.taskTypeName.toLowerCase().includes('punjenje')) {
+      return 'P'; // Punjenje
+    }
+    if (task.taskTypeName.toLowerCase().includes('mijenjanje') && task.taskTypeName.toLowerCase().includes('ručnika')) {
+      return 'MR'; // Mijenjanje ručnika
+    }
+    if (task.taskTypeName.toLowerCase().includes('mijenjanje') && task.taskTypeName.toLowerCase().includes('posteljine')) {
+      return 'MP'; // Mijenjanje posteljine
+    }
+    if (task.taskTypeName.toLowerCase().includes('popravak')) {
+      return 'P'; // Popravak
+    }
+    // If we can't recognize the task type, return the first two letters
+    return task.taskTypeName.substring(0, 2);
+  }
+
+  // Task action methods
+  canStartTask(task: HouseTask): boolean {
+    // Can start if task is assigned but not started
+    return task.taskProgressTypeName === 'Dodijeljeno' && !task.startTime;
+  }
+
+  canPauseTask(task: HouseTask): boolean {
+    // Can pause if task is in progress
+    return task.taskProgressTypeName === 'U tijeku';
+  }
+
+  canCompleteTask(task: HouseTask): boolean {
+    // Can complete if task is in progress
+    return task.taskProgressTypeName === 'U tijeku';
+  }
+
+  startTask(task: HouseTask): void {
+    // Start the task
+    this.homesService.updateTaskStatus(task.taskId, 'U tijeku');
+  }
+
+  pauseTask(task: HouseTask): void {
+    // Pause the task (return to assigned)
+    this.homesService.updateTaskStatus(task.taskId, 'Dodijeljeno');
+  }
+
+  completeTask(task: HouseTask): void {
+    // Complete the task
+    this.homesService.updateTaskStatus(task.taskId, 'Završeno');
+  }
+
+  // Legacy methods kept for compatibility
   ifNeedsInitialSetup(houseTasks: HouseTask[]){
     return houseTasks.some(houseTask => houseTask.taskTypeName.includes('Punjenje'));
   }

@@ -87,4 +87,64 @@
       }
     }
   }
+}
+
+.team-tasks {
+  margin-top: 2rem;
+  
+  h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  
+  .tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .task-item {
+    padding: 1rem;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .task-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5rem;
+    
+    .task-title {
+      font-weight: 500;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .task-location {
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+  
+  .task-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    
+    .task-type, .task-progress {
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+  
+  .no-tasks {
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    text-align: center;
+    color: #666;
+  }
 } 

@@ -13,37 +13,56 @@
     <div class="team-homes">
       <h3>Homes to Clean</h3>
       <div class="homes-grid">
-        <div *ngFor="let home of team.homes" class="home-card" [ngClass]="home.status">
-          <div class="home-number">{{home.number}}</div>
+        <div *ngFor="let task of team.tasks" class="home-card" [ngClass]="task.status">
+          <div class="home-number">{{task.number}}</div>
           <div class="home-actions">
             <!-- Show Start Cleaning button when home is dirty -->
-            <button *ngIf="home.status === CleaningState.DIRTY"
-                    (click)="startCleaning(home)"
+            <button *ngIf="task.status === CleaningState.DIRTY"
+                    (click)="startCleaning(task)"
                     class="btn-start">
               Start Cleaning
             </button>
 
             <!-- Show Stop Cleaning button when cleaning is in progress -->
-            <button *ngIf="home.status === CleaningState.CLEANING"
-                    (click)="stopCleaning(home)"
+            <button *ngIf="task.status === CleaningState.CLEANING"
+                    (click)="stopCleaning(task)"
                     class="btn-stop">
               Stop Cleaning
             </button>
 
             <!-- Show Full Cleaned button when partially cleaned -->
-            <button *ngIf="home.status === CleaningState.PARTIALLY_CLEANED"
-                    (click)="markFullyCleaned(home)"
+            <button *ngIf="task.status === CleaningState.PARTIALLY_CLEANED"
+                    (click)="markFullyCleaned(task)"
                     class="btn-complete">
               Full Cleaned!
             </button>
 
             <!-- Show status when fully cleaned -->
-            <span *ngIf="home.status === CleaningState.FULLY_CLEANED" 
+            <span *ngIf="task.status === CleaningState.FULLY_CLEANED" 
                   class="status-complete">
               Completed
             </span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="team-tasks">
+      <h3>Team Tasks</h3>
+      <div class="tasks-list" *ngIf="team.tasks && team.tasks.length > 0">
+        <div *ngFor="let task of team.tasks" class="task-item">
+          <div class="task-header">
+            <div class="task-title">Task #{{task.id}}</div>
+            <div class="task-location">Location: {{task.house || task.number}}</div>
+          </div>
+          <div class="task-details">
+            <div class="task-type">Type: {{task.taskType || 'Cleaning'}}</div>
+            <div class="task-progress">Progress: {{task.progressType || getProgressTypeFromStatus(task.status)}}</div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!team.tasks || team.tasks.length === 0" class="no-tasks">
+        <p>No tasks assigned to this team.</p>
       </div>
     </div>
   </div>

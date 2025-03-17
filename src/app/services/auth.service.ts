@@ -13,13 +13,24 @@ export class AuthService {
   constructor(
     private router: Router,
     private supabaseService: SupabaseService
-  ) {}
+  ) {
+    // this.initializeTestUsers();
+  }
+
+  private async initializeTestUsers(): Promise<void> {
+    try {
+      await this.createTestUsers();
+      console.log('Test users initialization completed');
+    } catch (error) {
+      console.error('Failed to initialize test users:', error);
+    }
+  }
 
   async login(email: string): Promise<boolean> {
     try {
       const { data, error } = await this.supabaseService.getClient().auth.signInWithPassword({
         email: email,
-        password: 'test' // Fixed password as requested
+        password: 'test123' // Fixed password as requested
       });
 
       if (error) throw error;
@@ -63,4 +74,47 @@ export class AuthService {
   getUsername() {
     return this.usernameSubject.asObservable();
   }
-} 
+
+  /**
+   * Creates 10 test users in the application
+   * @returns Promise that resolves to an array of created user IDs or null if operation failed
+   */
+  async createTestUsers(): Promise<string[] | null> {
+    try {
+      const userIds: string[] = [];
+      
+      // In a real application, you would typically create users through a secure backend API
+      // This is a simplified version for demonstration purposes
+      for (let i = 1; i <= 10; i++) {
+        const email = `User${i}@example.com`;
+        
+        // Using signUp instead of admin.createUser which requires admin privileges
+        const { data, error } = await this.supabaseService.getClient().auth.signUp({
+          email: email,
+          password: 'test123', // More secure password
+          options: {
+            data: {
+              display_name: `User ${i}`,
+              role: i <= 2 ? 'admin' : 'user' // First two users are admins
+            }
+          }
+        });
+        
+        if (error) {
+          console.error(`Error creating user ${i}:`, error);
+          continue;
+        }
+        
+        if (data.user) {
+          userIds.push(data.user.id);
+          console.log(`Created user: ${email}`);
+        }
+      }
+      
+      return userIds.length > 0 ? userIds : null;
+    } catch (error) {
+      console.error('Error creating test users:', error);
+      return null;
+    }
+  }
+}

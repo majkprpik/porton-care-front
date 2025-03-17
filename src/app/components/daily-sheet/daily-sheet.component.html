@@ -1,80 +1,71 @@
 <div class="daily-sheet-container">
-  <!-- Left side - Mobile Homes -->
-  <div class="homes-section">
-    <h3>Mobile Homes</h3>
+  <!-- Left side - Task Cards -->
+  <div class="tasks-section">
+    <h3>Tasks</h3>
     <div
-      class="homes-list"
+      class="tasks-list"
       cdkDropList
-      id="homes-list"
-      [cdkDropListData]="mobileHomes"
-      [cdkDropListConnectedTo]="getTeamHomeDropLists()"
+      id="tasks-list"
+      [cdkDropListData]="taskCards"
+      [cdkDropListConnectedTo]="getTeamTaskDropLists()"
       (cdkDropListDropped)="onDrop($event)"
     >
-      <app-mobile-home-card
-        *ngFor="let house of mobileHomes"
-        [status]="house.status"
-        [homeNumber]="house.number"
-        [mobileHome]="house"
-        [taskIndicators]="getTaskIndicators(house)"
+      <div 
+        class="task-card"
+        *ngFor="let task of taskCards"
         cdkDrag
+        [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
       >
-      </app-mobile-home-card>
+        <div class="task-indicator">{{ getTaskIndicator(task) }}</div>
+        <div class="task-number">{{ task.houseNumber }}</div>
+      </div>
+      <div class="placeholder" *ngIf="taskCards.length === 0">
+        No tasks available
+      </div>
     </div>
   </div>
 
   <!-- Middle - Teams -->
   <div class="teams-section">
-    <h3>Teams</h3>
-    <div class="button-container">
-      <button class="new-team-btn" (click)="createNewTeam()">
-        Create New Team
-      </button>
-      <button class="lock-teams-btn" (click)="lockTeams()">
-        Lock All Teams
-      </button>
-      <button class="load-default-btn" (click)="loadDefaultTeams()" *ngIf="assignedTeams.length === 0">
-        Load Default Teams
-      </button>
-      <button class="unlock-teams-btn" (click)="unlockAllTeams()">
-        Unlock All Teams
-      </button>
+    <div class="teams-header">
+      <h3>Teams</h3>
+      <div class="teams-actions">
+        <button class="new-team-btn" (click)="createNewTeam()">
+          Create New Team
+        </button>
+        <button class="publish-btn" (click)="publishTeams()">Publish</button>
+      </div>
     </div>
 
     <div class="teams-container">
       <div *ngIf="assignedTeams.length === 0" class="no-teams-message">
-        No teams found for today. Create a new team or load default teams.
+        No teams found for today. Create a new team to get started.
       </div>
       
-      <div class="team-box" *ngFor="let team of assignedTeams" [class.locked-team]="isTeamLocked(team.id)">
-        <div class="header-container">
-          <h4>Team {{ team.id }} <span *ngIf="isTeamLocked(team.id)" class="locked-indicator">🔒 Locked</span></h4>
-          <button (click)="isTeamLocked(team.id) ? unlockTeam(team.id) : lockTeam(team.id)">
-            <mat-icon *ngIf="!isTeamLocked(team.id)">lock_open</mat-icon>
-            <mat-icon *ngIf="isTeamLocked(team.id)">lock</mat-icon>
-          </button>
-        </div>
-        <div class="team-content">
+      <div class="team-box" *ngFor="let team of assignedTeams">
+        <h4>Team {{ team.id }} <span *ngIf="isTeamLocked(team.id)" class="locked-indicator">(Locked)</span></h4>
+        <div class="team-content" [ngClass]="{'locked': isTeamLocked(team.id)}">
           <div
-            class="team-homes"
+            class="team-tasks"
             cdkDropList
-            [id]="'team-' + team.id + '-homes'"
-            [cdkDropListData]="team.homes"
-            [cdkDropListConnectedTo]="isTeamLocked(team.id) ? [] : ['homes-list']"
+            [id]="'team-' + team.id + '-tasks'"
+            [cdkDropListData]="team.tasks"
+            [cdkDropListConnectedTo]="isTeamLocked(team.id) ? [] : ['tasks-list']"
             (cdkDropListDropped)="onDrop($event)"
             [cdkDropListDisabled]="isTeamLocked(team.id)"
           >
-            <app-mobile-home-card
-              *ngFor="let home of team.homes"
-              [status]="home.status"
-              [homeNumber]="home.number"
-              [mobileHome]="home"
-              [taskIndicators]="getTaskIndicators(home)"
-              [cdkDragDisabled]="isTeamLocked(team.id)"
+            <div 
+              class="task-card"
+              *ngFor="let task of team.tasks"
               cdkDrag
+              [cdkDragDisabled]="isTeamLocked(team.id)"
+              [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
             >
-            </app-mobile-home-card>
-            <div class="placeholder" *ngIf="team.homes.length === 0 && !isTeamLocked(team.id)">
-              Drop homes here
+              <div class="task-indicator">{{ getTaskIndicator(task) }}</div>
+              <div class="task-number">{{ task.houseNumber }}</div>
+            </div>
+            <div class="placeholder" *ngIf="team.tasks.length === 0">
+              Drop tasks here
             </div>
           </div>
 
@@ -95,7 +86,7 @@
             >
               {{ member.name }}
             </div>
-            <div class="placeholder" *ngIf="team.members.length === 0 && !isTeamLocked(team.id)">
+            <div class="placeholder" *ngIf="team.members.length === 0">
               Drop staff here
             </div>
           </div>
@@ -106,22 +97,25 @@
 
   <!-- Right side - Cleaning Staff -->
   <div class="staff-section">
-    <h3>Cleaning Staff</h3>
+    <h3>Available Cleaning Staff</h3>
     <div
       class="staff-list"
       cdkDropList
       id="staff-list"
-      [cdkDropListData]="cleaningStaff"
+      [cdkDropListData]="availableStaff"
       [cdkDropListConnectedTo]="getTeamMemberDropLists()"
       (cdkDropListDropped)="onDrop($event)"
     >
       <div
         class="staff-card"
-        *ngFor="let person of cleaningStaff"
+        *ngFor="let person of availableStaff"
         cdkDrag
         [class.unavailable]="!person.available"
       >
         {{ person.name }}
+      </div>
+      <div class="placeholder" *ngIf="availableStaff.length === 0">
+        No available staff members
       </div>
     </div>
   </div>

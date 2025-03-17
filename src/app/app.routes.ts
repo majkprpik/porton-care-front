@@ -7,6 +7,7 @@ import { RepairReportComponent } from './components/repair-report/repair-report.
 import { RepairReportsComponent } from './components/repair-reports/repair-reports.component';
 import { TeamViewComponent } from './components/team-view/team-view.component';
 import { DailySheetComponent } from './components/daily-sheet/daily-sheet.component';
+import { ProfileManagementComponent } from './components/profile-management/profile-management.component';
 
 
 export const routes: Routes = [
@@ -18,5 +19,6 @@ export const routes: Routes = [
   { path: 'team/:id', component: TeamDetailComponent },
   { path: 'repair-reports', component: RepairReportsComponent },
   { path: 'report-repair', component: RepairReportComponent },
+  { path: 'profiles', component: ProfileManagementComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '/dashboard' },
 ];
