@@ -1,0 +1,235 @@
+.damage-reports-list{
+    .damage-reports-wrapper{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+
+        .houses{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 4px 8px;
+            flex: 1 1 calc(25% - 10px); /* 4 per row */
+            min-width: 370px;
+            box-sizing: border-box;
+            height: auto;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: lightcoral;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+
+            .house-name{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                padding: 5px;
+                width: 100%;
+                border-bottom: 1px solid black;
+            }
+
+            .damage-title{
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+
+            .damage{
+                overflow-y: auto;
+                max-height: 200px;
+                font-size: 14px;
+                font-weight: 500;
+            }
+             
+            &:hover {
+              transform: scale(1.01);
+            }
+
+            .tabs{
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-evenly;
+                border-top: 1px solid black;
+                padding-top: 10px;
+
+                .images-tab{
+                    width: 50%;
+                    height: 50px;
+                    border-radius: 10px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+
+                    &:hover{
+                        background-color: rgb(212, 113, 113);
+                    }
+                }
+
+                .comments-tab{
+                    width: 50%;
+                    height: 50px;
+                    border-radius: 10px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+
+                    &:hover{
+                        background-color: rgb(212, 113, 113);
+                    }
+                }
+            }
+
+            
+            .images{
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                gap: 10px;
+                overflow-x: auto;
+                max-height: 350px;
+
+                img{
+                    border-radius: 10px;
+                    max-height: 350px;
+                }
+            }
+
+            .comments{
+                height: 240px;
+                width: 100%;
+
+                .back-button{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 5px;
+                    background-color: rgb(240, 184, 184);
+                    border-radius: 10px;
+                    border: none;
+                    margin-bottom: 5px;
+
+                    &:hover{
+                        cursor: pointer;
+                    }
+                }
+
+                form{
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 10px;
+
+                    textarea{
+                        background-color: rgb(243, 167, 167);
+                        width: 100%;
+                        height: 150px;
+                        resize: none;
+                    }
+    
+                    button{
+                        height: 40px;
+                        border-radius: 10px;
+                        border: none;
+                        width: 200px;
+                        background-color: rgb(240, 184, 184);
+                        transition: transform 0.3s ease;
+    
+                        &:hover{
+                            transform: scale(1.03);
+                            cursor: pointer;
+                        }
+                    }
+                }
+
+                .comments-container{
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: space-between;
+                    height: 100%;
+
+                    .comment-wrapper{
+                        height: 100%;
+                        width: 100%;
+    
+                        .comment{
+                            background-color: rgb(233, 143, 143);
+                            box-sizing: border-box;
+                            padding: 5px;
+                            border-radius: 10px;
+                            white-space: pre-line;
+                            max-height: 190px;
+                            max-width: 350px;
+                            overflow-y: auto;
+                            word-wrap: break-word; 
+                            overflow-wrap: break-word; 
+                        }
+                    }
+
+                    button{
+                        height: 40px;
+                        border-radius: 10px;
+                        border: none;
+                        width: 200px;
+                        background-color: rgb(240, 184, 184);
+                        transition: transform 0.3s ease;
+                        font-weight: bold;
+    
+                        &:hover{
+                            transform: scale(1.03);
+                            cursor: pointer;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+::-webkit-scrollbar {
+    width: 5px; 
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: lightgray; 
+    border-radius: 2px; 
+}
+
+::-webkit-scrollbar-thumb {
+    background: darkred; 
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Make houses expand when fewer than 4 fit */
+@media (max-width: 1200px) { /* Adjust breakpoint as needed */
+    .houses {
+        flex: 1 1 calc(33.33% - 10px); /* 3 per row */
+    }
+}
+
+@media (max-width: 900px) {
+    .houses {
+        flex: 1 1 calc(50% - 10px); /* 2 per row */
+    }
+}
+
+@media (max-width: 600px) {
+    .houses {
+        flex: 1 1 100%; /* 1 per row */
+    }
+}

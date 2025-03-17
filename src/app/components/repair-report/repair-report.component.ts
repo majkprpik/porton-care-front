@@ -8,6 +8,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
+import { MobileHomesService } from '../../services/mobile-homes.service';
+import { MobileHome } from '../../models/mobile-home.interface';
+import { TaskService } from '../../services/task.service';
 
 @Component({
   selector: 'app-repair-report',
@@ -25,7 +28,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./repair-report.component.scss']
 })
 export class RepairReportComponent {
-  locations = ['Room A1', 'Room A2', 'Room B1', 'Room B2', 'Common Area', 'Kitchen', 'Bathroom'];
+  mobileHomes: MobileHome[] = [];
   report = {
     description: '',
     location: ''
@@ -33,12 +36,25 @@ export class RepairReportComponent {
 
   constructor(
     private location: Location,
-    private router: Router
+    private router: Router,
+    private mobileHomesService: MobileHomesService,
+    private taskService: TaskService
   ) {}
+
+  ngOnInit(){
+    const today = new Date().toISOString().split('T')[0];
+
+    // Real implementation for later:
+    this.mobileHomesService.getHomesForDate(today)
+      .then(homes => {
+        console.log('Fetched homes:', homes);
+        this.mobileHomes = homes;
+      });
+  }
 
   onSubmit() {
     if (this.report.description && this.report.location) {
-      // Handle report submission
+      this.taskService.createTaskForHouse(this.report.location, this.report.description);
       console.log(this.report);
       this.router.navigate(['/']);
     }

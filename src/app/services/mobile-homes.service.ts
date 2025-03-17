@@ -29,6 +29,33 @@ export class MobileHomesService {
     }
   }
 
+  async getHomesWithRepairTasks(){
+    try {
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_statuses_view')
+        .select('*');
+
+      if (error) throw error;
+
+      let housesWithRepairTasks = data.flatMap(house => 
+        house.housetasks
+            .filter((houseTask: any) => houseTask.taskTypeName === "Popravak")
+            .map((houseTask: any) => ({
+                ...house,  // Copy house properties
+                housetasks: [houseTask]  // Replace housetasks array with only this task
+            }))
+      );
+      
+      console.log('Houses with repair tasks:', housesWithRepairTasks);
+
+      return housesWithRepairTasks;
+    } catch (error) {
+      console.error('Error fetching houses:', error);
+      return [];
+    }
+  }
+
   // Helper method to check if a house has active tasks
   hasActiveTasks(house: MobileHome): boolean {
     if (!house.housetasks || house.housetasks.length === 0) {

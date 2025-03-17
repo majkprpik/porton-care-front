@@ -32,6 +32,7 @@ export interface HouseTask {
   taskTypeName: string;
   taskProgressTypeId: number;
   taskProgressTypeName: string;
+  description: string;
 }
 
 // Supporting interfaces based on your view structure

@@ -6,6 +6,7 @@ import { MobileHomeCardComponent } from '../mobile-home-card/mobile-home-card.co
 import { MatCardModule } from '@angular/material/card';
 import { HomesFilterPipe } from '../../pipes/homes-filter.pipe';
 import { FormsModule } from '@angular/forms';
+import { TaskService } from '../../services/task.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -58,7 +59,9 @@ export class DashboardComponent implements OnInit {
     return indicators;
   }
 
-  constructor(private mobileHomesService: MobileHomesService) {}
+  constructor(
+    private mobileHomesService: MobileHomesService,
+    private taskService: TaskService) {}
 
   ngOnInit() {
     this.loadTodayHomes();

@@ -11,8 +11,8 @@
       <mat-form-field appearance="fill">
         <mat-label>Location</mat-label>
         <mat-select [(ngModel)]="report.location" name="location" required>
-          <mat-option *ngFor="let location of locations" [value]="location">
-            {{location}}
+          <mat-option *ngFor="let mobileHome of mobileHomes" [value]="mobileHome.house_id">
+            {{ mobileHome.housename }}
           </mat-option>
         </mat-select>
       </mat-form-field>

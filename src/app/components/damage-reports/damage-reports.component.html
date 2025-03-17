@@ -1,0 +1,55 @@
+<div class="damage-reports-list">
+    <h2>Damage reports</h2>
+    <div class="damage-reports-wrapper">
+        <div class="houses" *ngFor="let homeForRepair of homesForRepair">
+            <span class="house-name">
+                {{ homeForRepair.housename }}
+            </span>
+            <span class="damage" *ngFor="let houseTask of homeForRepair.housetasks">
+                {{ formatDescriptionForTask(houseTask.description) }}
+            </span>
+            <div class="tabs">
+                <div (click)="setImagesSelected(homeForRepair.housetasks[0].taskId)" 
+                    class="images-tab" 
+                    [ngStyle]="{'background-color': selectedTabs[homeForRepair.housetasks[0].taskId] === 'images' ? 'rgb(199, 104, 104)' : 'lightcoral'}">
+                    Images
+                </div>
+                <div (click)="setCommentsSelected(homeForRepair.housetasks[0].taskId)" 
+                    class="comments-tab" 
+                    [ngStyle]="{'background-color': selectedTabs[homeForRepair.housetasks[0].taskId] === 'comments' ? 'rgb(199, 104, 104)' : 'lightcoral'}">
+                    Comments
+                </div>
+            </div>
+
+            <div class="images" *ngIf="selectedTabs[homeForRepair.housetasks[0].taskId] === 'images'">
+                <img src="https://energosistemi.hr/wp-content/uploads/2021/05/clanak1-300x226.jpg" alt="">
+                <img src="https://energosistemi.hr/wp-content/uploads/2021/05/clanak1-300x226.jpg" alt="">
+            </div>
+
+            <div class="comments" *ngIf="selectedTabs[homeForRepair.housetasks[0].taskId] === 'comments'">
+                <button (click)="toggleShowTextbox(homeForRepair.housetasks[0].taskId)" *ngIf="isTextboxVisible(homeForRepair.housetasks[0].taskId) && isCommented(homeForRepair.housetasks[0].description)" class="back-button">
+                    <mat-icon>keyboard_backspace</mat-icon>
+                    <span>Back</span>
+                </button>
+                <form *ngIf="isTextboxVisible(homeForRepair.housetasks[0].taskId)" (submit)="submitComment(homeForRepair.housetasks[0])">
+                    <textarea 
+                        [(ngModel)]="comments[homeForRepair.housetasks[0].taskId]" 
+                        name="comment-{{ homeForRepair.housetasks[0].taskId }}" 
+                        placeholder="Write a comment..."></textarea>
+                    <button [disabled]="!comments[homeForRepair.housetasks[0].taskId]">Submit comment</button>
+                </form>
+                <div *ngIf="!isTextboxVisible(homeForRepair.housetasks[0].taskId) && isCommented(homeForRepair.housetasks[0].description)" class="comments-container">
+                    <div class="comment-wrapper">
+                        <div class="comment">
+                            {{ formatCommentForTask(homeForRepair.housetasks[0].description) }}
+                        </div>
+                    </div>
+                
+                    <button (click)="toggleShowTextbox(homeForRepair.housetasks[0].taskId)">
+                        Add new comment...
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
