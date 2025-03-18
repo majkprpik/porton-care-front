@@ -30,7 +30,9 @@ export class TaskService {
           house_id: parseInt(houseId),
           start_time: this.getFormattedDateTimeNowForSupabase(),
           description: description,
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
       
@@ -115,6 +117,29 @@ export class TaskService {
     }
   }
 
+  async updateTask(task: HouseTask){
+    try{
+      const { error: updateTaskError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('tasks')
+        .update({
+          task_type_id: task.taskTypeId,
+          task_progress_type_id: task.taskProgressTypeId,
+          start_time: task.startTime,
+          end_time: task.endTime,
+          description: task.description,
+        })
+        .eq('task_id', task.taskId);
+
+      if(updateTaskError) throw updateTaskError
+
+      return true;
+    } catch (error){
+      console.error('Error updating task:', error);
+      return false;
+    }
+  }
+
   private async getTaskTypeIdByTaskName(taskName: string){
     try{
       const { data: existingTaskTypeId, error: taskTypeIdError } = await this.supabase.getClient()
@@ -133,7 +158,7 @@ export class TaskService {
     }
   }
 
-  private async getTaskProgressTypeIdByTaskProgressTypeName(taskProgressTypeName: string){
+  async getTaskProgressTypeIdByTaskProgressTypeName(taskProgressTypeName: string){
     try{
       const { data: existingProgressTypeId, error: progressTypeIdError } = await this.supabase.getClient()
         .schema('porton')

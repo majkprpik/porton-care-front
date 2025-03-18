@@ -3,12 +3,16 @@ import { SupabaseService } from './supabase.service';
 import { Profile } from '../models/profile.interface';
 import { Observable, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { WorkGroupService } from './work-group.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
-  constructor(private supabase: SupabaseService) {}
+  constructor(
+    private supabase: SupabaseService,
+    private workGroupService: WorkGroupService
+  ) {}
 
   /**
    * Get all profiles
@@ -123,5 +127,33 @@ export class ProfileService {
       console.error(`Error saving profile with ID ${profile.id} to Supabase:`, error);
       throw error;
     }
+  }
+
+  public async getAllProfilesByRole(role: string){
+    try{
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('profiles')
+        .select('*')
+        .eq('role', role)
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching profiles from Supabase:', error);
+      return [];
+    }
+  }
+
+  public async getProfileByRepairTaskId(repairTaskId: number){
+    let existingWorkGroupTask = await this.workGroupService.getWorkGroupTasksByTaskId(repairTaskId);
+
+    if(Object.keys(existingWorkGroupTask).length > 0){
+      let existingWorkGroupProfile = await this.workGroupService.getWorkGroupProfileByWorkGroupId(existingWorkGroupTask.work_group_id);
+      return existingWorkGroupProfile[0].profile_id;
+    }
+    
+    return "";
   }
 } 
