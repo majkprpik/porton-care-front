@@ -1,0 +1,31 @@
+<!-- News feed container with fixed height of 250px and full width -->
+<div class="news-feed-container">
+  <div class="news-feed-header">
+    <h2>Activity Feed</h2>
+    <span class="refresh-button" (click)="refreshFeed()">
+      <i class="refresh-icon">↻</i>
+    </span>
+  </div>
+  
+  <div class="news-feed-content">
+    <!-- Here we'll display activity cards -->
+    <div class="activity-card" *ngFor="let activity of activities">
+      <div class="activity-icon" [ngClass]="activity.type">
+        <!-- Icon based on activity type -->
+        <span class="icon" *ngIf="activity.type === 'task-completed'">✓</span>
+        <span class="icon" *ngIf="activity.type === 'user-arrived'">👤</span>
+        <span class="icon" *ngIf="activity.type === 'task-assigned'">📋</span>
+        <span class="icon" *ngIf="activity.type === 'note-added'">📝</span>
+      </div>
+      <div class="activity-content">
+        <div class="activity-message">{{ activity.message }}</div>
+        <div class="activity-timestamp">{{ activity.timestamp | date:'short' }}</div>
+      </div>
+    </div>
+
+    <!-- Placeholder message when no activities -->
+    <div class="no-activities" *ngIf="activities.length === 0">
+      No recent activities to display
+    </div>
+  </div>
+</div>

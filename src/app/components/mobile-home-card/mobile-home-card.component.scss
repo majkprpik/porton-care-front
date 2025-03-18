@@ -18,7 +18,7 @@
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 0 rgba(11, 204, 34, 0.983);
   }
   70% {
     box-shadow: 0 0 0 5px rgba(0, 0, 0, 0);
@@ -36,8 +36,8 @@
 }
 
 .mobile-home-card {
-  width: 100px;
-  height: 28px; /* Collapsed height - increased to accommodate middle section */
+  min-width: 140px;
+  height: 28px; /* Collapsed height - only for the top row */
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -45,34 +45,39 @@
   align-items: center;
   margin: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: height 0.3s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease; /* Even slower transition */
+  transition: height 0.3s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease;
   position: relative;
   cursor: pointer;
   overflow: hidden;
   
   // Special styles for cards with tasks in progress
   &.has-in-progress {
-    animation: pulse 2.5s infinite ease-in-out;
+    animation: pulse 0.7s infinite ease-in-out;
     z-index: 20; // Ensure pulsing cards appear above other cards
   }
   
   // Expanded state - use specific height instead of auto
   &.expanded {
-    height: 100px; /* Fixed height for animation to work properly - increased to accommodate the bottom section */
+    height: 68px; /* Fixed height for expanded view */
     justify-content: flex-start;
-    transition: height 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease; /* Even slower expansion */
+    transition: height 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease;
     overflow-y: auto; /* Allow scrolling if content exceeds fixed height */
     
     .house-number {
       transform: scale(1.2);
       transform-origin: left center;
-      transition: transform 0.4s ease-in-out; /* Match the transition speed */
+      transition: transform 0.4s ease-in-out;
     }
   }
   
-  // Not expanded - slower collapse
+  // Not expanded - ensure only top row visible
   &:not(.expanded) {
-    transition: height 0.3 ease-in-out, box-shadow 0.3s ease, transform 0.3s ease; /* Even slower collapse */
+    transition: height 0.3s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease;
+    
+    // Hide content that shouldn't be visible when collapsed
+    .expanded-content {
+      display: none;
+    }
   }
   
   &:hover {
@@ -81,11 +86,11 @@
   }
   
   &.occupied {
-    background-color: lightcoral;
+    background-color: #f0808054;
   }
   
   &.free {
-    background-color: rgb(68, 219, 68);
+    background-color: rgb(68 219 68 / 26%);
   }
   
   &.free-with-tasks {
@@ -122,83 +127,18 @@
     z-index: 10;
     align-self: flex-start;
     margin: 0;
-    // padding: 0;
     line-height: 19px;
     max-width: 65px; /* Prevent overlap with icons */
     transition: transform 0.4s ease-in-out;
   }
   
-  // Expanded content container
-  .expanded-content {
-    width: 100%;
-    height: calc(100% - 64px); /* Full height minus the top row and middle section */
-    position: relative;
+  // Task icons container
+  .task-icons-container {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Push bottom counts down */
     align-items: center;
-    
-    // Bottom occupancy counts
-    .bottom-counts {
-      width: 100%;
-      height: 36px; /* Increased fixed height to accommodate both lines */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-      background-color: rgba(255, 255, 255, 0.1);
-      margin-top: auto; /* Push to bottom */
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      padding: 2px 0;
-      
-      .date-range {
-        font-size: 14px;
-        line-height: 16px;
-        text-align: center;
-        width: 100%;
-      }
-      
-      .people-counts {
-        font-size: 14px;
-        line-height: 16px;
-        text-align: center;
-        width: 100%;
-        margin-top: 2px;
-      }
-    }
-  }
-  
-  // Side tasks icons container
-  .side-tasks-icons {
-    position: absolute;
-    right: 4px;
-    top: 0;
+    justify-content: flex-end;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 4px;
-    
-    .side-task-icon {
-      margin: 4px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: rgba(0, 0, 0, 0.8);
-      }
-    }
+    z-index: 10;
   }
   
   // Style for task icon in corner
@@ -207,13 +147,28 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-left: 2px;
     
     mat-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
-      color: rgba(0, 0, 0, 0.8);
+      color: #0066cc; // Default blue color
       text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+    }
+    
+    // Repair task icon style - black color
+    &.repair-task mat-icon {
+      color: #000000; // Black color for repair tasks
+    }
+    
+    // Cleaning task icon styles
+    &.cleaning-task-red mat-icon {
+      color: #cc0000; // Red color for some cleaning tasks
+    }
+    
+    &.cleaning-task-blue mat-icon {
+      color: #0066cc; // Blue color for other cleaning tasks
     }
     
     &.rotating mat-icon {
@@ -244,12 +199,110 @@
       margin-left: 2px;
       
       &.small mat-icon {
-        color: rgba(0, 0, 0, 0.8);
+        color: #0066cc;
         text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
       }
       
       &.second mat-icon {
-        color: rgba(0, 0, 0, 0.8);
+        color: #0066cc;
+      }
+    }
+  }
+  
+  // Expanded content container
+  .expanded-content {
+    width: 100%;
+    height: calc(100% - 28px); /* Full height minus the top row */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Push bottom counts down */
+    align-items: center;
+  }
+  
+  // Bottom occupancy counts
+  .bottom-counts {
+    width: 100%;
+    height: 36px; /* Fixed height for the bottom part */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.15);
+    
+    // Reservation navigation container
+    .reservation-nav {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0;
+      
+      // Navigation arrows
+      .nav-arrow {
+        width: 20px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: rgba(0, 0, 0, 0.7);
+        transition: background-color 0.2s ease, color 0.2s ease;
+        padding: 0;
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+        
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.1);
+          color: rgba(0, 0, 0, 0.9);
+        }
+        
+        &.disabled {
+          opacity: 0.3;
+          cursor: default;
+          
+          &:hover {
+            background-color: transparent;
+            color: rgba(0, 0, 0, 0.7);
+          }
+        }
+      }
+      
+      // Date and people info center container
+      .date-info {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        
+        .date-range {
+          font-size: 14px;
+          line-height: 16px;
+          text-align: center;
+          width: 100%;
+        }
+        
+        .people-counts {
+          font-size: 14px;
+          line-height: 16px;
+          text-align: center;
+          width: 100%;
+          margin-top: 2px;
+        }
       }
     }
   }
@@ -302,7 +355,7 @@
 // }
 
 .mobile-home-card.free {
-  background-color: rgb(68, 219, 68);
+  background-color: rgb(68 219 68 / 26%);
 }
 
 .mobile-home-card.free-with-tasks {
@@ -311,7 +364,7 @@
 
 /* Status colors */
 .mobile-home-card.occupied { 
-  background-color: lightcoral;
+  background-color: #f0808054;
 }
 
 .mobile-home-card.in-progress { 

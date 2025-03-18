@@ -15,22 +15,43 @@
       <div class="house-number">{{ mobileHome.housename }}</div>
     </div>
     
-    <!-- Task icons on the right -->
-    <div *ngIf="getInProgressTask()" class="task-icon-corner rotating" [matTooltip]="getInProgressTask()?.taskTypeName">
-      <mat-icon>{{ getTaskIcon(getInProgressTask()!) }}</mat-icon>
-    </div>
-    
-    <div *ngIf="!getInProgressTask() && getTopRowTasks().length > 0" class="non-progress-icons">
-      <!-- First task icon -->
-      <div class="task-icon-corner small" *ngIf="getTopRowTasks().length > 0" 
-           [matTooltip]="getTopRowTasks()[0].taskTypeName">
-        <mat-icon>{{ getTaskIcon(getTopRowTasks()[0]) }}</mat-icon>
+    <!-- Task icons on the right - horizontal layout for all cards -->
+    <div class="task-icons-container">
+      <!-- In-progress task icon (if exists) -->
+      <div *ngIf="getInProgressTask()" class="task-icon-corner" 
+           [ngClass]="{
+             'rotating': true,
+             'repair-task': getInProgressTask() && getInProgressTask()!.taskTypeName.toLowerCase().includes('popravak'),
+             'cleaning-task-red': getInProgressTask() && getInProgressTask()!.taskTypeName.toLowerCase().includes('čišćenje') && getInProgressTask()!.taskTypeName.toLowerCase().includes('terase'),
+             'cleaning-task-blue': getInProgressTask() && getInProgressTask()!.taskTypeName.toLowerCase().includes('čišćenje') && getInProgressTask()!.taskTypeName.toLowerCase().includes('kućice')
+           }" 
+           [matTooltip]="getInProgressTask()?.taskTypeName">
+        <mat-icon>{{ getTaskIcon(getInProgressTask()!) }}</mat-icon>
       </div>
       
-      <!-- Second task icon if exists -->
-      <div class="task-icon-corner small second" *ngIf="getTopRowTasks().length > 1"
-           [matTooltip]="getTopRowTasks()[1].taskTypeName">
-        <mat-icon>{{ getTaskIcon(getTopRowTasks()[1]) }}</mat-icon>
+      <!-- Regular tasks (up to 2) - similar approach for both in-progress and regular -->
+      <div *ngIf="getTopRowTasks().length > 0" class="non-progress-icons">
+        <!-- First task icon -->
+        <div class="task-icon-corner small" *ngIf="getTopRowTasks().length > 0" 
+             [ngClass]="{
+               'repair-task': getTopRowTasks()[0] && getTopRowTasks()[0].taskTypeName.toLowerCase().includes('popravak'),
+               'cleaning-task-red': getTopRowTasks()[0] && getTopRowTasks()[0].taskTypeName.toLowerCase().includes('čišćenje') && getTopRowTasks()[0].taskTypeName.toLowerCase().includes('terase'),
+               'cleaning-task-blue': getTopRowTasks()[0] && getTopRowTasks()[0].taskTypeName.toLowerCase().includes('čišćenje') && getTopRowTasks()[0].taskTypeName.toLowerCase().includes('kućice')
+             }"
+             [matTooltip]="getTopRowTasks()[0].taskTypeName">
+          <mat-icon>{{ getTaskIcon(getTopRowTasks()[0]) }}</mat-icon>
+        </div>
+        
+        <!-- Second task icon if exists -->
+        <div class="task-icon-corner small second" *ngIf="getTopRowTasks().length > 1"
+             [ngClass]="{
+               'repair-task': getTopRowTasks()[1] && getTopRowTasks()[1].taskTypeName.toLowerCase().includes('popravak'),
+               'cleaning-task-red': getTopRowTasks()[1] && getTopRowTasks()[1].taskTypeName.toLowerCase().includes('čišćenje') && getTopRowTasks()[1].taskTypeName.toLowerCase().includes('terase'),
+               'cleaning-task-blue': getTopRowTasks()[1] && getTopRowTasks()[1].taskTypeName.toLowerCase().includes('čišćenje') && getTopRowTasks()[1].taskTypeName.toLowerCase().includes('kućice')
+             }"
+             [matTooltip]="getTopRowTasks()[1].taskTypeName">
+          <mat-icon>{{ getTaskIcon(getTopRowTasks()[1]) }}</mat-icon>
+        </div>
       </div>
     </div>
   </div>
@@ -40,19 +61,35 @@
   
   <!-- Expanded content (only visible when expanded) -->
   <div class="expanded-content" *ngIf="expanded">
-    <!-- Additional task icons for houses with in-progress tasks -->
-    <div class="side-tasks-icons" *ngIf="getInProgressTask() && getNonProgressTasks().length > 0">
-      <div *ngFor="let task of getNonProgressTasks()" 
-           class="side-task-icon" 
-           [matTooltip]="task.taskTypeName">
-        <mat-icon>{{ getTaskIcon(task) }}</mat-icon>
+    <!-- We no longer need side-tasks-icons since all icons are in top row -->
+    
+    <!-- Bottom counts section with navigation arrows -->
+    <div class="bottom-counts">
+      <div class="reservation-nav">
+        <!-- Left arrow -->
+        <button class="nav-arrow" 
+                [disabled]="!canNavigatePrev()" 
+                [ngClass]="{'disabled': !canNavigatePrev()}"
+                (click)="navigateToPrev($event)"
+                matTooltip="Previous reservation">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        
+        <!-- Date range -->
+        <div class="date-info">
+          <div class="date-range">{{ getReservationDateRange() }}</div>
+          <div class="people-counts">{{ getAdultsCount() }} | {{ getChildrenCount() }} | {{ getPetsCount() }}</div>
+        </div>
+        
+        <!-- Right arrow -->
+        <button class="nav-arrow" 
+                [disabled]="!canNavigateNext()" 
+                [ngClass]="{'disabled': !canNavigateNext()}"
+                (click)="navigateToNext($event)"
+                matTooltip="Next reservation">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
       </div>
     </div>
-  </div>
-  
-  <!-- Bottom counts section - moved outside expanded content to be always at the bottom -->
-  <div class="bottom-counts" *ngIf="mobileHome.availabilityname === 'Occupied'">
-    <div class="date-range">{{ '15.3 - 22.3' }}</div>
-    <div class="people-counts">{{ getAdultsCount() }} | {{ getChildrenCount() }} | {{ getPetsCount() }}</div>
   </div>
 </div>

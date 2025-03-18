@@ -111,9 +111,10 @@
           display: flex;
           flex-direction: row;
           flex-wrap: wrap;
-          // margin-right: 16px;
+          gap: 8px;
           max-width: 100%;
-          // gap: 12px;
+          justify-content: flex-start;
+          align-items: flex-start;
           
           .team-box {
             margin: 8px;
@@ -132,7 +133,7 @@
             
             // Direct styles for expanded state
             &.expanded {
-              height: 100px; /* Same as expanded house cards */
+              height: 68px; /* Same as expanded house cards */
               width: 150px; /* Slightly wider to fit member names better */
               
               .team-letter {
@@ -162,7 +163,7 @@
                 
                 .team-member {
                   padding: 2px 4px 2px 8px;
-                  font-size: 16px;
+                  font-size: 13px;
                   // color: white;
                   text-align: left;
                   margin: 2px 0;
@@ -179,16 +180,24 @@
               }
             }
             
+            // Not expanded - hide team members and only show title
+            &:not(.expanded) {
+              .team-members {
+                display: none; // Hide team members when collapsed
+              }
+            }
+            
             .team-letter {
               font-weight: bold;
-              // color: white;
-              text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-              font-size: 14px;
+              color: black;
+              // text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+              font-size: 18px;
               display: flex;
               align-items: center;
               justify-content: center;
               width: 100%;
               height: 28px;
+              line-height: 28px;
               transition: all 0.4s ease-in-out;
               padding: 0 4px;
               text-align: center;
@@ -208,9 +217,9 @@
               display: none;
               padding: 4px;
               // color: white;
-              font-weight: bold;
+              // font-weight: bold;
               text-align: center;
-              text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+              // text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             }
             
             &.expandable {
@@ -237,7 +246,7 @@
             
             // Black team box
             &.black {
-              background-color: rgba(33, 37, 41, 0.8);
+              background-color: rgb(33 37 41 / 49%);
             }
             
             // Yellow team box

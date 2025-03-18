@@ -19,6 +19,10 @@ export class MobileHomeCardComponent implements OnInit, OnDestroy {
   expanded = false;
   private subscription: Subscription = new Subscription();
   
+  // Add properties for reservation navigation
+  currentReservationIndex = 0;
+  reservations: Reservation[] = [];
+  
   constructor(private expansionService: ExpansionService) {}
   
   ngOnInit() {
@@ -26,6 +30,89 @@ export class MobileHomeCardComponent implements OnInit, OnDestroy {
     this.subscription = this.expansionService.expansionState$.subscribe(
       expanded => this.expanded = expanded
     );
+    
+    // Initialize mock reservations for now
+    this.initReservations();
+  }
+  
+  // Initialize reservations with mock data for demonstration
+  initReservations() {
+    const today = new Date();
+    
+    // Create mock reservations (past, current, future)
+    this.reservations = [
+      // Past reservation
+      {
+        id: 'past1',
+        startTime: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 14).toISOString(),
+        endTime: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7).toISOString(),
+        guestName: 'Past Guest 1'
+      },
+      // Current or upcoming reservation
+      {
+        id: 'current',
+        startTime: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3).toISOString(),
+        endTime: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 4).toISOString(),
+        guestName: 'Current Guest'
+      },
+      // Future reservation
+      {
+        id: 'future1',
+        startTime: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7).toISOString(),
+        endTime: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14).toISOString(),
+        guestName: 'Future Guest 1'
+      }
+    ];
+    
+    // Set current index to show the current/upcoming reservation by default
+    this.currentReservationIndex = 1;
+  }
+  
+  // Navigate to previous reservation
+  navigateToPrev(event: Event) {
+    event.stopPropagation(); // Prevent card expansion toggling
+    if (this.currentReservationIndex > 0) {
+      this.currentReservationIndex--;
+    }
+  }
+  
+  // Navigate to next reservation
+  navigateToNext(event: Event) {
+    event.stopPropagation(); // Prevent card expansion toggling
+    if (this.currentReservationIndex < this.reservations.length - 1) {
+      this.currentReservationIndex++;
+    }
+  }
+  
+  // Get current visible reservation
+  getCurrentVisibleReservation(): Reservation | null {
+    if (this.reservations.length === 0) {
+      return null;
+    }
+    
+    return this.reservations[this.currentReservationIndex];
+  }
+  
+  // Get reservation date range for display
+  getReservationDateRange(): string {
+    const reservation = this.getCurrentVisibleReservation();
+    if (!reservation) {
+      return ''; 
+    }
+    
+    const startDate = this.formatDate(reservation.startTime);
+    const endDate = this.formatDate(reservation.endTime);
+    return `${startDate} - ${endDate}`;
+  }
+  
+  // Can navigate to previous reservation?
+  canNavigatePrev(): boolean {
+    return this.currentReservationIndex > 0;
+  }
+  
+  // Can navigate to next reservation?
+  canNavigateNext(): boolean {
+    return this.currentReservationIndex < this.reservations.length - 1;
   }
   
   ngOnDestroy() {
@@ -42,21 +129,21 @@ export class MobileHomeCardComponent implements OnInit, OnDestroy {
     if (this.mobileHome.availabilityname !== 'Occupied') {
       return 0;
     }
-    return this.mobileHome.adults || 3; // Default to 2 adults for occupied homes
+    return this.mobileHome.adults || 3; // Default to 3 adults
   }
 
   getChildrenCount(): number {
     if (this.mobileHome.availabilityname !== 'Occupied') {
       return 0;
     }
-    return this.mobileHome.children || 5; // Default to 1 child for occupied homes
+    return this.mobileHome.children || 5; // Default to 5 children
   }
 
   getPetsCount(): number {
     if (this.mobileHome.availabilityname !== 'Occupied') {
       return 0;
     }
-    return this.mobileHome.pets || 2; // Default to 0 pets for occupied homes
+    return this.mobileHome.pets || 2; // Default to 2 pets
   }
   
   // Method to return tasks that are not in progress (for expanded view)
@@ -75,8 +162,16 @@ export class MobileHomeCardComponent implements OnInit, OnDestroy {
       return [];
     }
     
+    // If there's an in-progress task, only show other non-progress, non-punjenje tasks
+    if (this.getInProgressTask()) {
+      return this.mobileHome.housetasks
+        .filter(task => !this.isTaskInProgress(task) && !this.isPunjenjeTask(task))
+        .slice(0, 2); // Limit to 2 tasks for the top row
+    }
+    
+    // Otherwise, show all non-punjenje tasks (still limited to 2)
     return this.mobileHome.housetasks
-      .filter(task => !this.isTaskInProgress(task) && !this.isPunjenjeTask(task))
+      .filter(task => !this.isPunjenjeTask(task))
       .slice(0, 2); // Limit to 2 tasks for the top row
   }
   

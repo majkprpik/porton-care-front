@@ -1,11 +1,10 @@
-<!-- <div class="dashboard-header">
+<div class="dashboard-header">
   <h1>Houses Dashboard</h1>
+  45 KUCICA / 21 SLOBODNA / 24 ZAUZETE / 12 ODLAZAKA / 19 DOLAZAKA
   <div class="stats-container">
-    <div class="stat-card">
-      <span class="stat-value">{{mobileHomes.length}}</span>
-      <span class="stat-label">Total Houses</span>
-    </div>
-    <div class="stat-card">
+    <!-- <div class="stat-card">
+    </div> -->
+    <!-- <div class="stat-card">
       <span class="stat-value">{{getFreeHousesCount()}}</span>
       <span class="stat-label">Free Houses</span>
     </div>
@@ -13,8 +12,9 @@
       <span class="stat-value">{{getOccupiedHousesCount()}}</span>
       <span class="stat-label">Occupied Houses</span>
     </div>
-  </div>
-</div> -->
+  </div> -->
+</div>
+
 
 <div class="houses-container">
   <!-- Houses layout with categorized rows -->
@@ -25,7 +25,7 @@
       <div class="house-category-row" *ngIf="categorizedHomes.inProgressHomes.length > 0">
         <div class="category-header in-progress">
           <div class="category-label">U tijeku ({{categorizedHomes.inProgressHomes.length}})</div>
-          <div class="teams-header">OSOBLJE</div>
+          <div class="teams-header">Osoblje</div>
         </div>
         <div class="houses-row in-progress">
           <div>
@@ -41,7 +41,6 @@
             <div class="team-members">
               <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
-              <div class="team-member">Marko Maric</div>
             </div>
           </div>
           <div class="team-box blue expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
@@ -49,21 +48,18 @@
             <div class="team-members">
               <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
-              <div class="team-member">Marko Maric</div>
             </div>
           </div>
           <div class="team-box green expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
-            <div class="team-letter">M</div>
+            <div class="team-letter">Majstori</div>
             <div class="team-members">
-              <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
             </div>
           </div>
           <div class="team-box black expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
-            <div class="team-letter">R</div>
+            <div class="team-letter">Recepcija</div>
             <div class="team-members">
-              <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
             </div>
@@ -71,7 +67,6 @@
           <div class="team-box yellow expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
             <div class="team-letter">CS</div>
             <div class="team-members">
-              <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
               <div class="team-member">Marko Maric</div>
             </div>
@@ -111,3 +106,7 @@
     </ng-container>
   </div>
 </div>
+
+
+<!-- News Feed Component -->
+<app-news-feed></app-news-feed>

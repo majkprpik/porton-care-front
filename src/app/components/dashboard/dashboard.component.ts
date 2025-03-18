@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
 import { ExpansionService } from '../../services/expansion.service';
 import { Subscription } from 'rxjs';
+import { NewsFeedComponent } from '../news-feed/news-feed.component';
 
 // Interface for categorized homes
 interface CategorizedHomes {
@@ -23,7 +24,7 @@ interface CategorizedHomes {
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss', 
   standalone: true,
-  imports: [CommonModule, MobileHomeCardComponent, MatCardModule, HomesFilterPipe, FormsModule]
+  imports: [CommonModule, MobileHomeCardComponent, MatCardModule, HomesFilterPipe, FormsModule, NewsFeedComponent]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   mobileHomes: MobileHome[] = [];
