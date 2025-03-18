@@ -7,4 +7,5 @@ export interface Profile {
   // is_cleaning_staff?: boolean;
   // is_available?: boolean;
   created_at?: string;
+  phone_number: string;
 } 

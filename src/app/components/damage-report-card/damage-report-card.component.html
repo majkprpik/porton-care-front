@@ -1,0 +1,67 @@
+<div class="damage-report-card">
+    <span class="damage">{{ formatDescriptionForTask(houseTask.description) }}</span>
+
+    <div class="tabs">
+        <div (click)="setSelectedTab('images')" 
+            class="images-tab" 
+            [ngStyle]="{'background-color': selectedTab === 'images' ? 'rgb(199, 104, 104)' : 'lightcoral'}">
+            Images
+        </div>
+        <div (click)="setSelectedTab('comments')" 
+            class="comments-tab" 
+            [ngStyle]="{'background-color': selectedTab === 'comments' ? 'rgb(199, 104, 104)' : 'lightcoral'}">
+            Comments
+        </div>
+        <div (click)="setSelectedTab('team')" 
+            class="team-tab"
+            [ngStyle]="{'background-color': selectedTab === 'team' ? 'rgb(199, 104, 104)' : 'lightcoral'}">
+            Team
+        </div>
+    </div>
+
+    <div class="images" *ngIf="selectedTab === 'images'">
+        <img src="https://energosistemi.hr/wp-content/uploads/2021/05/clanak1-300x226.jpg" alt="">
+        <img src="https://static.jutarnji.hr/images/slike/2022/02/01/k_23496803_640.jpg" alt="">
+        <img src="https://static.wixstatic.com/media/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg/v1/fill/w_568,h_378,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg" alt="">
+    </div>
+
+    <div class="comments" *ngIf="selectedTab === 'comments'">
+        <button (click)="toggleShowTextbox()" *ngIf="showTextbox && isCommented(houseTask.description)" class="back-button">
+            <mat-icon>keyboard_backspace</mat-icon>
+            <span>Back</span>
+        </button>
+        <form *ngIf="showTextbox" (submit)="submitComment()">
+            <textarea [(ngModel)]="comment" name="comment" placeholder="Write a comment..."></textarea>
+            <button [disabled]="!comment">Submit comment</button>
+        </form>
+        <div *ngIf="!showTextbox && isCommented(houseTask.description)" class="comments-container">
+            <div class="comment-wrapper">
+                <div class="comment">
+                    {{ formatCommentForTask(houseTask.description) }}
+                </div>
+            </div>
+            <button (click)="toggleShowTextbox()">Add new comment...</button>
+        </div>
+    </div>
+
+    <div class="team" *ngIf="selectedTab === 'team'">
+        <div class="maintenance-team-container">
+            <select *ngIf="!isTechnicianSubmitted" [(ngModel)]="selectedTechnician">
+                <option value="" disabled selected>Select a repair technician...</option>
+                <option *ngFor="let profile of maintenanceProfiles" [value]="profile.id">
+                    {{ profile.first_name }} {{ profile.last_name }}
+                </option>
+            </select>
+            <div *ngIf="isTechnicianSubmitted">
+                <span>{{ getSelectedTechnicianDetails() }}</span>
+            </div>
+        </div>
+
+        <div class="checkbox-container">
+            <input id="repaired-checkbox" type="checkbox" [(ngModel)]="isMarkedAsRepaired">
+            <label for="repaired-checkbox">Mark as repaired</label>
+        </div>
+
+        <button (click)="submitTechnicianForRepairTask()" [disabled]="!selectedTechnician">Submit</button>
+    </div>
+</div>

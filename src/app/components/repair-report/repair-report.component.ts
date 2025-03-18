@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { MobileHomesService } from '../../services/mobile-homes.service';
 import { MobileHome } from '../../models/mobile-home.interface';
 import { TaskService } from '../../services/task.service';
+import { WorkGroupService } from '../../services/work-group.service';
 
 @Component({
   selector: 'app-repair-report',
@@ -38,7 +39,8 @@ export class RepairReportComponent {
     private location: Location,
     private router: Router,
     private mobileHomesService: MobileHomesService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private workGroupService: WorkGroupService
   ) {}
 
   ngOnInit(){
@@ -54,10 +56,16 @@ export class RepairReportComponent {
 
   onSubmit() {
     if (this.report.description && this.report.location) {
-      this.taskService.createTaskForHouse(this.report.location, this.report.description);
+      this.createTaskForHouse();
       console.log(this.report);
       this.router.navigate(['/']);
     }
+  }
+
+  async createTaskForHouse(){
+    let createdTask = await this.taskService.createTaskForHouse(this.report.location, this.report.description);
+    let createdWorkGroup = await this.workGroupService.createWorkGroup();
+    let createdWorkGroupTask = await this.workGroupService.createWorkGroupTask(createdWorkGroup.work_group_id, createdTask.task_id);
   }
 
   goBack() {
