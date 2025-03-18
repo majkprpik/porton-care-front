@@ -1,3 +1,33 @@
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(90deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  75% {
+    transform: rotate(270deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(0, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
 :host {
   margin: 0;
   padding: 0;
@@ -6,15 +36,44 @@
 }
 
 .mobile-home-card {
+  width: 100px;
+  height: 28px; /* Collapsed height - increased to accommodate middle section */
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 16px;
-  background-color: #ffffff;
-  transition: all 0.3s ease;
+  transition: height 0.3s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease; /* Even slower transition */
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  
+  // Special styles for cards with tasks in progress
+  &.has-in-progress {
+    animation: pulse 2.5s infinite ease-in-out;
+    z-index: 20; // Ensure pulsing cards appear above other cards
+  }
+  
+  // Expanded state - use specific height instead of auto
+  &.expanded {
+    height: 100px; /* Fixed height for animation to work properly - increased to accommodate the bottom section */
+    justify-content: flex-start;
+    transition: height 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease; /* Even slower expansion */
+    overflow-y: auto; /* Allow scrolling if content exceeds fixed height */
+    
+    .house-number {
+      transform: scale(1.2);
+      transform-origin: left center;
+      transition: transform 0.4s ease-in-out; /* Match the transition speed */
+    }
+  }
+  
+  // Not expanded - slower collapse
+  &:not(.expanded) {
+    transition: height 0.3 ease-in-out, box-shadow 0.3s ease, transform 0.3s ease; /* Even slower collapse */
+  }
   
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -22,125 +81,187 @@
   }
   
   &.occupied {
-    border-left: 4px solid #e74c3c; /* Red for occupied */
+    background-color: lightcoral;
   }
   
   &.free {
-    border-left: 4px solid #2ecc71; /* Green for free */
+    background-color: rgb(68, 219, 68);
   }
   
   &.free-with-tasks {
-    border-left: 4px solid #f39c12; /* Orange for free but has tasks */
+    background-color: white;
   }
   
-  .home-header {
-    padding: 12px 16px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    
-    .house-number {
-      font-size: 18px;
-      font-weight: 600;
-      color: #343a40;
-    }
+  // Top row containing house number and task icons
+  .card-top-row {
+    width: 100%;
+    height: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 0 4px;
   }
   
-  .tasks-container {
-    padding: 0;
+  // House info container (number + counts)
+  .house-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  // House number styles
+  .house-number {
+    padding-top: 3px;
+    padding-left: 3px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #212529;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+    z-index: 10;
+    align-self: flex-start;
+    margin: 0;
+    // padding: 0;
+    line-height: 19px;
+    max-width: 65px; /* Prevent overlap with icons */
+    transition: transform 0.4s ease-in-out;
+  }
+  
+  // Expanded content container
+  .expanded-content {
+    width: 100%;
+    height: calc(100% - 64px); /* Full height minus the top row and middle section */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Push bottom counts down */
+    align-items: center;
     
-    .task-item {
+    // Bottom occupancy counts
+    .bottom-counts {
+      width: 100%;
+      height: 36px; /* Increased fixed height to accommodate both lines */
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px solid #e9ecef;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: rgba(255, 255, 255, 0.1);
+      margin-top: auto; /* Push to bottom */
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      padding: 2px 0;
       
-      &:last-child {
-        border-bottom: none;
+      .date-range {
+        font-size: 14px;
+        line-height: 16px;
+        text-align: center;
+        width: 100%;
       }
       
-      .task-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        
-        .task-indicator {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          background-color: #6c757d;
-          color: white;
-          font-weight: 600;
-          font-size: 14px;
-        }
-        
-        .task-name {
-          font-size: 14px;
-          font-weight: 500;
-          color: #495057;
-        }
-        
-        .task-progress {
-          font-size: 12px;
-          color: #6c757d;
-          background-color: #e9ecef;
-          padding: 4px 8px;
-          border-radius: 12px;
-        }
-      }
-      
-      .task-actions {
-        display: flex;
-        gap: 8px;
-        
-        .action-btn {
-          padding: 6px 12px;
-          border: none;
-          border-radius: 4px;
-          font-size: 12px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.2s;
-          
-          &.start-btn {
-            background-color: #2ecc71;
-            color: white;
-            
-            &:hover {
-              background-color: #27ae60;
-            }
-          }
-          
-          &.pause-btn {
-            background-color: #f39c12;
-            color: white;
-            
-            &:hover {
-              background-color: #e67e22;
-            }
-          }
-          
-          &.complete-btn {
-            background-color: #3498db;
-            color: white;
-            
-            &:hover {
-              background-color: #2980b9;
-            }
-          }
-        }
+      .people-counts {
+        font-size: 14px;
+        line-height: 16px;
+        text-align: center;
+        width: 100%;
+        margin-top: 2px;
       }
     }
   }
   
-  .no-tasks {
-    padding: 16px;
-    text-align: center;
-    color: #6c757d;
-    font-style: italic;
+  // Side tasks icons container
+  .side-tasks-icons {
+    position: absolute;
+    right: 4px;
+    top: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 4px;
+    
+    .side-task-icon {
+      margin: 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: rgba(0, 0, 0, 0.8);
+      }
+    }
+  }
+  
+  // Style for task icon in corner
+  .task-icon-corner {
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: rgba(0, 0, 0, 0.8);
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+    }
+    
+    &.rotating mat-icon {
+      animation: rotate 6s ease-in-out infinite;
+    }
+    
+    &.small {
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+    
+    &.second {
+      margin-right: 4px;
+    }
+  }
+  
+  // Container for non-progress task icons
+  .non-progress-icons {
+    z-index: 10;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    
+    .task-icon-corner {
+      margin-left: 2px;
+      
+      &.small mat-icon {
+        color: rgba(0, 0, 0, 0.8);
+        text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+      }
+      
+      &.second mat-icon {
+        color: rgba(0, 0, 0, 0.8);
+      }
+    }
+  }
+  
+  // Style for in-progress task overlay (full card)
+  .task-indicator.in-progress {
+    display: none;
+  }
+  
+  // Container for top row of task icons
+  .task-icons-row {
+    display: none;
   }
 }
 
@@ -148,34 +269,61 @@
   color: black;
 }
 
+// Middle counts styling (always visible)
+// .middle-counts {
+//   width: 100%;
+//   height: 36px; /* Fixed height to accommodate both lines */
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: center;
+//   align-items: center;
+//   font-size: 13px;
+//   font-weight: 600;
+//   color: #333;
+//   border-top: 1px solid rgba(0, 0, 0, 0.1);
+//   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+//   background-color: rgba(255, 255, 255, 0.2);
+//   padding: 2px 0;
+  
+//   .date-range {
+//     font-size: 13px;
+//     line-height: 16px;
+//     text-align: center;
+//     width: 100%;
+//   }
+  
+//   .people-counts {
+//     font-size: 13px;
+//     line-height: 16px;
+//     text-align: center;
+//     width: 100%;
+//     margin-top: 2px;
+//   }
+// }
+
 .mobile-home-card.free {
-  background-color: rgb(68, 219, 68); /* Light green background */
-  // border-left: 4px solid #4CAF50; /* Green border accent */
+  background-color: rgb(68, 219, 68);
 }
 
-.mobile-home-card.free-with-tasks{
+.mobile-home-card.free-with-tasks {
   background-color: white;
 }
 
 /* Status colors */
 .mobile-home-card.occupied { 
-  background-color: lightcoral; /* Light red background */
-  // border-left: 4px solid #f44336; /* Red border accent */     
+  background-color: lightcoral;
 }
 
 .mobile-home-card.in-progress { 
-  background-color: #f7e6e6; /* Light red background */
-  // border-left: 4px solid #f44336; /* Red border accent */ 
+  background-color: #f7e6e6;
 }
 
 .mobile-home-card.urgent { 
-  background-color: #f7e6e6; /* Light red background */
-  // border-left: 4px solid #f44336; /* Red border accent */ 
+  background-color: #f7e6e6;
 }
 
 .mobile-home-card.pending { 
-  background-color: #f7e6e6; /* Light red background */
-  // border-left: 4px solid #f44336; /* Red border accent */ 
+  background-color: #f7e6e6;
 }
 
 .card-header {
@@ -225,22 +373,60 @@
   font-style: italic;
 }
 
-.mobile-home-card {
-  // margin: 0;
-  padding: 4px 8px;
-  width: 60px;
-  height: 60px;
-  border-radius: 4px;
+// Reservation dates styles
+.reservation-dates {
+  width: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: white;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  transition: transform 0.2s;
+  font-size: 11px;
+  color: #212529;
+  padding: 3px 4px;
+  text-align: center;
+  
+  .current-stay, .next-reservation {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  
+  .date-range {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    
+    .date-label {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    .date-value {
+      font-weight: 500;
+    }
+  }
+}
 
-  &:hover {
-    transform: scale(1.05);
+// Style for occupied homes reservation
+.mobile-home-card.occupied .reservation-dates {
+  background-color: rgba(255, 255, 255, 0.2);
+  
+  .date-label, .date-value {
+    color: #212529;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.7);
+  }
+}
+
+// Style for free homes reservation
+.mobile-home-card.free .reservation-dates, 
+.mobile-home-card.free-with-tasks .reservation-dates {
+  .date-label, .date-value {
+    color: #212529;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.7);
+  }
+  
+  .next-reservation {
+    font-style: italic;
   }
 } 

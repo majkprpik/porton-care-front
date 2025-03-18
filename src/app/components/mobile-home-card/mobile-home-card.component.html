@@ -1,43 +1,58 @@
-<div class="mobile-home-card" [ngClass]="{
-    'occupied': mobileHome.availabilityname === 'Occupied', 
-    'free-with-tasks': mobileHome.availabilityname === 'Free' && mobileHome.housetasks.length > 0,
-    'free': mobileHome.availabilityname === 'Free' && mobileHome.housetasks.length === 0,
-  }">
-  <div class="home-header">
-    <div class="house-number">{{ mobileHome.housename }}</div>
-  </div>
+<div class="mobile-home-card" 
+     [ngClass]="{
+       'occupied': mobileHome.availabilityname === 'Occupied', 
+       'free-with-tasks': mobileHome.availabilityname === 'Free' && mobileHome.housetasks.length > 0,
+       'free': mobileHome.availabilityname === 'Free' && mobileHome.housetasks.length === 0,
+       'expanded': expanded,
+       'has-in-progress': getInProgressTask() !== null
+     }"
+     (click)="toggleExpansion($event)">
   
-  <div class="tasks-container" *ngIf="mobileHome.housetasks.length > 0">
-    <div class="task-item" *ngFor="let task of mobileHome.housetasks">
-      <div class="task-info">
-        <div class="task-indicator">{{ getTaskIndicator(task) }}</div>
-        <div class="task-name">{{ task.taskTypeName }}</div>
-        <div class="task-progress">{{ task.taskProgressTypeName }}</div>
+  <!-- Top row with house number and task icons (always visible) -->
+  <div class="card-top-row">
+    <!-- House number on the left -->
+    <div class="house-info">
+      <div class="house-number">{{ mobileHome.housename }}</div>
+    </div>
+    
+    <!-- Task icons on the right -->
+    <div *ngIf="getInProgressTask()" class="task-icon-corner rotating" [matTooltip]="getInProgressTask()?.taskTypeName">
+      <mat-icon>{{ getTaskIcon(getInProgressTask()!) }}</mat-icon>
+    </div>
+    
+    <div *ngIf="!getInProgressTask() && getTopRowTasks().length > 0" class="non-progress-icons">
+      <!-- First task icon -->
+      <div class="task-icon-corner small" *ngIf="getTopRowTasks().length > 0" 
+           [matTooltip]="getTopRowTasks()[0].taskTypeName">
+        <mat-icon>{{ getTaskIcon(getTopRowTasks()[0]) }}</mat-icon>
       </div>
-      <div class="task-actions">
-        <button 
-          *ngIf="canStartTask(task)" 
-          class="action-btn start-btn" 
-          (click)="startTask(task)">
-          Start
-        </button>
-        <button 
-          *ngIf="canPauseTask(task)" 
-          class="action-btn pause-btn" 
-          (click)="pauseTask(task)">
-          Pause
-        </button>
-        <button 
-          *ngIf="canCompleteTask(task)" 
-          class="action-btn complete-btn" 
-          (click)="completeTask(task)">
-          Complete
-        </button>
+      
+      <!-- Second task icon if exists -->
+      <div class="task-icon-corner small second" *ngIf="getTopRowTasks().length > 1"
+           [matTooltip]="getTopRowTasks()[1].taskTypeName">
+        <mat-icon>{{ getTaskIcon(getTopRowTasks()[1]) }}</mat-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reservation dates (always visible) -->
+
+  
+  <!-- Expanded content (only visible when expanded) -->
+  <div class="expanded-content" *ngIf="expanded">
+    <!-- Additional task icons for houses with in-progress tasks -->
+    <div class="side-tasks-icons" *ngIf="getInProgressTask() && getNonProgressTasks().length > 0">
+      <div *ngFor="let task of getNonProgressTasks()" 
+           class="side-task-icon" 
+           [matTooltip]="task.taskTypeName">
+        <mat-icon>{{ getTaskIcon(task) }}</mat-icon>
       </div>
     </div>
   </div>
   
-  <div class="no-tasks" *ngIf="mobileHome.housetasks.length === 0">
-    No tasks assigned
+  <!-- Bottom counts section - moved outside expanded content to be always at the bottom -->
+  <div class="bottom-counts" *ngIf="mobileHome.availabilityname === 'Occupied'">
+    <div class="date-range">{{ '15.3 - 22.3' }}</div>
+    <div class="people-counts">{{ getAdultsCount() }} | {{ getChildrenCount() }} | {{ getPetsCount() }}</div>
   </div>
 </div>

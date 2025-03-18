@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MobileHomesService } from '../../services/mobile-homes.service';
 import { MobileHome } from '../../models/mobile-home.interface';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,16 @@ import { MatCardModule } from '@angular/material/card';
 import { HomesFilterPipe } from '../../pipes/homes-filter.pipe';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
+import { ExpansionService } from '../../services/expansion.service';
+import { Subscription } from 'rxjs';
+
+// Interface for categorized homes
+interface CategorizedHomes {
+  freeHomes: MobileHome[];
+  occupiedNoTasksHomes: MobileHome[];
+  inProgressHomes: MobileHome[];
+  othersHomes: MobileHome[];
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -15,12 +25,18 @@ import { TaskService } from '../../services/task.service';
   standalone: true,
   imports: [CommonModule, MobileHomeCardComponent, MatCardModule, HomesFilterPipe, FormsModule]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   mobileHomes: MobileHome[] = [];
+
+  
   showFreeHouses = true;
   showFreeHousesWithTasks = true;
   showOccupiedHouses = true;
   sortBy = '';
+  
+  // Subscribe to expansion state
+  areTeamBoxesExpanded = false;
+  private expansionSubscription: Subscription;
   
   getFreeHousesCount(): number {
     return this.mobileHomes.filter(home => home.availabilityname === 'Free').length;
@@ -30,41 +46,128 @@ export class DashboardComponent implements OnInit {
     return this.mobileHomes.filter(home => home.availabilityname === 'Occupied').length;
   }
 
-  getTaskIndicators(home: MobileHome): string[] {
-    const indicators: string[] = [];
-    
-    // Add indicators based on home properties
-    if (home.housetasks && home.housetasks.length > 0) {
-      // Check for specific task types
-      home.housetasks.forEach(task => {
-        // Using taskTypeName to determine the type of task
-        if (task.taskTypeName.toLowerCase().includes('cleaning')) {
-          indicators.push('C'); // C for Cleaning
+  // New method to return categorized homes for the template
+  getCategorizedHomes(): CategorizedHomes {
+    // Since we removed the filters UI, show all homes by default
+    let filteredHomes = this.mobileHomes;
+
+    // Initialize category arrays
+    const freeHomes: MobileHome[] = [];
+    const occupiedNoTasksHomes: MobileHome[] = [];
+    const inProgressHomes: MobileHome[] = [];
+    const othersHomes: MobileHome[] = [];
+
+    // Sort homes into categories
+    filteredHomes.forEach(house => {
+      // Filter out punjenje tasks
+      const nonPunjenjeTasks = house.housetasks.filter(task => !this.isPunjenjeTask(task));
+      
+      // Check if the house has any non-punjenje tasks
+      if (nonPunjenjeTasks.length === 0) {
+        // House has no non-punjenje tasks
+        if (house.availabilityname === 'Free') {
+          // Category 1: Free houses with no relevant tasks (green)
+          freeHomes.push(house);
+        } else if (house.availabilityname === 'Occupied') {
+          // Category 2: Occupied houses with no relevant tasks (red)
+          occupiedNoTasksHomes.push(house);
         }
-        if (task.taskTypeName.toLowerCase().includes('maintenance')) {
-          indicators.push('M'); // M for Maintenance
+      } else {
+        // House has non-punjenje tasks
+        if (this.hasTaskInProgress(house)) {
+          // Category 3: Houses with non-punjenje tasks in progress
+          inProgressHomes.push(house);
+        } else {
+          // Category 4: All others with non-punjenje tasks
+          othersHomes.push(house);
         }
-        if (task.taskTypeName.toLowerCase().includes('inspection')) {
-          indicators.push('I'); // I for Inspection
-        }
-        if (task.taskTypeName.toLowerCase().includes('checkout')) {
-          indicators.push('O'); // O for Checkout
-        }
-        if (task.taskTypeName.toLowerCase().includes('checkin')) {
-          indicators.push('N'); // N for New guests/Check-in
-        }
-      });
-    }
-    
-    return indicators;
+      }
+    });
+
+    // Apply sorting by house number by default
+    const sortByHouseNumber = (a: MobileHome, b: MobileHome) => a.housename.localeCompare(b.housename);
+    freeHomes.sort(sortByHouseNumber);
+    occupiedNoTasksHomes.sort(sortByHouseNumber);
+    inProgressHomes.sort(sortByHouseNumber);
+    othersHomes.sort(sortByHouseNumber);
+
+    return {
+      freeHomes,
+      occupiedNoTasksHomes,
+      inProgressHomes,
+      othersHomes
+    };
+  }
+
+  // Helper to check if a house has a task in progress
+  private hasTaskInProgress(house: MobileHome): boolean {
+    return house.housetasks.some(task => 
+      !this.isPunjenjeTask(task) && (
+        task.taskProgressTypeName.toLowerCase().includes('u progresu') ||
+        task.taskProgressTypeName.toLowerCase().includes('u tijeku') ||
+        task.taskProgressTypeName.toLowerCase().includes('započet')
+      )
+    );
+  }
+
+  // Helper to check if task is of type 'punjenje' (charging)
+  private isPunjenjeTask(task: any): boolean {
+    return task.taskTypeName.toLowerCase().includes('punjenje');
+  }
+
+  // Count total number of tasks in progress
+  getTotalTasksInProgress(): number {
+    return this.mobileHomes.reduce((count, house) => {
+      const inProgressTasksCount = house.housetasks.filter(task => 
+        !this.isPunjenjeTask(task) && (
+          task.taskProgressTypeName.toLowerCase().includes('u progresu') ||
+          task.taskProgressTypeName.toLowerCase().includes('u tijeku') ||
+          task.taskProgressTypeName.toLowerCase().includes('započet')
+        )
+      ).length;
+      return count + inProgressTasksCount;
+    }, 0);
+  }
+
+  // Count total number of assigned tasks (not in progress)
+  getTotalAssignedTasks(): number {
+    return this.mobileHomes.reduce((count, house) => {
+      // Count tasks that are assigned but not in progress and not punjenje
+      const assignedTasksCount = house.housetasks.filter(task => 
+        !this.isPunjenjeTask(task) && !(
+          task.taskProgressTypeName.toLowerCase().includes('u progresu') ||
+          task.taskProgressTypeName.toLowerCase().includes('u tijeku') ||
+          task.taskProgressTypeName.toLowerCase().includes('započet')
+        )
+      ).length;
+      return count + assignedTasksCount;
+    }, 0);
+  }
+
+  // Get count of houses that have assigned tasks (not in progress)
+  getHousesWithAssignedTasksCount(): number {
+    return this.getCategorizedHomes().othersHomes.length;
   }
 
   constructor(
     private mobileHomesService: MobileHomesService,
-    private taskService: TaskService) {}
+    private taskService: TaskService,
+    private expansionService: ExpansionService) {
+    // Subscribe to expansion state changes
+    this.expansionSubscription = this.expansionService.expansionState$.subscribe(
+      expanded => this.areTeamBoxesExpanded = expanded
+    );
+  }
 
   ngOnInit() {
     this.loadTodayHomes();
+  }
+
+  ngOnDestroy() {
+    // Clean up subscription when component is destroyed
+    if (this.expansionSubscription) {
+      this.expansionSubscription.unsubscribe();
+    }
   }
 
   private loadTodayHomes() {
@@ -94,5 +197,14 @@ export class DashboardComponent implements OnInit {
 
   toggleOccupiedHouses(){
     this.showOccupiedHouses = !this.showOccupiedHouses;
+  }
+
+  // Method to toggle team box expansion - now uses service
+  toggleTeamBox(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Use the service to toggle the expansion state
+    this.expansionService.toggleExpansion();
   }
 } 

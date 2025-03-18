@@ -18,6 +18,7 @@ export class HomesFilterPipe implements PipeTransform {
       return [];
     }
 
+    // First, filter houses based on checkboxes
     let filteredHomes = homes.filter(house => {
       if (showFree && house.availabilityname === 'Free' && house.housetasks.length == 0) return true;
       if (showFreeWithTasks && house.availabilityname === 'Free' && house.housetasks.length > 0) return true;
@@ -25,20 +26,59 @@ export class HomesFilterPipe implements PipeTransform {
       return false;
     });
 
-    if (sortBy === 'house-number') {
-      filteredHomes.sort((a, b) => a.housename.localeCompare(b.housename));
-    } else if (sortBy === 'availability') {
-      filteredHomes.sort((a, b) => {
-        const availabilityOrder = (home: MobileHome) => {
-          if (home.availabilityname === 'Free' && home.housetasks.length === 0) return 0;
-          if (home.availabilityname === 'Free' && home.housetasks.length > 0) return 1;
-          if (home.availabilityname === 'Occupied') return 2;
-          return 3;
-        };
-        return availabilityOrder(a) - availabilityOrder(b);
-      });
+    // Always sort by category first, then apply other sorts within categories
+    return this.sortByCustomOrder(filteredHomes, sortBy);
+  }
+
+  // Helper to check if a house has a task in progress
+  private hasTaskInProgress(house: MobileHome): boolean {
+    return house.housetasks.some(task => 
+      task.taskProgressTypeName.toLowerCase().includes('u progresu') ||
+      task.taskProgressTypeName.toLowerCase().includes('u tijeku') ||
+      task.taskProgressTypeName.toLowerCase().includes('započet')
+    );
+  }
+
+  // Custom sorting implementation based on the specified order
+  private sortByCustomOrder(homes: MobileHome[], secondarySortBy: string): MobileHome[] {
+    // Categorize homes
+    const freeHomes: MobileHome[] = [];
+    const occupiedNoTasksHomes: MobileHome[] = [];
+    const inProgressHomes: MobileHome[] = [];
+    const othersHomes: MobileHome[] = [];
+
+    // Sort homes into categories
+    homes.forEach(house => {
+      if (house.availabilityname === 'Free' && house.housetasks.length === 0) {
+        // Category 1: Free houses (green)
+        freeHomes.push(house);
+      } else if (house.availabilityname === 'Occupied' && house.housetasks.length === 0) {
+        // Category 2: Occupied houses with no tasks (red)
+        occupiedNoTasksHomes.push(house);
+      } else if (this.hasTaskInProgress(house)) {
+        // Category 3: Houses with tasks in progress
+        inProgressHomes.push(house);
+      } else {
+        // Category 4: All others
+        othersHomes.push(house);
+      }
+    });
+
+    // Apply secondary sorting within each category if needed
+    if (secondarySortBy === 'house-number') {
+      const sortByHouseNumber = (a: MobileHome, b: MobileHome) => a.housename.localeCompare(b.housename);
+      freeHomes.sort(sortByHouseNumber);
+      occupiedNoTasksHomes.sort(sortByHouseNumber);
+      inProgressHomes.sort(sortByHouseNumber);
+      othersHomes.sort(sortByHouseNumber);
     }
 
-    return filteredHomes;
+    // Combine all categories in the specified order
+    return [
+      ...freeHomes,
+      ...occupiedNoTasksHomes,
+      ...inProgressHomes,
+      ...othersHomes
+    ];
   }
 }

@@ -1,4 +1,4 @@
-<div class="dashboard-header">
+<!-- <div class="dashboard-header">
   <h1>Houses Dashboard</h1>
   <div class="stats-container">
     <div class="stat-card">
@@ -14,55 +14,100 @@
       <span class="stat-label">Occupied Houses</span>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="houses-container">
-  <div class="house-filters-container">
-    <h3>Show houses:</h3>
-    <div class="house-filters">
-      <button (click)="toggleFreeHouses()" [ngStyle]="{'background-color': showFreeHouses ? 'white' : 'lightgray'}">
-        Free <input type="checkbox" [checked]="showFreeHouses">
-      </button>
-      <button (click)="toggleFreeHousesWithTasks()" [ngStyle]="{'background-color': showFreeHousesWithTasks ? 'white' : 'lightgray'}">
-        Free with tasks <input type="checkbox" [checked]="showFreeHousesWithTasks">
-      </button>
-      <button (click)="toggleOccupiedHouses()" [ngStyle]="{'background-color': showOccupiedHouses ? 'white' : 'lightgray'}">
-        Occupied <input type="checkbox" [checked]="showOccupiedHouses">
-      </button>
-    </div>
-  </div>
-  <div class="sort-container">
-    <select name="house-sort" id="house-sort" [(ngModel)]="sortBy">
-      <option value="" disabled selected>Sort by</option>
-      <option value="house-number">House number</option>
-      <option value="availability">Availability</option>
-    </select>
-  </div>
+  <!-- Houses layout with categorized rows -->
   <div class="houses-wrapper">
-    <app-mobile-home-card 
-      *ngFor="let house of mobileHomes | homesFilterPipe: showFreeHouses: showFreeHousesWithTasks: showOccupiedHouses: sortBy" 
-      [mobileHome]="house"
-      [taskIndicators]="getTaskIndicators(house)">
-    </app-mobile-home-card>
-  </div>
-</div>
+    <!-- Get filtered and sorted homes -->
+    <ng-container *ngIf="getCategorizedHomes() as categorizedHomes">
+      <!-- Row 3: Houses with tasks in progress -->
+      <div class="house-category-row" *ngIf="categorizedHomes.inProgressHomes.length > 0">
+        <div class="category-header in-progress">
+          <div class="category-label">U tijeku ({{categorizedHomes.inProgressHomes.length}})</div>
+          <div class="teams-header">OSOBLJE</div>
+        </div>
+        <div class="houses-row in-progress">
+          <div>
+            <app-mobile-home-card 
+            *ngFor="let house of categorizedHomes.inProgressHomes" 
+            [mobileHome]="house">
+            </app-mobile-home-card>
 
-<div class="dashboard-container">
-  <h2>Dashboard</h2>
-  <div class="dashboard-stats">
-    <div class="stat-card">
-      <h3>Total Teams</h3>
-      <p>0</p>
-    </div>
-    <div class="stat-card">
-      <h3>Daily Sheets</h3>
-      <p>0</p>
-    </div>
-  </div>
-  <div class="recent-activity">
-    <h3>Recent Activity</h3>
-    <ul>
-      <!-- Activity items will go here -->
-    </ul>
+          </div>
+        <div class="team-boxes">
+          <div class="team-box red expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
+            <div class="team-letter">S1</div>
+            <div class="team-members">
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+            </div>
+          </div>
+          <div class="team-box blue expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
+            <div class="team-letter">S2</div>
+            <div class="team-members">
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+            </div>
+          </div>
+          <div class="team-box green expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
+            <div class="team-letter">M</div>
+            <div class="team-members">
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+            </div>
+          </div>
+          <div class="team-box black expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
+            <div class="team-letter">R</div>
+            <div class="team-members">
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+            </div>
+          </div>
+          <div class="team-box yellow expandable" [ngClass]="{'expanded': areTeamBoxesExpanded}" (click)="toggleTeamBox($event)">
+            <div class="team-letter">CS</div>
+            <div class="team-members">
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+              <div class="team-member">Marko Maric</div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+      
+      <!-- Row 4: Other houses -->
+      <div class="house-category-row" *ngIf="categorizedHomes.othersHomes.length > 0">
+        <div class="category-header">
+          <div class="category-label">Dodjeljeno ({{getTotalAssignedTasks()}} zadataka / {{categorizedHomes.othersHomes.length}} kućica)</div>
+        </div>
+        <div class="houses-row">
+          <app-mobile-home-card 
+            *ngFor="let house of categorizedHomes.othersHomes" 
+            [mobileHome]="house">
+          </app-mobile-home-card>
+        </div>
+      </div>
+
+      <div class="house-category-row" *ngIf="categorizedHomes.freeHomes.length > 0 || categorizedHomes.occupiedNoTasksHomes.length > 0">
+        <div class="category-header">
+          <div class="category-label">Ostale (Slobodne: {{categorizedHomes.freeHomes.length}}, Zauzete: {{categorizedHomes.occupiedNoTasksHomes.length}})</div>
+        </div>
+        <div class="houses-row">
+          <app-mobile-home-card 
+            *ngFor="let house of categorizedHomes.freeHomes" 
+            [mobileHome]="house">
+          </app-mobile-home-card>
+          <app-mobile-home-card 
+          *ngFor="let house of categorizedHomes.occupiedNoTasksHomes" 
+          [mobileHome]="house">
+        </app-mobile-home-card>
+        </div>
+      </div>
+    </ng-container>
   </div>
 </div>

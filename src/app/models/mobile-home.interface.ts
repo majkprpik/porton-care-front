@@ -22,6 +22,11 @@ export interface MobileHome {
   
   // Flag for tracking if there are active tasks
   hasTasks?: boolean;
+  
+  // Occupancy information
+  adults?: number;
+  children?: number;
+  pets?: number;
 }
 
 export interface HouseTask {

@@ -1,30 +1,30 @@
 .dashboard-header {
-  padding: 20px;
+  padding: 12px;
   background-color: #f5f5f5;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .dashboard-header h1 {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   color: #333;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .stats-container {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .stat-card {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   background-color: white;
-  padding: 16px;
-  border-radius: 8px;
-  min-width: 120px;
+  padding: 10px;
+  border-radius: 6px;
+  min-width: 90px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
@@ -33,80 +33,236 @@
 }
 
 .stat-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: bold;
   color: #2196F3;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #757575;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .houses-container {
   display: flex;
   flex-wrap: wrap;
-  // gap: 20px;
-  padding: 20px;
+  padding: 10px;
   flex-direction: column;
-
-  .house-filters-container{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: 20px;
-    border-bottom: 2px solid black;
-
-    .house-filters{
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
-      padding-left: 20px;
-  
-      button{
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        height: 25px;
-        width: 140px;
-        border: 1px solid lightgray;
-        border-radius: 5px;
-        font-weight: bold;
-      }
-  
-      button:hover{
-        cursor: pointer;
-      }
-    }
-  }
-
-  .sort-container{
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding-top: 10px;
-    padding-left: 20px;
-
-    select{
-      border-radius: 5px;
-    }
-
-    select:hover{
-      cursor: pointer;
-    }
-  }
 
   .houses-wrapper{
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 20px;
+    flex-direction: column;
+    width: 100%;
+    
+    .house-category-row {
+      margin-top: 12px;
+      // margin-bottom: 18px;
+      
+      .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      
+      .category-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        padding-left: 10px;
+        border-left: 4px solid #2196F3;
+        display: flex;
+        align-items: center;
+      }
+      
+      .teams-header {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        padding-right: 10px;
+        border-right: 4px solid rgba(138, 43, 226, 0.8);
+        display: flex;
+        align-items: center;
+      }
+      
+      // Team boxes container
+      // Moved to .houses-row
+      
+      .houses-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: flex-start;
+        
+        // justify-content: space-between;
+        
+        &.in-progress{
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        // Team boxes container when in houses row
+        .team-boxes {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          // margin-right: 16px;
+          max-width: 100%;
+          // gap: 12px;
+          
+          .team-box {
+            margin: 8px;
+            width: 150px; /* Width when collapsed - small enough to show initial */
+            height: 28px; /* Same height as mobile home card when collapsed */
+            border-radius: 8px; /* Match mobile home card border radius */
+            cursor: pointer;
+            overflow: hidden;
+            transition: height 0.4s ease-in-out, width 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Match mobile home card shadow */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+            // Direct styles for expanded state
+            &.expanded {
+              height: 100px; /* Same as expanded house cards */
+              width: 150px; /* Slightly wider to fit member names better */
+              
+              .team-letter {
+                transform: scale(1.2);
+                transform-origin: center center;
+                height: 22px; /* Slightly smaller to give more room to member list */
+                margin-bottom: 2px;
+              }
+              
+              .team-members {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 2px;
+                max-height: calc(100% - 28px); /* Adjusted to accommodate smaller team-letter */
+                overflow-y: auto;
+                padding: 0 2px;
+                
+                &::-webkit-scrollbar {
+                  width: 4px;
+                }
+                
+                &::-webkit-scrollbar-thumb {
+                  background-color: rgba(255, 255, 255, 0.4);
+                  border-radius: 2px;
+                }
+                
+                .team-member {
+                  padding: 2px 4px 2px 8px;
+                  font-size: 16px;
+                  // color: white;
+                  text-align: left;
+                  margin: 2px 0;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  transition: background-color 0.2s ease;
+                  border-radius: 2px;
+                  
+                  &:hover {
+                    background-color: rgba(255, 255, 255, 0.1);
+                  }
+                }
+              }
+            }
+            
+            .team-letter {
+              font-weight: bold;
+              // color: white;
+              text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+              font-size: 14px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 28px;
+              transition: all 0.4s ease-in-out;
+              padding: 0 4px;
+              text-align: center;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+
+            .team-members {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin-top: 10px;
+            }
+            
+            .team-name {
+              display: none;
+              padding: 4px;
+              // color: white;
+              font-weight: bold;
+              text-align: center;
+              text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            }
+            
+            &.expandable {
+              &:hover {
+                // transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+              }
+            }
+            
+            // Red team box
+            &.red {
+              background-color: rgba(220, 53, 69, 0.8);
+            }
+            
+            // Blue team box
+            &.blue {
+              background-color: rgba(13, 110, 253, 0.8);
+            }
+            
+            // Green team box
+            &.green {
+              background-color: rgba(25, 135, 84, 0.8);
+            }
+            
+            // Black team box
+            &.black {
+              background-color: rgba(33, 37, 41, 0.8);
+            }
+            
+            // Yellow team box
+            &.yellow {
+              background-color: rgba(255, 193, 7, 0.8);
+            }
+          }
+        }
+      }
+      
+      &:nth-child(1) .category-label {
+        border-left-color: rgb(68, 219, 68);
+      }
+      
+      &:nth-child(2) .category-label {
+        border-left-color: lightcoral;
+      }
+      
+      &:nth-child(3) .category-label {
+        border-left-color: #2196F3;
+      }
+      
+      &:nth-child(4) .category-label {
+        border-left-color: #f39c12;
+      }
+    }
   }
 } 

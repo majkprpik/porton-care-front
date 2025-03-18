@@ -1,68 +1,45 @@
 <div class="team-detail" *ngIf="team">
-    <h2>Team {{team.id}}</h2>
-    
-    <div class="team-members">
-      <h3>Team Members</h3>
-      <ul>
-        <li *ngFor="let member of team.members">
-          {{member.name}}
-        </li>
-      </ul>
+    <div class="team-header">
+      <h2>Team {{team.id}}</h2>
+      <div class="team-members">
+        <span class="members-label">Members:</span>
+        <div class="members-list">
+          <span class="member-pill" *ngFor="let member of team.members">{{member.name}}</span>
+        </div>
+      </div>
     </div>
   
     <div class="team-homes">
       <h3>Homes to Clean</h3>
       <div class="homes-grid">
-        <div *ngFor="let task of team.tasks" class="home-card" [ngClass]="task.status">
+        <div *ngFor="let task of team.tasks" class="home-card" [ngClass]="{'in-progress': isTaskInProgress(task), 'completed': isTaskCompleted(task)}">
           <div class="home-number">{{task.number}}</div>
           <div class="home-actions">
-            <!-- Show Start Cleaning button when home is dirty -->
-            <button *ngIf="task.status === CleaningState.DIRTY"
-                    (click)="startCleaning(task)"
+            <!-- Show Start button when task is assigned -->
+            <button *ngIf="isTaskAssigned(task)" 
+                    (click)="startTask(task)" 
                     class="btn-start">
               Start Cleaning
             </button>
-
-            <!-- Show Stop Cleaning button when cleaning is in progress -->
-            <button *ngIf="task.status === CleaningState.CLEANING"
-                    (click)="stopCleaning(task)"
-                    class="btn-stop">
-              Stop Cleaning
-            </button>
-
-            <!-- Show Full Cleaned button when partially cleaned -->
-            <button *ngIf="task.status === CleaningState.PARTIALLY_CLEANED"
-                    (click)="markFullyCleaned(task)"
-                    class="btn-complete">
-              Full Cleaned!
-            </button>
-
-            <!-- Show status when fully cleaned -->
-            <span *ngIf="task.status === CleaningState.FULLY_CLEANED" 
-                  class="status-complete">
+            
+            <!-- Show Pause and Finish buttons when task is in progress -->
+            <div *ngIf="isTaskInProgress(task)" class="button-group">
+              <button (click)="pauseTask(task)" 
+                      class="btn-pause">
+                Pause
+              </button>
+              <button (click)="finishTask(task)" 
+                      class="btn-finish">
+                Finish
+              </button>
+            </div>
+            
+            <!-- Show status label when task is completed -->
+            <span *ngIf="isTaskCompleted(task)" class="status-complete">
               Completed
             </span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="team-tasks">
-      <h3>Team Tasks</h3>
-      <div class="tasks-list" *ngIf="team.tasks && team.tasks.length > 0">
-        <div *ngFor="let task of team.tasks" class="task-item">
-          <div class="task-header">
-            <div class="task-title">Task #{{task.id}}</div>
-            <div class="task-location">Location: {{task.house || task.number}}</div>
-          </div>
-          <div class="task-details">
-            <div class="task-type">Type: {{task.taskType || 'Cleaning'}}</div>
-            <div class="task-progress">Progress: {{task.progressType || getProgressTypeFromStatus(task.status)}}</div>
-          </div>
-        </div>
-      </div>
-      <div *ngIf="!team.tasks || team.tasks.length === 0" class="no-tasks">
-        <p>No tasks assigned to this team.</p>
       </div>
     </div>
   </div>
