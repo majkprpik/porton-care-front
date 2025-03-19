@@ -3,24 +3,29 @@
 }
 
 .damage-report-card{
-    .name-and-desc-header{
+    width: 340px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    padding: 10px;
+
+    .name-and-desc-header {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-    }
-
-    .damage{
-        overflow-y: auto;
-        max-height: 200px;
-        font-size: 14px;
-        font-weight: 500;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
         box-sizing: border-box;
-        padding: 5px;
+        padding: 5px 10px 5px 10px;
+    
+        span {
+            font-weight: bold;
+        }
+    
+        .damage {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 85%; 
+        }
     }
 
     .tabs{
@@ -29,7 +34,8 @@
         flex-direction: row;
         justify-content: space-evenly;
         border-top: 1px solid black;
-        padding-top: 10px;
+        padding-top: 5px;
+        box-sizing: border-box;
 
         .images-tab, .comments-tab, .team-tab{
             width: 50%;
@@ -39,9 +45,11 @@
             flex-direction: row;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
 
             &:hover{
                 background-color: rgb(212, 113, 113);
+                cursor: pointer;
             }
         }
     }
@@ -96,12 +104,13 @@
             }
 
             button{
-                height: 40px;
+                height: 35px;
                 border-radius: 10px;
                 border: none;
                 width: 200px;
                 background-color: rgb(240, 184, 184);
                 transition: transform 0.3s ease;
+                font-weight: bold;
 
                 &:hover{
                     transform: scale(1.03);
@@ -136,7 +145,7 @@
             }
 
             button{
-                height: 40px;
+                height: 35px;
                 border-radius: 10px;
                 border: none;
                 width: 200px;
@@ -204,18 +213,29 @@
         }
 
         button{
-            height: 40px;
+            height: 35px;
             border-radius: 10px;
             border: none;
             width: 200px;
             background-color: rgb(240, 184, 184);
             transition: transform 0.3s ease;
+            font-weight: bold;
 
             &:hover{
                 transform: scale(1.03);
                 cursor: pointer;
             }
         }
+    }
+
+    .reported-by{
+        padding-top: 2px;
+        
+        span{
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
     }
 }
 

@@ -9,37 +9,12 @@
         justify-content: flex-start;
         gap: 10px;
         flex-wrap: wrap;
+        width: 100%;
 
-        .houses{
+        app-damage-report-card {
             display: flex;
-            flex-direction: column;
-            padding: 4px 8px;
-            width: 330px;
-            box-sizing: border-box;
-            padding: 10px;
-            height: 300px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            background-color: lightcoral;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-
-            .house-name{
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
-                padding: 5px;
-                width: 100%;
-                border-bottom: 1px solid black;
-            }
-             
-            &:hover {
-              transform: scale(1.01);
-            }
+            flex-direction: row;
+            width: 340px;
         }
     }
 }

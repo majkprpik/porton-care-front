@@ -15,7 +15,7 @@ import { DamageReportCardComponent } from "../damage-report-card/damage-report-c
   imports: [CommonModule, FormsModule, MatIconModule, DamageReportCardComponent]
 })
 export class DamageReportsComponent {
-  homesForRepair: MobileHome[] = [];
+  homesForRepair: any[] = [];
   maintenanceProfiles: Profile[] = [];
   repairedHomes = new Map<number, boolean>();
 

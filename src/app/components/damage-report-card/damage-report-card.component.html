@@ -1,6 +1,6 @@
 <div class="damage-report-card" [ngStyle]="{'background-color': isMarkedAsRepaired ? 'lightgreen' : 'lightcoral'}">
     <div class="name-and-desc-header">
-        <span>{{ houseName }}</span>
+        <span>{{ houseTask.housename }}</span>
         <span class="damage">{{ formatDescriptionForTask(houseTask.description) }}</span>
     </div>
 
@@ -103,5 +103,9 @@
                 *ngIf="isMarkedAsRepaired">
             Mark as not repaired
         </button>
+    </div>
+
+    <div class="reported-by">
+        <span>Reported by {{ this.authService.userProfile.value.first_name }} {{ this.authService.userProfile.value.last_name }} at {{ getTaskReportedTime() }}</span>
     </div>
 </div>

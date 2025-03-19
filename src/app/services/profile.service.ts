@@ -81,7 +81,7 @@ export class ProfileService {
    * @param id Profile ID
    * @returns Promise of Profile
    */
-  private async fetchProfileById(id: string): Promise<Profile> {
+  public async fetchProfileById(id: string): Promise<Profile> {
     try {
       const { data, error } = await this.supabase.getClient()
         .schema('porton')

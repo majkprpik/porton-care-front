@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { MobileHomesService } from './mobile-homes.service';
 import { HouseTask, MobileHome } from '../models/mobile-home.interface';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ export class TaskService {
 
   constructor(
     private supabase: SupabaseService,
-    private mobileHomesService: MobileHomesService
+    private mobileHomesService: MobileHomesService,
+    private authService: AuthService
   ) {
 
   }
@@ -28,8 +30,9 @@ export class TaskService {
           task_type_id: taskTypeId,
           task_progress_type_id: taskProgressTypeId,
           house_id: parseInt(houseId),
-          start_time: this.getFormattedDateTimeNowForSupabase(),
           description: description,
+          created_by: this.authService.getStoredUserId(),
+          created_at: this.getFormattedDateTimeNowForSupabase(),
         })
         .select()
         .single();
