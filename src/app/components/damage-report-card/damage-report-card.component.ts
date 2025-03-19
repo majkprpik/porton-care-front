@@ -14,25 +14,28 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, FormsModule, MatIconModule]
 })
 export class DamageReportCardComponent {
+  @Input() houseName: string = '';
   @Input() houseTask!: HouseTask;
   @Input() maintenanceProfiles: Profile[] = [];
-  @Output() technicianSubmitted = new EventEmitter<void>();
+  @Output() taskRepaired = new EventEmitter<{ taskId: number, isRepaired: boolean }>();
 
   selectedTab: string = 'images';
   comment: string = '';
   showTextbox: boolean = false;
-  selectedTechnician: string = '';
+  selectedTechnicianId: string = '';
   isMarkedAsRepaired: boolean = false;
   isTechnicianSubmitted: boolean = false;
+  workGroupProfile: any;
 
   constructor(
     private taskService: TaskService,
     private workGroupService: WorkGroupService
   ) {}
 
-  ngOnInit() {
-    this.isTechnicianSubmitted = !!this.selectedTechnician;
+  async ngOnInit() {
     this.showTextbox = !this.isCommented(this.houseTask.description);
+    this.selectedTechnicianId = await this.getSelectedTechnicianId();
+    this.checkIfRepaired();
   }
 
   setSelectedTab(tab: string) {
@@ -41,6 +44,8 @@ export class DamageReportCardComponent {
 
   submitComment() {
     if (!this.comment.trim()) return;
+
+    this.comment = this.comment.trim();
 
     this.comment = "\nMauro: " + this.comment;
     this.houseTask.description += this.comment;
@@ -67,13 +72,25 @@ export class DamageReportCardComponent {
   }
 
   getSelectedTechnicianDetails(): string {
-    const technician = this.maintenanceProfiles.find(profile => profile.id === this.selectedTechnician);
-    return technician ? `${technician.first_name} ${technician.last_name}` : '';
+    const technician = this.maintenanceProfiles.find(profile => profile.id === this.selectedTechnicianId);
+    return technician ? technician.first_name + ' ' + technician.last_name : '';
+  }
+
+  async getSelectedTechnicianId(): Promise<string>{
+    let workGroupTask = await this.workGroupService.getWorkGroupTasksByTaskId(this.houseTask.taskId);
+    this.workGroupProfile = await this.workGroupService.getWorkGroupProfileByWorkGroupId(workGroupTask.work_group_id);
+
+    if(!this.workGroupProfile[0].profile_id){
+      return '';
+    }
+
+    this.isTechnicianSubmitted = true;
+    return this.workGroupProfile[0].profile_id;
   }
 
   async submitTechnicianForRepairTask() {
     let workGroupTasks = await this.workGroupService.getWorkGroupTasksByTaskId(this.houseTask.taskId);
-    this.workGroupService.submitTechnicianForRepairTask(workGroupTasks.work_group_id, this.selectedTechnician);
+    this.workGroupService.submitTechnicianForRepairTask(workGroupTasks.work_group_id, this.selectedTechnicianId);
 
     let taskProgressTypeId = await this.taskService.getTaskProgressTypeIdByTaskProgressTypeName("U progresu");
     this.houseTask.taskProgressTypeId = taskProgressTypeId;
@@ -81,6 +98,23 @@ export class DamageReportCardComponent {
     this.workGroupService.lockWorkGroup(workGroupTasks.work_group_id);
     
     this.isTechnicianSubmitted = true;
-    this.technicianSubmitted.emit();
+  }
+
+  markAsRepaired(){
+    this.taskService.setTaskProgress(this.houseTask.taskId, 'Završeno');
+    this.isMarkedAsRepaired = true;
+    this.taskRepaired.emit({ taskId: this.houseTask.taskId, isRepaired: true });
+  }
+
+  markAsNotRepaired(){
+    this.taskService.setTaskProgress(this.houseTask.taskId, 'U progresu');
+    this.isMarkedAsRepaired = false;
+    this.taskRepaired.emit({ taskId: this.houseTask.taskId, isRepaired: false });
+  }
+
+  checkIfRepaired(){
+    if(this.houseTask.taskProgressTypeName === "Završeno"){
+      this.isMarkedAsRepaired = true;
+    }
   }
 }

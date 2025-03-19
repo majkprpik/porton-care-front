@@ -158,6 +158,28 @@ export class TaskService {
     }
   }
 
+  async setTaskProgress(taskId: number, taskProgress: string){
+    try{
+      const taskProgressTypeId = await this.getTaskProgressTypeIdByTaskProgressTypeName(taskProgress);
+
+      const { error: taskTypeIdError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('tasks')
+        .update({ 
+          task_progress_type_id: taskProgressTypeId,
+        })
+        .eq('task_id', taskId)
+        .single();
+
+      if(taskTypeIdError) throw taskTypeIdError
+
+      return true;
+    } catch (error) {
+      console.error('Error fetching task type ids', error);
+      return false;
+    }
+  }
+
   async getTaskProgressTypeIdByTaskProgressTypeName(taskProgressTypeName: string){
     try{
       const { data: existingProgressTypeId, error: progressTypeIdError } = await this.supabase.getClient()

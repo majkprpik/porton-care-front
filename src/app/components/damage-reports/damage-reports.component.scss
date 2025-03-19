@@ -1,4 +1,8 @@
 .damage-reports-list{
+    width: calc(100vw - 20px);
+    box-sizing: border-box;
+    padding: 20px;
+
     .damage-reports-wrapper{
         display: flex;
         flex-direction: row;
@@ -10,11 +14,10 @@
             display: flex;
             flex-direction: column;
             padding: 4px 8px;
-            flex: 1 1 calc(25% - 10px); /* 4 per row */
-            min-width: 370px;
+            width: 330px;
             box-sizing: border-box;
             padding: 10px;
-            height: 350px;
+            height: 300px;
             border-radius: 4px;
             display: flex;
             align-items: center;
@@ -38,24 +41,5 @@
               transform: scale(1.01);
             }
         }
-    }
-}
-
-/* Make houses expand when fewer than 4 fit */
-@media (max-width: 1200px) { /* Adjust breakpoint as needed */
-    .houses {
-        flex: 1 1 calc(33.33% - 10px); /* 3 per row */
-    }
-}
-
-@media (max-width: 900px) {
-    .houses {
-        flex: 1 1 calc(50% - 10px); /* 2 per row */
-    }
-}
-
-@media (max-width: 600px) {
-    .houses {
-        flex: 1 1 100%; /* 1 per row */
     }
 }
