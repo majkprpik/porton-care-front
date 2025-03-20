@@ -1,8 +1,8 @@
 .news-feed-container {
-  height: 250px; /* Fixed height as requested */
+  height: 350px; /* Fixed height as requested */
   width: 100%; /* Full width as requested */
   border-radius: 8px;
-  background-color: #f5f5f5;
+  // background-color: #f5f5f5;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 15px;
   overflow: hidden;
@@ -12,7 +12,7 @@
 
 .news-feed-header {
   padding: 10px 15px;
-  background-color: #f0f0f0;
+  // background-color: #f0f0f0;
   border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
@@ -114,6 +114,11 @@
 
 .activity-icon.note-added {
   background-color: #9C27B0; /* Purple for notes */
+}
+
+.activity-icon.repair-alert {
+  background-color: #000000; /* Black background for repair/alert */
+  color: white; /* White exclamation mark */
 }
 
 .activity-content {

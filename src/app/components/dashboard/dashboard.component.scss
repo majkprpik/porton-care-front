@@ -48,28 +48,178 @@
   margin-top: 2px;
 }
 
+.main-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  max-height: calc(100vh - 64px);
+  /* Adjusted to account for status bar height */
+  overflow-x: hidden;
+  flex-direction: column;
+  /* Make sure child elements stack vertically */
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+
+  &.drawer-open {
+    width: calc(100% - 350px);
+    margin-right: 350px;
+  }
+}
+
+/* Toggle Button - adjust position */
+.drawer-toggle {
+  position: fixed;
+  top: 120px;
+  /* Position below the status bar */
+  right: 0;
+  width: 40px;
+  height: 60px;
+  background-color: #2196F3;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.15);
+  z-index: 1010;
+  /* Increased z-index to ensure it's always on top */
+  transition: right 0.3s ease;
+  border: 2px solid white;
+  border-right: none;
+
+  &:hover {
+    background-color: #1976D2;
+  }
+
+  i {
+    font-size: 18px;
+    font-weight: bold;
+  }
+}
+
+/* Move button when sidebar is open - explicitly set transition and position */
+.main-container.drawer-open~.drawer-toggle,
+.main-container.drawer-open+.drawer-toggle {
+  right: 350px;
+  transition: right 0.3s ease;
+}
+
 .houses-container {
   display: flex;
   flex-wrap: wrap;
   padding: 10px;
   flex-direction: column;
+  flex: 1;
+  transition: margin-right 0.3s ease;
+  margin-right: 0;
+  /* Default state - no margin */
+  max-height: none;
+  /* Remove max-height constraint to prevent cutoff */
+  overflow: visible;
+  /* Allow content to be fully visible */
+  width: 100%;
 
-  .houses-wrapper{
+  /* View Toggle Buttons */
+  .view-toggle-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-right: 10px;
+    align-items: center;
+
+    .view-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      &.active {
+        color: #3498db;
+      }
+
+      i {
+        font-size: 18px;
+        color: #1e2a39;
+      }
+    }
+
+    .search-container {
+      margin-left: 15px;
+      position: relative;
+      
+      .house-search {
+        width: 180px;
+        height: 36px;
+        border-radius: 18px;
+        border: 1px solid #e0e0e0;
+        padding: 0 15px;
+        font-size: 14px;
+        color: #1e2a39;
+        transition: all 0.2s ease;
+        outline: none;
+        background-color: white;
+        
+        &:focus {
+          border-color: #3498db;
+          box-shadow: 0 0 4px rgba(52, 152, 219, 0.2);
+        }
+        
+        &::placeholder {
+          color: #999;
+        }
+      }
+    }
+  }
+
+  &.drawer-open {
+    margin-right: 0;
+    /* No margin needed since main-container handles this */
+    width: 100%;
+    /* Full width of parent container */
+  }
+
+  .houses-wrapper {
     display: flex;
     flex-direction: column;
     width: 100%;
-    
+    overflow: visible;
+    /* Ensure content is not cut off */
+
+    /* Grid view specific styles */
+    &.grid-view {
+      .houses-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+      }
+    }
+
     .house-category-row {
       margin-top: 12px;
+      width: 100%;
+      overflow: visible;
       // margin-bottom: 18px;
-      
+
       .category-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 8px;
       }
-      
+
       .category-label {
         font-size: 16px;
         font-weight: 600;
@@ -79,7 +229,7 @@
         display: flex;
         align-items: center;
       }
-      
+
       .teams-header {
         font-size: 16px;
         font-weight: 600;
@@ -89,23 +239,38 @@
         display: flex;
         align-items: center;
       }
-      
+
       // Team boxes container
       // Moved to .houses-row
-      
+
       .houses-row {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
         align-items: flex-start;
-        
+        width: 100%;
+        min-height: 30px;
+        margin-bottom: 15px;
+        overflow: visible;
+
         // justify-content: space-between;
-        
-        &.in-progress{
+
+        &.in-progress {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
+          flex-wrap: wrap;
+          justify-content: flex-start;
+          /* Changed from space-between to avoid stretching */
+          align-items: flex-start;
+          width: 100%;
+
+          >div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
+          }
         }
+
         // Team boxes container when in houses row
         .team-boxes {
           display: flex;
@@ -115,52 +280,60 @@
           max-width: 100%;
           justify-content: flex-start;
           align-items: flex-start;
-          
+
           .team-box {
             margin: 8px;
-            width: 150px; /* Width when collapsed - small enough to show initial */
-            height: 28px; /* Same height as mobile home card when collapsed */
-            border-radius: 8px; /* Match mobile home card border radius */
+            width: 150px;
+            /* Width when collapsed - small enough to show initial */
+            height: 28px;
+            /* Same height as mobile home card when collapsed */
+            border-radius: 8px;
+            /* Match mobile home card border radius */
             cursor: pointer;
             overflow: hidden;
             transition: height 0.4s ease-in-out, width 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease;
             border: 1px solid rgba(0, 0, 0, 0.2);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Match mobile home card shadow */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Match mobile home card shadow */
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            
+
             // Direct styles for expanded state
             &.expanded {
-              height: 68px; /* Same as expanded house cards */
-              width: 150px; /* Slightly wider to fit member names better */
-              
+              height: 68px;
+              /* Same as expanded house cards */
+              width: 150px;
+              /* Slightly wider to fit member names better */
+
               .team-letter {
                 transform: scale(1.2);
                 transform-origin: center center;
-                height: 22px; /* Slightly smaller to give more room to member list */
+                height: 22px;
+                /* Slightly smaller to give more room to member list */
                 margin-bottom: 2px;
               }
-              
+
               .team-members {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
                 margin-top: 2px;
-                max-height: calc(100% - 28px); /* Adjusted to accommodate smaller team-letter */
+                max-height: calc(100% - 28px);
+                /* Adjusted to accommodate smaller team-letter */
                 overflow-y: auto;
                 padding: 0 2px;
-                
+
                 &::-webkit-scrollbar {
                   width: 4px;
                 }
-                
+
                 &::-webkit-scrollbar-thumb {
                   background-color: rgba(255, 255, 255, 0.4);
                   border-radius: 2px;
                 }
-                
+
                 .team-member {
                   padding: 2px 4px 2px 8px;
                   font-size: 13px;
@@ -172,21 +345,21 @@
                   text-overflow: ellipsis;
                   transition: background-color 0.2s ease;
                   border-radius: 2px;
-                  
+
                   &:hover {
                     background-color: rgba(255, 255, 255, 0.1);
                   }
                 }
               }
             }
-            
+
             // Not expanded - hide team members and only show title
             &:not(.expanded) {
               .team-members {
                 display: none; // Hide team members when collapsed
               }
             }
-            
+
             .team-letter {
               font-weight: bold;
               color: black;
@@ -207,12 +380,36 @@
             }
 
             .team-members {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              margin-top: 10px;
+              margin-bottom: 12px;
+              padding: 5px;
+              border-radius: 4px;
+              background-color: rgba(255, 255, 255, 0.4);
+
+              .team-member {
+                display: flex;
+                align-items: center;
+                margin-bottom: 5px;
+                padding: 3px 5px;
+                border-radius: 3px;
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                  background-color: rgba(255, 255, 255, 0.6);
+                }
+
+                i {
+                  font-size: 12px;
+                  color: #666;
+                  margin-right: 8px;
+                }
+
+                span {
+                  font-size: 13px;
+                  color: #444;
+                }
+              }
             }
-            
+
             .team-name {
               display: none;
               padding: 4px;
@@ -221,34 +418,34 @@
               text-align: center;
               // text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             }
-            
+
             &.expandable {
               &:hover {
                 // transform: translateY(-2px);
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
               }
             }
-            
+
             // Red team box
             &.red {
               background-color: rgba(220, 53, 69, 0.8);
             }
-            
+
             // Blue team box
             &.blue {
               background-color: rgba(13, 110, 253, 0.8);
             }
-            
+
             // Green team box
             &.green {
               background-color: rgba(25, 135, 84, 0.8);
             }
-            
+
             // Black team box
             &.black {
               background-color: rgb(33 37 41 / 49%);
             }
-            
+
             // Yellow team box
             &.yellow {
               background-color: rgba(255, 193, 7, 0.8);
@@ -256,22 +453,569 @@
           }
         }
       }
-      
+
       &:nth-child(1) .category-label {
         border-left-color: rgb(68, 219, 68);
       }
-      
+
       &:nth-child(2) .category-label {
         border-left-color: lightcoral;
       }
-      
+
       &:nth-child(3) .category-label {
         border-left-color: #2196F3;
       }
-      
+
       &:nth-child(4) .category-label {
         border-left-color: #f39c12;
       }
     }
   }
-} 
+}
+
+// Side drawer styles
+.side-drawer {
+  position: fixed;
+  top: 64px;
+  /* Position from the top of the page, right below main navbar */
+  right: 0;
+  width: 350px;
+  height: calc(100vh - 64px);
+  /* Adjust height based on top position */
+  background-color: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  z-index: 999;
+  overflow: hidden;
+  /* Changed from overflow-y: auto to prevent scrolling on the entire sidebar */
+
+  &.collapsed {
+    transform: translateX(350px);
+  }
+
+  .drawer-content {
+    // padding: 15px;
+    height: 100%;
+    /* Changed from max-height to ensure it fills the full height */
+    display: flex;
+    /* Add flex display to properly structure the sidebar */
+    flex-direction: column;
+    /* Stack children vertically */
+    overflow: hidden;
+    /* Changed from overflow-y: auto to prevent overall scrolling */
+
+    h2 {
+      margin-top: 0;
+      color: #333;
+      font-size: 18px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    // Sidebar tabs styles
+    .sidebar-tabs {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      /* Take full height of parent */
+
+      .tab-navigation {
+        display: flex;
+        border-bottom: 1px solid #e0e0e0;
+        // margin-bottom: 15px;
+        flex-shrink: 0;
+        /* Prevent tabs from shrinking */
+
+        .tab-button {
+          justify-content: center;
+          min-height: 55px;
+          flex: 1;
+          text-align: center;
+          padding: 10px 0;
+          cursor: pointer;
+          color: #666;
+          transition: all 0.2s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 14px;
+
+          i {
+            font-size: 18px;
+            margin-bottom: 5px;
+          }
+
+          &:hover {
+            color: #0275d8;
+          }
+
+          &.active {
+            color: #0275d8;
+            border-bottom: 2px solid #0275d8;
+          }
+        }
+      }
+
+      .tab-content {
+        padding: 5px 0;
+        flex: 1;
+        /* Allow the tab content to take the remaining space */
+        overflow-y: auto;
+        /* Only the tab content area will scroll */
+
+        .tab-pane {
+          h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 10px;
+          }
+
+          p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+          }
+
+          // Style adjustments for news feed in sidebar
+          app-news-feed {
+            display: block;
+
+            ::ng-deep .news-feed-container {
+              height: auto;
+              /* Changed from fixed height to auto to work better with scrollable container */
+              max-height: 100%;
+              /* Use the available space */
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Status Summary Bar
+.status-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  background-color: #1e2a39;
+  color: white;
+  padding: 10px 10px;
+  width: 100%;
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+  z-index: 99;
+  border-bottom: 2px solid #3498db;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  margin: 0 0 10px 0;
+  border-radius: 0;
+  height: 55px;
+  flex-shrink: 0;
+  /* Prevent the header from shrinking */
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 4px; // Further reduced padding
+  position: relative;
+  min-width: 65px; // Ensure minimum width for each item
+  text-align: center;
+}
+
+.status-value {
+  font-size: 28px; // Slightly smaller for better fit
+  font-weight: 700;
+  color: #3498db;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  margin-bottom: 0;
+}
+
+.status-label {
+  font-size: 16px; // Reduce font size slightly
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.status-sublabel {
+  font-size: 16x;
+  opacity: 0.8;
+  margin-top: 0;
+}
+
+.dolazaka-special {
+  min-width: 120px; // Give it a bit more space than standard items
+  padding: 0 5px;
+
+  .dolazaka-top {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .status-value {
+      margin-right: 4px;
+      margin-bottom: 0;
+    }
+
+    .status-label {
+      margin-top: 2px;
+      margin-bottom: 0;
+      font-size: 14px;
+    }
+  }
+
+  .ociscenih-label {
+    font-size: 16px;
+    opacity: 0.8;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    margin-top: 0;
+  }
+}
+
+.status-divider {
+  font-size: 20px; // Smaller dividers
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 2px;
+  align-self: center;
+}
+
+@media (max-width: 992px) {
+  .status-summary-bar {
+    flex-wrap: wrap;
+    padding: 5px;
+    justify-content: center;
+    height: auto;
+  }
+
+  .status-item {
+    margin: 2px 0;
+    padding: 0 5px;
+    min-width: 60px;
+  }
+
+  .status-label {
+    font-size: 8px;
+  }
+
+  .status-divider {
+    margin: 0 1px;
+    font-size: 16px;
+  }
+
+  .main-container {
+    padding-top: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .status-summary-bar {
+    height: auto;
+    padding: 5px;
+  }
+
+  .drawer-toggle {
+    top: 90px;
+    /* Adjust for mobile */
+  }
+}
+
+app-mobile-home-card {
+  display: inline-block;
+  margin-bottom: 8px;
+  flex: 0 0 auto;
+}
+
+// Team Cards in Sidebar
+.teams-container {
+  display: flex;
+  flex-direction: column;
+  // gap: 15px;
+  height: auto;
+  /* Allow natural height */
+  max-height: none;
+  /* Remove max-height constraint - parent will handle scrolling */
+  overflow: visible;
+  /* Remove the overflow property since parent handles scrolling */
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  .team-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    // Team card colors - each team has a distinct soft primary color
+    &:nth-child(1) {
+      background-color: #e3f2fd; // Soft blue
+      &:hover {
+        background-color: #bbdefb; // Slightly brighter blue
+      }
+    }
+
+    &:nth-child(2) {
+      background-color: #e8f5e9; // Soft green
+      &:hover {
+        background-color: #c8e6c9; // Slightly brighter green
+      }
+    }
+
+    &:nth-child(3) {
+      background-color: #fff3e0; // Soft orange
+      &:hover {
+        background-color: #ffe0b2; // Slightly brighter orange
+      }
+    }
+
+    &:nth-child(4) {
+      background-color: #f3e5f5; // Soft purple
+      &:hover {
+        background-color: #e1bee7; // Slightly brighter purple
+      }
+    }
+
+    &:nth-child(5) {
+      background-color: #ffebee; // Soft red
+      &:hover {
+        background-color: #ffcdd2; // Slightly brighter red
+      }
+    }
+
+    &:nth-child(6) {
+      background-color: #e0f7fa; // Soft cyan
+      &:hover {
+        background-color: #b2ebf2; // Slightly brighter cyan
+      }
+    }
+
+    &:nth-child(7) {
+      background-color: #f1f8e9; // Soft light green
+      &:hover {
+        background-color: #dcedc8; // Slightly brighter light green
+      }
+    }
+
+    &:nth-child(8) {
+      background-color: #fff8e1; // Soft yellow
+      &:hover {
+        background-color: #ffecb3; // Slightly brighter yellow
+      }
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: rgba(255, 255, 255, 0.5);
+      padding: 5px 8px;
+      border-radius: 4px;
+
+      .team-name {
+        font-weight: 600;
+        font-size: 15px;
+        color: #333;
+      }
+
+      .team-status {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 4px;
+
+        &.active {
+          background-color: rgba(40, 167, 69, 0.15);
+          color: #28a745;
+          font-weight: 500;
+        }
+
+        &.inactive {
+          background-color: rgba(108, 117, 125, 0.15);
+          color: #6c757d;
+        }
+      }
+    }
+
+    .team-members {
+      margin-bottom: 12px;
+      padding: 5px;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 0.4);
+
+      .team-member {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        padding: 3px 5px;
+        border-radius: 3px;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        i {
+          font-size: 12px;
+          color: #666;
+          margin-right: 8px;
+        }
+
+        span {
+          font-size: 13px;
+          color: #444;
+        }
+      }
+    }
+
+    .team-tasks {
+      .task-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 6px;
+      }
+
+      .task-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+
+        .task-badge {
+          display: flex;
+          align-items: center;
+          background-color: rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          padding: 3px 6px;
+          border-radius: 4px;
+          font-size: 12px;
+          cursor: pointer;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+          }
+
+          .house-number {
+            font-weight: 600;
+            color: #0275d8;
+          }
+
+          i {
+            margin-left: 5px;
+            font-size: 11px;
+            color: #777;
+          }
+
+          // Task type-specific styling
+          &[title*="Čišćenje"] i {
+            color: #2196F3;
+          }
+
+          &[title*="Terasa"] i {
+            color: #ffb300;
+          }
+
+          &[title*="Popravak"] i {
+            color: #f44336;
+          }
+        }
+      }
+    }
+
+    .team-info {
+      background-color: rgba(255, 255, 255, 0.6);
+      border-radius: 4px;
+      padding: 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      
+      i {
+        margin-right: 8px;
+        color: #666;
+      }
+      
+      span {
+        color: #555;
+      }
+    }
+  }
+}
+
+// Settings styles
+.settings-section {
+  margin-bottom: 20px;
+  // padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  h4 {
+    font-size: 15px;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+  }
+
+  .form-check {
+    margin-bottom: 10px;
+
+    .form-check-input {
+      margin-right: 8px;
+    }
+
+    .form-check-label {
+      color: #555;
+      font-size: 14px;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+
+      &:focus {
+        border-color: #0275d8;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.25);
+      }
+    }
+  }
+}
