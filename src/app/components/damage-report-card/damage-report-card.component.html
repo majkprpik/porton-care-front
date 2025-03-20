@@ -1,111 +1,134 @@
 <div class="damage-report-card" [ngStyle]="{'background-color': isMarkedAsRepaired ? 'lightgreen' : 'lightcoral'}">
-    <div class="name-and-desc-header">
-        <span>{{ houseTask.housename }}</span>
-        <span class="damage">{{ formatDescriptionForTask(houseTask.description) }}</span>
-    </div>
-
-    <div class="tabs">
-        <div (click)="setSelectedTab('images')" 
-            class="images-tab" 
-            [ngStyle]="{'background-color': isMarkedAsRepaired 
-                ? (selectedTab === 'images' ? 'rgb(62, 175, 62)' : 'lightgreen') 
-                : (selectedTab === 'images' ? 'rgb(199, 104, 104)' : 'lightcoral')}">
-            Images
+    <div class="damage-report-card-container" *ngIf="!capturedImage">
+        <div class="name-and-desc-header">
+            <span>{{ houseTask.housename }}</span>
+            <span class="damage">{{ formatDescriptionForTask(houseTask.description) }}</span>
         </div>
-        <div (click)="setSelectedTab('comments')" 
-            class="comments-tab" 
-            [ngStyle]="{'background-color': isMarkedAsRepaired 
-                ? (selectedTab === 'comments' ? 'rgb(62, 175, 62)' : 'lightgreen') 
-                : (selectedTab === 'comments' ? 'rgb(199, 104, 104)' : 'lightcoral')}">
-            Comments
+    
+        <div class="tabs">
+            <div (click)="setSelectedTab('images')" 
+                class="images-tab" 
+                [ngStyle]="{'background-color': isMarkedAsRepaired 
+                    ? (selectedTab === 'images' ? 'rgb(62, 175, 62)' : 'lightgreen') 
+                    : (selectedTab === 'images' ? 'rgb(199, 104, 104)' : 'lightcoral')}">
+                Images
+            </div>
+            <div (click)="setSelectedTab('comments')" 
+                class="comments-tab" 
+                [ngStyle]="{'background-color': isMarkedAsRepaired 
+                    ? (selectedTab === 'comments' ? 'rgb(62, 175, 62)' : 'lightgreen') 
+                    : (selectedTab === 'comments' ? 'rgb(199, 104, 104)' : 'lightcoral')}">
+                Comments
+            </div>
+            <div (click)="setSelectedTab('team')" 
+                class="team-tab"
+                [ngStyle]="{'background-color': isMarkedAsRepaired 
+                    ? (selectedTab === 'team' ? 'rgb(62, 175, 62)' : 'lightgreen') 
+                    : (selectedTab === 'team' ? 'rgb(199, 104, 104)' : 'lightcoral')}">
+                Team
+            </div>
         </div>
-        <div (click)="setSelectedTab('team')" 
-            class="team-tab"
-            [ngStyle]="{'background-color': isMarkedAsRepaired 
-                ? (selectedTab === 'team' ? 'rgb(62, 175, 62)' : 'lightgreen') 
-                : (selectedTab === 'team' ? 'rgb(199, 104, 104)' : 'lightcoral')}">
-            Team
-        </div>
-    </div>
-
-    <div class="images" *ngIf="selectedTab === 'images'">
-        <img src="https://energosistemi.hr/wp-content/uploads/2021/05/clanak1-300x226.jpg" alt="">
-        <img src="https://static.jutarnji.hr/images/slike/2022/02/01/k_23496803_640.jpg" alt="">
-        <img src="https://static.wixstatic.com/media/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg/v1/fill/w_568,h_378,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg" alt="">
-    </div>
-
-    <div class="comments" *ngIf="selectedTab === 'comments'">
-        <button 
-                (click)="toggleShowTextbox()" 
-                *ngIf="showTextbox && isCommented(houseTask.description)" class="back-button"
-                [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}">
-            <mat-icon>keyboard_backspace</mat-icon>
-            <span>Back</span>
-        </button>
-        <form *ngIf="showTextbox" (submit)="submitComment()">
-            <textarea 
-                [(ngModel)]="comment" 
-                name="comment" 
-                placeholder="Write a comment..."
-                [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"></textarea>
-            <button 
-                [disabled]="!comment"
+    
+        <input type="file" accept="image/*" capture="environment" (change)="handleImageCapture($event)" hidden #fileInput>
+    
+        <div class="images" *ngIf="selectedTab === 'images'">
+            <img src="https://energosistemi.hr/wp-content/uploads/2021/05/clanak1-300x226.jpg" alt="">
+            <img src="https://static.jutarnji.hr/images/slike/2022/02/01/k_23496803_640.jpg" alt="">
+            <img src="https://static.wixstatic.com/media/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg/v1/fill/w_568,h_378,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg" alt="">
+            <div class="camera-icon-container"
+                (click)="openCamera()"
                 [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"
-            >Submit comment</button>
-        </form>
-        <div *ngIf="!showTextbox && isCommented(houseTask.description)" class="comments-container">
-            <div class="comment-wrapper">
-                <div class="comment"
+            >
+                <span class="camera-icon">📷</span>
+                <span class="camera-icon-label">Capture an image...</span>
+            </div>
+        </div>
+    
+        <div class="comments" *ngIf="selectedTab === 'comments'">
+            <button 
+                    (click)="toggleShowTextbox()" 
+                    *ngIf="showTextbox && isCommented(houseTask.description)" class="back-button"
+                    [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}">
+                <mat-icon>keyboard_backspace</mat-icon>
+                <span>Back</span>
+            </button>
+            <form *ngIf="showTextbox" (submit)="submitComment()">
+                <textarea 
+                    [(ngModel)]="comment" 
+                    name="comment" 
+                    placeholder="Write a comment..."
+                    [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"></textarea>
+                <button 
+                    [disabled]="!comment"
                     [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"
+                >Submit comment</button>
+            </form>
+            <div *ngIf="!showTextbox && isCommented(houseTask.description)" class="comments-container">
+                <div class="comment-wrapper">
+                    <div class="comment"
+                        [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"
+                    >
+                        {{ formatCommentForTask(houseTask.description) }}
+                    </div>
+                </div>
+                <button 
+                    (click)="toggleShowTextbox()"
+                    [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"
+                >Add new comment...</button>
+            </div>
+        </div>
+    
+        <div class="team" *ngIf="selectedTab === 'team'">
+            <div class="maintenance-team-container">
+                <select *ngIf="!isTechnicianSubmitted" [(ngModel)]="selectedTechnicianId">
+                    <option value="" disabled selected>Select a repair technician...</option>
+                    <option *ngFor="let profile of maintenanceProfiles" [value]="profile.id">
+                        {{ profile.first_name }} {{ profile.last_name }}
+                    </option>
+                </select>
+                <div 
+                    class="selected-technician" 
+                    *ngIf="isTechnicianSubmitted" 
+                    [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)': 'rgb(233, 143, 143)'}"
                 >
-                    {{ formatCommentForTask(houseTask.description) }}
+                    <span>{{ getSelectedTechnicianDetails() }}</span>
                 </div>
             </div>
             <button 
-                (click)="toggleShowTextbox()"
-                [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"
-            >Add new comment...</button>
+                    (click)="submitTechnicianForRepairTask()" 
+                    [disabled]="isTechnicianSubmitted"
+                    *ngIf="!isTechnicianSubmitted">
+                Select technician
+            </button>
+            
+            <button 
+                    (click)="markAsRepaired()" 
+                    *ngIf="isTechnicianSubmitted && !isMarkedAsRepaired">
+                Mark as repaired
+            </button>
+    
+            <button 
+                    (click)="markAsNotRepaired()" 
+                    [ngStyle]="{'background-color': 'rgb(102, 215, 102)'}"
+                    *ngIf="isMarkedAsRepaired">
+                Mark as not repaired
+            </button>
+        </div>
+    
+        <div class="reported-by">
+            <span>Reported by {{ this.authService.userProfile.value.first_name }} {{ this.authService.userProfile.value.last_name }} at {{ getTaskReportedTime() }}</span>
         </div>
     </div>
 
-    <div class="team" *ngIf="selectedTab === 'team'">
-        <div class="maintenance-team-container">
-            <select *ngIf="!isTechnicianSubmitted" [(ngModel)]="selectedTechnicianId">
-                <option value="" disabled selected>Select a repair technician...</option>
-                <option *ngFor="let profile of maintenanceProfiles" [value]="profile.id">
-                    {{ profile.first_name }} {{ profile.last_name }}
-                </option>
-            </select>
-            <div 
-                class="selected-technician" 
-                *ngIf="isTechnicianSubmitted" 
-                [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)': 'rgb(233, 143, 143)'}"
-            >
-                <span>{{ getSelectedTechnicianDetails() }}</span>
-            </div>
+    <div 
+        class="save-captured-image"
+        *ngIf="capturedImage"    
+    >  
+        <span>Save captured image?</span>
+        <img [src]="capturedImage" alt="Captured Photo">
+        <div class="save-captured-image-buttons">
+            <button (click)="saveImage()" [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(240, 184, 184)'}">Save</button>
+            <button (click)="discardImage()" [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(240, 184, 184)'}">Discard</button>
         </div>
-        <button 
-                (click)="submitTechnicianForRepairTask()" 
-                [disabled]="isTechnicianSubmitted"
-                *ngIf="!isTechnicianSubmitted">
-            Select technician
-        </button>
-        
-        <button 
-                (click)="markAsRepaired()" 
-                *ngIf="isTechnicianSubmitted && !isMarkedAsRepaired">
-            Mark as repaired
-        </button>
-
-        <button 
-                (click)="markAsNotRepaired()" 
-                [ngStyle]="{'background-color': 'rgb(102, 215, 102)'}"
-                *ngIf="isMarkedAsRepaired">
-            Mark as not repaired
-        </button>
-    </div>
-
-    <div class="reported-by">
-        <span>Reported by {{ this.authService.userProfile.value.first_name }} {{ this.authService.userProfile.value.last_name }} at {{ getTaskReportedTime() }}</span>
     </div>
 </div>

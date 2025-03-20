@@ -1,8 +1,6 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { WorkGroupService } from '../../services/work-group.service';
-import { HouseTask } from '../../models/mobile-home.interface';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -16,10 +14,12 @@ import { Profile } from '../../models/profile.interface';
   imports: [CommonModule, FormsModule, MatIconModule]
 })
 export class DamageReportCardComponent {
+  @ViewChild('fileInput') fileInput!: ElementRef;
+
   @Input() houseTask!: any;
   @Input() maintenanceProfiles: Profile[] = [];
   @Output() taskRepaired = new EventEmitter<{ taskId: number, isRepaired: boolean }>();
-
+  
   selectedTab: string = 'images';
   comment: string = '';
   showTextbox: boolean = false;
@@ -28,6 +28,7 @@ export class DamageReportCardComponent {
   isTechnicianSubmitted: boolean = false;
   workGroupProfile: any;
   userName: string | null = '';
+  capturedImage: string | null = null;
 
   constructor(
     private taskService: TaskService,
@@ -160,5 +161,30 @@ export class DamageReportCardComponent {
   
     // Convert to required format: "YYYY-MM-DD HH:MM:SS.ssssss+00"
     return isoString.replace('T', ' ').replace('Z', '+00');
+  }
+
+  openCamera() {
+    console.log('Opening default camera app...');
+    this.fileInput.nativeElement.click();
+  }
+
+  handleImageCapture(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.capturedImage = reader.result as string; 
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveImage(){
+
+  }
+
+  discardImage(){
+    this.capturedImage = null;
+    this.fileInput.nativeElement.value = ''; 
   }
 }
