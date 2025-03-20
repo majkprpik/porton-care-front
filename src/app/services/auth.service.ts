@@ -34,7 +34,7 @@ export class AuthService {
     try {
       const { data, error } = await this.supabaseService.getClient().auth.signInWithPassword({
         email: email,
-        password: 'test' // Fixed password as requested
+        password: 'test123' // Fixed password as requested
       });
 
       if (error) throw error;
