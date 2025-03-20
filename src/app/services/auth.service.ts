@@ -97,7 +97,7 @@ export class AuthService {
       // In a real application, you would typically create users through a secure backend API
       // This is a simplified version for demonstration purposes
       for (let i = 1; i <= 10; i++) {
-        const email = `User${i}@example.com`;
+        const email = `vedran${i}@gmail.com`;
         
         // Using signUp instead of admin.createUser which requires admin privileges
         const { data, error } = await this.supabaseService.getClient().auth.signUp({
