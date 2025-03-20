@@ -1,0 +1,43 @@
+<div class="reservations-container">
+  <div class="reservations-header">
+    <h1>Reservations</h1>
+    <div class="header-controls">
+      <button class="control-button">Previous Month</button>
+      <span class="current-month">{{ currentDate | date: 'MMMM yyyy' }}</span>
+      <button class="control-button">Next Month</button>
+    </div>
+  </div>
+
+  <div class="reservations-grid">
+    <div class="grid-container">
+      <!-- Header Row with Days -->
+      <div class="grid-header">
+        <div class="grid-cell header-cell house-cell">House ID</div>
+        <div 
+          class="grid-cell header-cell day-cell" 
+          *ngFor="let day of days"
+        >
+          {{ day }}
+        </div>
+      </div>
+
+      <!-- House Rows with Reservation Cells -->
+      <div class="grid-row" *ngFor="let house of mobileHomes">
+        <div class="grid-cell house-cell">{{ house.housename }}</div>
+        <div 
+          *ngFor="let day of days" 
+          class="grid-cell reservation-cell"
+          [ngStyle]="getCellStyle(house.house_id, day)"
+          (click)="onCellClick(house.house_id, day)"
+        >
+          <ng-container *ngIf="hasReservation(house.house_id, day)">
+            <div class="reservation-content">
+              <div class="guest-name">{{ getReservation(house.house_id, day).guest }}</div>
+              <div class="phone-number">{{ getReservation(house.house_id, day).phone }}</div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -230,7 +230,14 @@ BEGIN
 END $$;
 
 -- ovo je portrebno ako izbaci gresku code:"PGRST106", message : "The schema must be one of the following: public, graphql_public"
--- ALTER ROLE authenticator SET pgrst.db_schemas TO 'public, graphql_public, porton';
--- NOTIFY pgrst;
+ALTER ROLE authenticator SET pgrst.db_schemas TO 'public, graphql_public, porton';
+NOTIFY pgrst;
 
 -- GRANT SELECT ON TABLE porton.task_types TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.task_types TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.task_progress_types TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.task_types TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.house_availability_types TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.house_availabilities TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.houses TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.house_types TO authenticated, anon;

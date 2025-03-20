@@ -18,7 +18,7 @@ export class AuthService {
     private supabaseService: SupabaseService,
     private profileService: ProfileService
   ) {
-    // this.initializeTestUsers();
+    this.initializeTestUsers();
   }
 
   private async initializeTestUsers(): Promise<void> {

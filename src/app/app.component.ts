@@ -3,6 +3,7 @@ import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/rou
 import { AuthService } from './services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { StatsHeaderComponent } from './components/stats-header/stats-header.component';
 import { ProfileService } from './services/profile.service';
 
 @Component({
@@ -13,7 +14,8 @@ import { ProfileService } from './services/profile.service';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatIconModule
+    MatIconModule,
+    StatsHeaderComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

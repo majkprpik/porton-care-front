@@ -10,8 +10,8 @@ export class SupabaseService {
 
   constructor() {
     this.supabase = createClient(
-      environment.supabaseUrl,
-      environment.supabaseKey
+      environment.supabaseUrl as string,
+      environment.supabaseAnonKey as string
     );
   }
 

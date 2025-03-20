@@ -115,6 +115,14 @@ export class MobileHomeCardComponent implements OnInit, OnDestroy {
     return this.currentReservationIndex < this.reservations.length - 1;
   }
   
+  // Select a specific reservation by index
+  selectReservation(index: number, event: Event) {
+    event.stopPropagation(); // Prevent card expansion toggling
+    if (index >= 0 && index < this.reservations.length) {
+      this.currentReservationIndex = index;
+    }
+  }
+  
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }

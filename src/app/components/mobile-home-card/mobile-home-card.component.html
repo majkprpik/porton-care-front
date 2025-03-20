@@ -78,7 +78,7 @@
         <!-- Date range -->
         <div class="date-info">
           <div class="date-range">{{ getReservationDateRange() }}</div>
-          <div class="people-counts">{{ getAdultsCount() }} | {{ getChildrenCount() }} | {{ getPetsCount() }}</div>
+          <div class="people-counts">{{ getAdultsCount() }} | {{ getChildrenCount() }} | {{ getPetsCount() }} | {{ getPetsCount() }}</div>
         </div>
         
         <!-- Right arrow -->
@@ -91,5 +91,14 @@
         </button>
       </div>
     </div>
+    <!-- <div class="bottom-counts-dots">
+      <div class="navigation-dots">
+        <span *ngFor="let reservation of reservations; let i = index" 
+              class="dot"
+              [ngClass]="{'active': i === currentReservationIndex}"
+              (click)="selectReservation(i, $event)">
+        </span>
+      </div>
+    </div> -->
   </div>
 </div>

@@ -24,11 +24,22 @@ interface CategorizedHomes {
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss', 
   standalone: true,
-  imports: [CommonModule, MobileHomeCardComponent, MatCardModule, HomesFilterPipe, FormsModule, NewsFeedComponent]
+  imports: [
+    CommonModule, 
+    MobileHomeCardComponent, 
+    MatCardModule, 
+    HomesFilterPipe, 
+    FormsModule, 
+    NewsFeedComponent
+  ]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   mobileHomes: MobileHome[] = [];
+  filteredMobileHomes: MobileHome[] = [];
+  searchQuery: string = '';
 
+  // Layout view type: 'list' (default, categorized) or 'grid' (all rooms by number)
+  viewType: 'list' | 'grid' = 'list';
   
   showFreeHouses = true;
   showFreeHousesWithTasks = true;
@@ -39,6 +50,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   areTeamBoxesExpanded = false;
   private expansionSubscription: Subscription;
   
+  // Side drawer state
+  isDrawerCollapsed = false; // Start with drawer collapsed by default
+  activeTab = 'tasks'; // Default active tab
+  
   getFreeHousesCount(): number {
     return this.mobileHomes.filter(home => home.availabilityname === 'Free').length;
   }
@@ -47,10 +62,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.mobileHomes.filter(home => home.availabilityname === 'Occupied').length;
   }
 
-  // New method to return categorized homes for the template
+  // Search and filter functionality
+  filterHouses(): void {
+    if (!this.searchQuery || this.searchQuery.trim() === '') {
+      this.filteredMobileHomes = [...this.mobileHomes];
+      return;
+    }
+    
+    const query = this.searchQuery.toLowerCase().trim();
+    this.filteredMobileHomes = this.mobileHomes.filter(home => 
+      home.housename.toLowerCase().includes(query)
+    );
+  }
+
+  // New method to return categorized homes for the template - updated to use filtered homes
   getCategorizedHomes(): CategorizedHomes {
-    // Since we removed the filters UI, show all homes by default
-    let filteredHomes = this.mobileHomes;
+    // Use filtered homes instead of all homes
+    let homesToCategorize = this.filteredMobileHomes.length > 0 ? this.filteredMobileHomes : this.mobileHomes;
 
     // Initialize category arrays
     const freeHomes: MobileHome[] = [];
@@ -59,7 +87,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const othersHomes: MobileHome[] = [];
 
     // Sort homes into categories
-    filteredHomes.forEach(house => {
+    homesToCategorize.forEach(house => {
       // Filter out punjenje tasks
       const nonPunjenjeTasks = house.housetasks.filter(task => !this.isPunjenjeTask(task));
       
@@ -185,6 +213,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .then(homes => {
         console.log('Fetched homes:', homes);
         this.mobileHomes = homes;
+        this.filteredMobileHomes = [...homes]; // Initialize filtered homes
       });
   }
 
@@ -207,5 +236,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     
     // Use the service to toggle the expansion state
     this.expansionService.toggleExpansion();
+  }
+
+  // Toggle drawer open/closed state
+  toggleDrawer() {
+    this.isDrawerCollapsed = !this.isDrawerCollapsed;
+  }
+
+  // Set active tab
+  setActiveTab(tabName: string) {
+    this.activeTab = tabName;
+  }
+
+  // Toggle between list and grid view
+  toggleViewType() {
+    this.viewType = this.viewType === 'list' ? 'grid' : 'list';
+  }
+
+  // Get all homes sorted by number for grid view - updated to use filtered homes
+  getAllHomesSorted(): MobileHome[] {
+    const homesToDisplay = this.filteredMobileHomes.length > 0 ? this.filteredMobileHomes : this.mobileHomes;
+    return [...homesToDisplay].sort((a, b) => 
+      a.housename.localeCompare(b.housename, undefined, { numeric: true, sensitivity: 'base' })
+    );
   }
 } 
