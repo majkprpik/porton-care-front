@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from './supabase.service';
+import { ProfileService } from './profile.service';
+import { Profile } from '../models/profile.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +11,12 @@ import { SupabaseService } from './supabase.service';
 export class AuthService {
   private readonly STORAGE_KEY = 'username';
   private usernameSubject = new BehaviorSubject<string | null>(this.getStoredUsername());
+  public userProfile = new BehaviorSubject<any>({});
 
   constructor(
     private router: Router,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private profileService: ProfileService
   ) {
     // this.initializeTestUsers();
   }
@@ -37,7 +41,9 @@ export class AuthService {
 
       if (data.user) {
         localStorage.setItem(this.STORAGE_KEY, email);
+        localStorage.setItem('profileId', data.user.id)
         this.usernameSubject.next(email);
+        this.userProfile.next(await this.profileService.fetchProfileById(data.user.id));
         // Wait for navigation to complete
         await this.router.navigate(['/dashboard']);
         return true;
@@ -54,6 +60,7 @@ export class AuthService {
       await this.supabaseService.getClient().auth.signOut();
       localStorage.removeItem(this.STORAGE_KEY);
       this.usernameSubject.next(null);
+      this.userProfile.next(null);
       // Wait for navigation to complete
       await this.router.navigate(['/login']);
     } catch (error) {
@@ -69,6 +76,10 @@ export class AuthService {
 
   getStoredUsername(): string | null {
     return localStorage.getItem(this.STORAGE_KEY);
+  }
+
+  getStoredUserId(){
+    return localStorage.getItem('profileId');
   }
 
   getUsername() {

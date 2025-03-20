@@ -1,15 +1,11 @@
 <div class="damage-reports-list">
     <h2>Damage reports</h2>
     <div class="damage-reports-wrapper">
-        <div class="houses" *ngFor="let homeForRepair of homesForRepair">
-            <span class="house-name">{{ homeForRepair.housename }}</span>
-
-            <app-damage-report-card 
-                *ngFor="let houseTask of homeForRepair.housetasks"
+        <app-damage-report-card 
+                *ngFor="let houseTask of homesForRepair"
                 [houseTask]="houseTask"
                 [maintenanceProfiles]="maintenanceProfiles"
-                (technicianSubmitted)="getMobileHomesForRepair()">
-            </app-damage-report-card>
-        </div>
+                (taskRepaired)="onHouseRepaired($event)">
+        </app-damage-report-card>
     </div>
 </div>

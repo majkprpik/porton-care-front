@@ -42,8 +42,8 @@ export class MobileHomesService {
         house.housetasks
             .filter((houseTask: any) => houseTask.taskTypeName === "Popravak")
             .map((houseTask: any) => ({
-                ...house,  // Copy house properties
-                housetasks: [houseTask]  // Replace housetasks array with only this task
+                ...house,
+                ...houseTask,
             }))
       );
       

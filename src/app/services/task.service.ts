@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { MobileHomesService } from './mobile-homes.service';
 import { HouseTask, MobileHome } from '../models/mobile-home.interface';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ export class TaskService {
 
   constructor(
     private supabase: SupabaseService,
-    private mobileHomesService: MobileHomesService
+    private mobileHomesService: MobileHomesService,
+    private authService: AuthService
   ) {
 
   }
@@ -28,8 +30,9 @@ export class TaskService {
           task_type_id: taskTypeId,
           task_progress_type_id: taskProgressTypeId,
           house_id: parseInt(houseId),
-          start_time: this.getFormattedDateTimeNowForSupabase(),
           description: description,
+          created_by: this.authService.getStoredUserId(),
+          created_at: this.getFormattedDateTimeNowForSupabase(),
         })
         .select()
         .single();
@@ -155,6 +158,28 @@ export class TaskService {
     } catch (error) {
       console.error('Error fetching task type ids', error);
       return null;
+    }
+  }
+
+  async setTaskProgress(taskId: number, taskProgress: string){
+    try{
+      const taskProgressTypeId = await this.getTaskProgressTypeIdByTaskProgressTypeName(taskProgress);
+
+      const { error: taskTypeIdError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('tasks')
+        .update({ 
+          task_progress_type_id: taskProgressTypeId,
+        })
+        .eq('task_id', taskId)
+        .single();
+
+      if(taskTypeIdError) throw taskTypeIdError
+
+      return true;
+    } catch (error) {
+      console.error('Error fetching task type ids', error);
+      return false;
     }
   }
 

@@ -15,8 +15,9 @@ import { DamageReportCardComponent } from "../damage-report-card/damage-report-c
   imports: [CommonModule, FormsModule, MatIconModule, DamageReportCardComponent]
 })
 export class DamageReportsComponent {
-  homesForRepair: MobileHome[] = [];
+  homesForRepair: any[] = [];
   maintenanceProfiles: Profile[] = [];
+  repairedHomes = new Map<number, boolean>();
 
   constructor(
     private mobileHomesService: MobileHomesService,
@@ -31,7 +32,15 @@ export class DamageReportsComponent {
   }
 
   async getMobileHomesForRepair(){
-    this.homesForRepair = await this.mobileHomesService.getHomesWithRepairTasks();
+    this.homesForRepair = await this.mobileHomesService.getHomesWithRepairTasks(); 
+    this.checkIfHomeIsRepaired();
+  }
+
+  checkIfHomeIsRepaired(){
+    this.homesForRepair.forEach(home => {
+      const isRepaired = home.housetasks[0].taskProgressTypeName.includes("Završeno");
+      this.repairedHomes.set(home.housetasks[0].taskId, isRepaired);
+    })
   }
 
   async getAllProfilesByRole(role: string){
@@ -41,5 +50,17 @@ export class DamageReportsComponent {
 
   isCommented(comment: string){
     return comment.split('\n')[1] ? true : false;
+  }
+
+  taskRepaired(){
+    console.log('Task repaired man!!');
+  }
+
+  onHouseRepaired(event: { taskId: number; isRepaired: boolean }){
+    let home = this.homesForRepair.find(home => home.housetasks[0].taskId == event.taskId);
+    
+    if (home) {
+      this.repairedHomes.set(home.housetasks[0].taskId, event.isRepaired);
+    }
   }
 }

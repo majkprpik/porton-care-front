@@ -4,6 +4,7 @@ import { AuthService } from './services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { StatsHeaderComponent } from './components/stats-header/stats-header.component';
+import { ProfileService } from './services/profile.service';
 
 @Component({
   selector: 'app-root',
@@ -24,12 +25,27 @@ export class AppComponent {
   isMenuOpen = false;
   username: string | null = null;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private profileService: ProfileService
+  ) {}
 
   ngOnInit() {
     this.authService.getUsername().subscribe(username => {
       this.username = username;
     });
+
+    localStorage.getItem('userId')
+
+    let profileId = this.authService?.getStoredUserId();
+
+    if(profileId){
+      this.profileService.fetchProfileById(profileId).then(profile => {
+        this.authService.userProfile.next(profile);
+      })
+    }
+
   }
 
   toggleMenu() {
