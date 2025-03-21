@@ -173,6 +173,7 @@
                         overflow-y: auto;
                         word-wrap: break-word; 
                         overflow-wrap: break-word; 
+                        font-weight: bold;
                     }
                 }
     
@@ -291,9 +292,19 @@
             object-fit: contain; 
         }
 
-        .save-image-error{
+        .save-image-error {
+            display: block;
+            width: 100%; 
+            max-width: 300px; 
+            overflow-wrap: break-word;
+            word-wrap: break-word; 
+            overflow: hidden;
+            white-space: normal; 
+            text-align: center;
+
             span{
                 font-size: 12px;
+                display: block;
             }
         }
 

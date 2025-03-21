@@ -31,7 +31,7 @@ export class DamageReportsComponent {
   ngOnInit(){
     this.getMobileHomesForRepair();
     this.getAllProfilesByRole('maintenance');
-    this.storageService.getAllStoredImagesInBucket('images_damage_report');
+    this.storageService.getAllStoredImagesInBucket('images-damage-report');
   }
 
   async getMobileHomesForRepair(){

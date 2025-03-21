@@ -126,7 +126,7 @@
         <img [src]="capturedImage" alt="Captured Photo">
         <div class="save-image-error" *ngIf="displaySaveImageError">
             <span>
-                Image already exists for this repair task
+                {{ saveImageError }}
             </span>
         </div>
         <div class="save-captured-image-buttons">

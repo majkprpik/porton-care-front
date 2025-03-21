@@ -33,6 +33,7 @@ export class DamageReportCardComponent {
   imageToUpload: any;
   images: any;
   displaySaveImageError = false;
+  saveImageError = '';
 
   constructor(
     private taskService: TaskService,
@@ -209,11 +210,14 @@ export class DamageReportCardComponent {
     if(this.imageToUpload && this.houseTask.taskId){
       this.storageService.storeImageForTask(this.imageToUpload, this.houseTask.taskId)
         .then(result => {
-          if(result) {
+          if(!result.error) {
             this.images.push({ name: this.imageToUpload.name, url: result.url });
             this.capturedImage = '';
+            this.displaySaveImageError = false;   
+            this.saveImageError = '';
           } else {
             this.displaySaveImageError = true;
+            this.saveImageError = result.error;
           }
         })  
     } else{
@@ -224,5 +228,6 @@ export class DamageReportCardComponent {
   discardImage(){
     this.capturedImage = '';
     this.displaySaveImageError = false;
+    this.saveImageError = '';
   }
 }
