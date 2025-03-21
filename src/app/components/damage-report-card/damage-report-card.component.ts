@@ -39,7 +39,7 @@ export class DamageReportCardComponent {
     private taskService: TaskService,
     private workGroupService: WorkGroupService,
     public authService: AuthService,
-    private storageService: StorageService,
+    private storageService: StorageService
   ) {}
 
   async ngOnInit() {
