@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ProfileService } from '../../services/profile.service';
 import { Profile } from '../../models/profile.interface';
 import { DamageReportCardComponent } from "../damage-report-card/damage-report-card.component";
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-damage-reports',
@@ -22,6 +23,7 @@ export class DamageReportsComponent {
   constructor(
     private mobileHomesService: MobileHomesService,
     private profileService: ProfileService,
+    private storageService: StorageService,
   ) {
         
   }
@@ -29,6 +31,7 @@ export class DamageReportsComponent {
   ngOnInit(){
     this.getMobileHomesForRepair();
     this.getAllProfilesByRole('maintenance');
+    this.storageService.getAllStoredImagesInBucket('images_damage_report');
   }
 
   async getMobileHomesForRepair(){

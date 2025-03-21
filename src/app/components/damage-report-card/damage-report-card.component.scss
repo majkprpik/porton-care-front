@@ -291,6 +291,12 @@
             object-fit: contain; 
         }
 
+        .save-image-error{
+            span{
+                font-size: 12px;
+            }
+        }
+
         .save-captured-image-buttons{
             display: flex;
             flex-direction: row;
@@ -303,6 +309,12 @@
                 height: 30px;
                 border-radius: 10px;
                 border: none;
+                transition: transform 0.3s ease;
+
+                &:hover{
+                    cursor: pointer;
+                    transform: scale(1.05);
+                }
             }
         }
     }

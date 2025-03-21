@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Profile } from '../../models/profile.interface';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-damage-report-card',
@@ -29,11 +30,15 @@ export class DamageReportCardComponent {
   workGroupProfile: any;
   userName: string | null = '';
   capturedImage: string | null = null;
+  imageToUpload: any;
+  images: any;
+  displaySaveImageError = false;
 
   constructor(
     private taskService: TaskService,
     private workGroupService: WorkGroupService,
     public authService: AuthService,
+    private storageService: StorageService,
   ) {}
 
   async ngOnInit() {
@@ -44,7 +49,28 @@ export class DamageReportCardComponent {
       if(userProfile){
         this.userName = userProfile.first_name + ' ' + userProfile.last_name;
       }
-    })
+    });
+    this.getStoredImagesForTask();
+  }
+
+  async getStoredImagesForTask() {
+    try {
+        const fetchedImages = await this.storageService.getStoredImagesForTask(this.houseTask.taskId);
+
+        if (!fetchedImages || fetchedImages.length === 0) {
+          console.warn('No images found.');
+          this.images = [];
+          return;
+        }
+
+        this.images = await Promise.all(fetchedImages.map(async (image: any) => {
+          const url = await this.storageService.getPublicUrlForImage(`task_${this.houseTask.taskId}/${image.name}`);
+          console.log('Generated URL:', url); 
+          return { name: image.name, url };
+        }));
+    } catch (error) {
+        console.error('Error fetching images:', error);
+    }
   }
 
   setSelectedTab(tab: string) {
@@ -94,7 +120,7 @@ export class DamageReportCardComponent {
 
     this.workGroupProfile = await this.workGroupService.getWorkGroupProfileByWorkGroupId(workGroupTask.work_group_id);
 
-    if(!this.workGroupProfile[0].profile_id){
+    if(!this.workGroupProfile[0]){
       return '';
     }
 
@@ -169,22 +195,34 @@ export class DamageReportCardComponent {
   }
 
   handleImageCapture(event: any) {
-    const file = event.target.files[0];
-    if (file) {
+    this.imageToUpload = event.target.files[0];
+    if (this.imageToUpload) {
       const reader = new FileReader();
       reader.onload = () => {
         this.capturedImage = reader.result as string; 
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(this.imageToUpload);
     }
   }
 
   saveImage(){
-
+    if(this.imageToUpload && this.houseTask.taskId){
+      this.storageService.storeImageForTask(this.imageToUpload, this.houseTask.taskId)
+        .then(result => {
+          if(result) {
+            this.images.push({ name: this.imageToUpload.name, url: result.url });
+            this.capturedImage = '';
+          } else {
+            this.displaySaveImageError = true;
+          }
+        })  
+    } else{
+      console.log("Image or id null");
+    }
   }
 
   discardImage(){
-    this.capturedImage = null;
-    this.fileInput.nativeElement.value = ''; 
+    this.capturedImage = '';
+    this.displaySaveImageError = false;
   }
 }
