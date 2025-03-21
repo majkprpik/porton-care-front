@@ -44,12 +44,14 @@
             <div 
               class="cell reservation-cell" 
               [class.has-reservation]="row.dates.includes(date)"
+              [class.draggable]="row.dates.includes(date) && row.reservations[date].isFirstDay"
               [class.drag-selected]="isDragSelecting(row.house_id, date)"
               [class.pending-reservation]="isPendingReservation(row.house_id, date)"
               [class.isFirstDay]="row.dates.includes(date) && row.reservations[date].isFirstDay"
               [class.isLastDay]="row.dates.includes(date) && row.reservations[date].isLastDay"
               [attr.data-reservation-id]="row.dates.includes(date) ? row.reservations[date].reservationId : null"
               [attr.data-date]="date"
+              [attr.data-house-id]="row.house_id"
               (mouseover)="onCellHover(row.house_id, date, $event)" 
               (mouseleave)="onCellLeave(row.house_id, date, $event)"
               [ngStyle]="row.dates.includes(date) ? { 'background-color': row.reservations[date].color } : {}"
@@ -57,6 +59,13 @@
               (mousemove)="onCellMouseMove(row.house_id, date, $event)"
               (mouseup)="onCellMouseUp(row.house_id, date, $event)"
               (click)="onCellClick(row.house_id, date, $event)"
+              draggable="{{row.dates.includes(date) && row.reservations[date].isFirstDay}}"
+              (dragstart)="onReservationDragStart(row.house_id, date, $event)"
+              (dragend)="onReservationDragEnd($event)"
+              (dragover)="onReservationDragOver(row.house_id, date, $event)"
+              (dragenter)="onReservationDragEnter(row.house_id, date, $event)"
+              (dragleave)="onReservationDragLeave(row.house_id, date, $event)"
+              (drop)="onReservationDrop(row.house_id, date, $event)"
             >
               <ng-container *ngIf="row.dates.includes(date)">
                 <span class="reservation-content" *ngIf="row.reservations[date].isFirstDay">
@@ -242,5 +251,16 @@
         </div>
       </form>
     </div>
+  </div>
+
+  <!-- Add drag status message element at the end of the component -->
+  <div class="drag-status-message" [class.visible]="dragStatusVisible" [class.success]="dragStatusSuccess" [class.error]="!dragStatusSuccess">
+    {{ dragStatusMessage }}
+  </div>
+
+  <!-- Add a ghost element for dragging -->
+  <div class="drag-ghost" *ngIf="dragGhostVisible" [ngStyle]="dragGhostPosition">
+    <div class="ghost-header">{{ dragGhostData.guest }}</div>
+    <div class="ghost-dates">{{ dragGhostData.startDate }} - {{ dragGhostData.endDate }}</div>
   </div>
 </div> 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -40,6 +40,15 @@ interface ReservationInfo {
   isFirstDay: boolean;
   isLastDay: boolean;
   house_id: number;
+}
+
+// Interface for drag ghost data
+interface DragGhostData {
+  guest: string;
+  startDate: string;
+  endDate: string;
+  reservationId: string;
+  color: string;
 }
 
 @Component({
@@ -130,10 +139,36 @@ export class Reservations2Component implements OnInit, OnDestroy {
   
   // Store reference to document click handler for cleanup
   private documentClickHandler: ((event: MouseEvent) => void) | null = null;
+  
+  // Properties for drag and drop functionality
+  draggedReservationId: string | null = null;
+  draggedFromHouseId: number | null = null;
+  draggedFromDate: string | null = null;
+  draggedStartDate: Date | null = null;
+  draggedEndDate: Date | null = null;
+  draggedDuration: number = 0;
+  
+  // Ghost element and status message
+  dragGhostVisible: boolean = false;
+  dragGhostPosition = { top: '0px', left: '0px' };
+  dragGhostData: DragGhostData = {
+    guest: '',
+    startDate: '',
+    endDate: '',
+    reservationId: '',
+    color: ''
+  };
+  
+  // Status message for drag operations
+  dragStatusVisible: boolean = false;
+  dragStatusMessage: string = '';
+  dragStatusSuccess: boolean = true;
+  dragStatusTimeoutId: any = null;
 
   constructor(
     private reservationsService: ReservationsService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -1093,6 +1128,11 @@ export class Reservations2Component implements OnInit, OnDestroy {
     
     // Clear any row/column highlighting
     this.clearHighlighting();
+    
+    // Clear any timeout for status messages
+    if (this.dragStatusTimeoutId) {
+      clearTimeout(this.dragStatusTimeoutId);
+    }
   }
 
   // Get the tooltip text for a cell
@@ -1214,5 +1254,388 @@ export class Reservations2Component implements OnInit, OnDestroy {
     document.querySelectorAll('.row-highlight, .column-highlight, .active-header').forEach(element => {
       element.classList.remove('row-highlight', 'column-highlight', 'active-header');
     });
+  }
+
+  // Drag and drop methods
+  
+  // Handle start of dragging a reservation
+  onReservationDragStart(houseId: number, date: string, event: DragEvent): void {
+    // Only allow dragging from the first day of a reservation
+    const reservation = this.getReservation(houseId, date);
+    if (!reservation || !reservation.isFirstDay || !event.dataTransfer) {
+      event.preventDefault();
+      return;
+    }
+    
+    // Set drag data
+    this.draggedReservationId = reservation.reservationId;
+    this.draggedFromHouseId = houseId;
+    this.draggedFromDate = date;
+    
+    // Get the full duration of the reservation
+    const startDate = new Date(this.currentDate.getFullYear(), reservation.startMonth - 1, reservation.startDay);
+    const endDate = new Date(this.currentDate.getFullYear(), reservation.endMonth - 1, reservation.endDay);
+    this.draggedStartDate = startDate;
+    this.draggedEndDate = endDate;
+    
+    // Calculate duration in days
+    const oneDay = 24 * 60 * 60 * 1000; // milliseconds in a day
+    this.draggedDuration = Math.round((endDate.getTime() - startDate.getTime()) / oneDay) + 1;
+    
+    // Add visual feedback that element is being dragged
+    document.querySelectorAll(`[data-reservation-id="${reservation.reservationId}"]`).forEach(el => {
+      el.classList.add('dragging');
+    });
+    
+    // Set drag ghost data
+    this.dragGhostData = {
+      guest: reservation.guest,
+      startDate: `${reservation.startDay}/${reservation.startMonth}`,
+      endDate: `${reservation.endDay}/${reservation.endMonth}`,
+      reservationId: reservation.reservationId,
+      color: reservation.color
+    };
+    
+    // Create a transparent drag image (we'll use our own ghost element)
+    const dragImg = document.createElement('div');
+    dragImg.style.opacity = '0';
+    dragImg.style.position = 'absolute';
+    dragImg.style.top = '-9999px';
+    document.body.appendChild(dragImg);
+    event.dataTransfer.setDragImage(dragImg, 0, 0);
+    
+    // Show our custom ghost element
+    this.dragGhostVisible = true;
+    this.updateDragGhostPosition(event);
+    
+    // Set data for the drag operation
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', reservation.reservationId);
+    
+    // Show status message
+    this.showStatusMessage('Drag to move reservation', true);
+    
+    // Force change detection
+    this.changeDetectorRef.detectChanges();
+  }
+  
+  // Handle dragging over a potential drop target
+  onReservationDragOver(houseId: number, date: string, event: DragEvent): void {
+    if (!this.draggedReservationId || !event.dataTransfer) return;
+    
+    event.preventDefault();
+    
+    // Check if this would be a valid drop
+    const isValid = this.isValidDropTarget(houseId, date);
+    
+    // Set the drop effect based on validity
+    event.dataTransfer.dropEffect = isValid ? 'move' : 'none';
+    
+    // Update ghost position
+    this.updateDragGhostPosition(event);
+  }
+  
+  // Handle entering a potential drop target
+  onReservationDragEnter(houseId: number, date: string, event: DragEvent): void {
+    if (!this.draggedReservationId) return;
+    
+    event.preventDefault();
+    
+    // Check if this would be a valid drop
+    const isValid = this.isValidDropTarget(houseId, date);
+    
+    // Add appropriate visual class
+    const cell = event.target as HTMLElement;
+    if (isValid) {
+      cell.classList.add('drag-over-valid');
+      cell.classList.remove('drag-over-invalid');
+    } else {
+      cell.classList.add('drag-over-invalid');
+      cell.classList.remove('drag-over-valid');
+    }
+  }
+  
+  // Handle leaving a potential drop target
+  onReservationDragLeave(houseId: number, date: string, event: DragEvent): void {
+    if (!this.draggedReservationId) return;
+    
+    // Remove visual feedback classes
+    const cell = event.target as HTMLElement;
+    cell.classList.remove('drag-over-valid', 'drag-over-invalid');
+  }
+  
+  // Handle dropping a reservation
+  onReservationDrop(houseId: number, date: string, event: DragEvent): void {
+    if (!this.draggedReservationId || !event.dataTransfer || !this.draggedFromHouseId || 
+        !this.draggedStartDate || !this.draggedEndDate) {
+      return;
+    }
+    
+    event.preventDefault();
+    
+    // Check if this is a valid drop target
+    if (!this.isValidDropTarget(houseId, date)) {
+      this.showStatusMessage('Invalid drop location - Reservation not moved', false);
+      return;
+    }
+    
+    // Same house, no need to move
+    if (houseId === this.draggedFromHouseId) {
+      this.showStatusMessage('Reservation is already in this room', false);
+      return;
+    }
+    
+    // Parse the target date
+    const [dayNum, monthNum] = date.split('.').map(Number);
+    const targetDate = new Date(this.currentDate.getFullYear(), monthNum - 1, dayNum);
+    
+    // Find the source reservation information
+    const sourceReservation = this.findReservationById(this.draggedReservationId);
+    if (!sourceReservation) {
+      this.showStatusMessage('Error: Reservation not found', false);
+      return;
+    }
+    
+    // Calculate new start and end dates, maintaining the same duration
+    const newStartDate = new Date(targetDate);
+    const newEndDate = new Date(newStartDate);
+    newEndDate.setDate(newStartDate.getDate() + this.draggedDuration - 1);
+    
+    // Check for overlaps in target house
+    const newStartDay = newStartDate.getDate();
+    const newStartMonth = newStartDate.getMonth() + 1;
+    const newEndDay = newEndDate.getDate();
+    const newEndMonth = newEndDate.getMonth() + 1;
+    
+    // Check for overlaps
+    if (this.hasOverlappingReservations(houseId, newStartDate, newEndDate)) {
+      this.showStatusMessage('Cannot move: Overlaps with existing reservations', false);
+      return;
+    }
+    
+    // First remove the reservation from the source house
+    this.removeReservationById(this.draggedReservationId);
+    
+    // Then add it to the target house
+    this.addReservationToHouse(
+      houseId, 
+      this.draggedReservationId,
+      newStartDay,
+      newStartMonth,
+      newEndDay,
+      newEndMonth,
+      sourceReservation
+    );
+    
+    // Show success message
+    this.showStatusMessage('Reservation moved successfully!', true);
+    
+    // Force UI update
+    this.changeDetectorRef.detectChanges();
+  }
+  
+  // Handle end of drag operation
+  onReservationDragEnd(event: DragEvent): void {
+    // Remove dragging classes from all cells
+    document.querySelectorAll('.dragging, .drag-over-valid, .drag-over-invalid').forEach(el => {
+      el.classList.remove('dragging', 'drag-over-valid', 'drag-over-invalid');
+    });
+    
+    // Hide ghost element
+    this.dragGhostVisible = false;
+    
+    // Reset drag state
+    this.draggedReservationId = null;
+    this.draggedFromHouseId = null;
+    this.draggedFromDate = null;
+    this.draggedStartDate = null;
+    this.draggedEndDate = null;
+    this.draggedDuration = 0;
+    
+    // Force UI update
+    this.changeDetectorRef.detectChanges();
+  }
+  
+  // Helper method to check if a drop target is valid
+  isValidDropTarget(houseId: number, date: string): boolean {
+    if (!this.draggedStartDate || !this.draggedEndDate || !this.draggedDuration) {
+      return false;
+    }
+    
+    // Parse the target date
+    const [dayNum, monthNum] = date.split('.').map(Number);
+    const targetDate = new Date(this.currentDate.getFullYear(), monthNum - 1, dayNum);
+    
+    // Calculate the potential new date range
+    const newStartDate = new Date(targetDate);
+    const newEndDate = new Date(newStartDate);
+    newEndDate.setDate(newStartDate.getDate() + this.draggedDuration - 1);
+    
+    // Check if the new date range is valid
+    return !this.hasOverlappingReservations(houseId, newStartDate, newEndDate, this.draggedReservationId || undefined);
+  }
+  
+  // Check if there are overlapping reservations for a date range in a house
+  hasOverlappingReservations(houseId: number, startDate: Date, endDate: Date, excludeReservationId?: string): boolean {
+    const row = this.reservationRows.find(r => r.house_id === houseId);
+    if (!row) return false;
+    
+    // Helper function to create a date string
+    const formatDateKey = (date: Date) => {
+      return `${date.getDate()}.${date.getMonth() + 1}`;
+    };
+    
+    // Check each day in the range
+    const currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const dateKey = formatDateKey(currentDate);
+      
+      // If there's a reservation on this date that isn't the one we're moving, it's an overlap
+      if (row.reservations[dateKey] && 
+          (!excludeReservationId || row.reservations[dateKey].reservationId !== excludeReservationId)) {
+        return true;
+      }
+      
+      // Move to the next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return false;
+  }
+  
+  // Find a reservation by its ID
+  findReservationById(reservationId: string): ReservationInfo | null {
+    for (const row of this.reservationRows) {
+      for (const dateKey of row.dates) {
+        if (row.reservations[dateKey] && row.reservations[dateKey].reservationId === reservationId) {
+          return row.reservations[dateKey];
+        }
+      }
+    }
+    return null;
+  }
+  
+  // Remove a reservation by its ID
+  removeReservationById(reservationId: string): void {
+    this.reservationRows.forEach(row => {
+      // Create a copy of the dates array to avoid issues while iterating
+      const datesToRemove = [...row.dates].filter(dateKey => 
+        row.reservations[dateKey] && row.reservations[dateKey].reservationId === reservationId
+      );
+      
+      // Remove each matching date
+      datesToRemove.forEach(dateKey => {
+        delete row.reservations[dateKey];
+        const index = row.dates.indexOf(dateKey);
+        if (index !== -1) {
+          row.dates.splice(index, 1);
+        }
+      });
+    });
+  }
+  
+  // Add a reservation to a house
+  addReservationToHouse(
+    houseId: number, 
+    reservationId: string,
+    startDay: number,
+    startMonth: number,
+    endDay: number,
+    endMonth: number,
+    sourceReservation: ReservationInfo
+  ): void {
+    // Find the target row
+    const rowIndex = this.reservationRows.findIndex(r => r.house_id === houseId);
+    if (rowIndex === -1) return;
+    
+    const row = this.reservationRows[rowIndex];
+    
+    // For each day in the range, add a reservation entry
+    const startDate = new Date(this.currentDate.getFullYear(), startMonth - 1, startDay);
+    const endDate = new Date(this.currentDate.getFullYear(), endMonth - 1, endDay);
+    
+    // Helper function to format date key
+    const formatDateKey = (date: Date) => {
+      return `${date.getDate()}.${date.getMonth() + 1}`;
+    };
+    
+    const currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const dateKey = formatDateKey(currentDate);
+      
+      // Add this date to the dates array if not already there
+      if (!row.dates.includes(dateKey)) {
+        row.dates.push(dateKey);
+      }
+      
+      const isFirstDay = currentDate.getTime() === startDate.getTime();
+      const isLastDay = currentDate.getTime() === endDate.getTime();
+      
+      // Add the reservation info
+      row.reservations[dateKey] = {
+        reservationId: reservationId,
+        guest: sourceReservation.guest,
+        color: sourceReservation.color,
+        phone: sourceReservation.phone,
+        adults: sourceReservation.adults,
+        children: sourceReservation.children,
+        extraBeds: sourceReservation.extraBeds,
+        pets: sourceReservation.pets,
+        notes: sourceReservation.notes,
+        startDay: startDay,
+        startMonth: startMonth,
+        endDay: endDay,
+        endMonth: endMonth,
+        isFirstDay: isFirstDay,
+        isLastDay: isLastDay,
+        house_id: houseId
+      };
+      
+      // Move to the next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Add animation class to show successful move
+    setTimeout(() => {
+      document.querySelectorAll(`[data-reservation-id="${reservationId}"]`).forEach(el => {
+        el.classList.add('reservation-moved');
+        setTimeout(() => el.classList.remove('reservation-moved'), 500);
+      });
+    }, 50);
+  }
+  
+  // Update the position of the ghost element during drag
+  updateDragGhostPosition(event: DragEvent): void {
+    if (!this.dragGhostVisible) return;
+    
+    this.dragGhostPosition = {
+      top: `${event.clientY + 15}px`,
+      left: `${event.clientX + 15}px`
+    };
+    
+    // Force change detection to update the position
+    this.changeDetectorRef.detectChanges();
+  }
+  
+  // Show a status message during drag operations
+  showStatusMessage(message: string, isSuccess: boolean): void {
+    // Clear any existing timeout
+    if (this.dragStatusTimeoutId) {
+      clearTimeout(this.dragStatusTimeoutId);
+    }
+    
+    // Update message properties
+    this.dragStatusMessage = message;
+    this.dragStatusSuccess = isSuccess;
+    this.dragStatusVisible = true;
+    
+    // Force update
+    this.changeDetectorRef.detectChanges();
+    
+    // Hide message after 3 seconds
+    this.dragStatusTimeoutId = setTimeout(() => {
+      this.dragStatusVisible = false;
+      this.changeDetectorRef.detectChanges();
+    }, 3000);
   }
 } 

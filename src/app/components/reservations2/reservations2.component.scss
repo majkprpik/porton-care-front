@@ -221,6 +221,42 @@
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
       z-index: 5;
       
+      // Make reservations draggable with visual cues
+      &.draggable {
+        cursor: grab;
+        transition: transform 0.1s, box-shadow 0.1s;
+        
+        &:hover {
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        &:active {
+          cursor: grabbing;
+          transform: scale(0.98);
+        }
+      }
+      
+      // Style for when reservation is being dragged
+      &.dragging {
+        opacity: 0.7;
+        transform: scale(0.98);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+        cursor: grabbing !important;
+      }
+      
+      // Style for valid drop target
+      &.drag-over-valid, .reservation-cell.drag-over-valid {
+        box-shadow: inset 0 0 0 2px #4CAF50;
+        background-color: rgba(76, 175, 80, 0.1);
+      }
+      
+      // Style for invalid drop target
+      &.drag-over-invalid, .reservation-cell.drag-over-invalid {
+        box-shadow: inset 0 0 0 2px #F44336;
+        background-color: rgba(244, 67, 54, 0.1);
+      }
+      
       // Connect multi-day reservations visually with connector dots
       &:not(:first-child):after {
         content: '';
@@ -885,4 +921,91 @@
   border-color: #4285f4 !important;
   filter: brightness(1.05) !important; // Slightly brighter
   transform: translateY(-1px) !important; // Slight lift effect
+}
+
+// Empty cells need drag-over states too
+.reservation-cell:not(.has-reservation) {
+  &.drag-over-valid {
+    box-shadow: inset 0 0 0 2px #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+    z-index: 5;
+  }
+  
+  &.drag-over-invalid {
+    box-shadow: inset 0 0 0 2px #F44336;
+    background-color: rgba(244, 67, 54, 0.1);
+    z-index: 5;
+  }
+}
+
+// Animation for reservation being moved
+@keyframes move-success {
+  0% { transform: translateY(0); opacity: 1; }
+  20% { transform: translateY(-10px); opacity: 0.8; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.reservation-moved {
+  animation: move-success 0.5s ease-in-out;
+}
+
+// Ghost element styles for dragging
+.drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #444;
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  color: #333;
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  
+  .ghost-header {
+    font-size: 14px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .ghost-dates {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+}
+
+// Status message for drag operations
+.drag-status-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #333;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  z-index: 1010;
+  font-size: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  &.success {
+    background-color: #4CAF50;
+  }
+  
+  &.error {
+    background-color: #F44336;
+  }
 } 
