@@ -65,7 +65,7 @@ export class DamageReportCardComponent {
         }
 
         this.images = await Promise.all(fetchedImages.map(async (image: any) => {
-          const url = await this.storageService.getPublicUrlForImage(`task_${this.houseTask.taskId}/${image.name}`);
+          const url = await this.storageService.getPublicUrlForImage(`task-${this.houseTask.taskId}/${image.name}`);
           console.log('Generated URL:', url); 
           return { name: image.name, url };
         }));

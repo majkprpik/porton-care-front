@@ -14,7 +14,7 @@ export class StorageService {
 
   async storeImageForTask(image: any, taskId: number) {
     try {  
-      const filePath = 'task_' + taskId + '/' + image.name;
+      const filePath = 'task-' + taskId + '/' + image.name;
   
       const { data, error: storeImageError } = await this.supabase.getClient()
         .storage
@@ -38,7 +38,7 @@ export class StorageService {
 
   async getStoredImagesForTask(taskId: number){
     try {
-      const folderPath = 'task_' + taskId;
+      const folderPath = 'task-' + taskId;
 
       const { data: files, error: listError } = await this.supabase.getClient()
         .storage
