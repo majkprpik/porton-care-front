@@ -31,10 +31,8 @@
     
         <input type="file" accept="image/*" capture="environment" (change)="handleImageCapture($event)" hidden #fileInput>
     
-        <div class="images" *ngIf="selectedTab === 'images'">
-            <img src="https://energosistemi.hr/wp-content/uploads/2021/05/clanak1-300x226.jpg" alt="">
-            <img src="https://static.jutarnji.hr/images/slike/2022/02/01/k_23496803_640.jpg" alt="">
-            <img src="https://static.wixstatic.com/media/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg/v1/fill/w_568,h_378,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/11062b_db16985f4bf04df1892dab9822d4f840~mv2.jpeg" alt="">
+        <div class="images" *ngIf="selectedTab === 'images'" [ngStyle]="{'justify-content': images?.length > 0 ? '' : 'center'}">
+            <img [src]="image.url" [alt]="image.name" *ngFor="let image of images">
             <div class="camera-icon-container"
                 (click)="openCamera()"
                 [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"
@@ -126,6 +124,11 @@
     >  
         <span>Save captured image?</span>
         <img [src]="capturedImage" alt="Captured Photo">
+        <div class="save-image-error" *ngIf="displaySaveImageError">
+            <span>
+                Image already exists for this repair task
+            </span>
+        </div>
         <div class="save-captured-image-buttons">
             <button (click)="saveImage()" [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(240, 184, 184)'}">Save</button>
             <button (click)="discardImage()" [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(240, 184, 184)'}">Discard</button>
