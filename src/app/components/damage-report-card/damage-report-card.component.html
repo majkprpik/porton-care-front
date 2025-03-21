@@ -32,7 +32,7 @@
         <input type="file" accept="image/*" capture="environment" (change)="handleImageCapture($event)" hidden #fileInput>
     
         <div class="images" *ngIf="selectedTab === 'images'" [ngStyle]="{'justify-content': images?.length > 0 ? '' : 'center'}">
-            <img [src]="image.url" [alt]="image.name" *ngFor="let image of images">
+            <img (click)="onOpenImage(image.url)" [src]="image.url" [alt]="image.name" *ngFor="let image of images">
             <div class="camera-icon-container"
                 (click)="openCamera()"
                 [ngStyle]="{'background-color': isMarkedAsRepaired ? 'rgb(102, 215, 102)' : 'rgb(233, 143, 143)'}"

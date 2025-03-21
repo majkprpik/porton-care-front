@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import imageCompression from 'browser-image-compression';
 
 @Injectable({
   providedIn: 'root'
@@ -14,19 +15,21 @@ export class StorageService {
 
   async storeImageForTask(image: any, taskId: number) {
     try {  
-      const filePath = 'task-' + taskId + '/' + image.name;
+      const compressedImage = await this.compressImage(image, 1);
+
+      const filePath = 'task-' + taskId + '/' + compressedImage.name;
   
       const { data, error: storeImageError } = await this.supabase.getClient()
         .storage
-        .from('images-damage-report')
-        .upload(filePath, image);
+        .from('damage-reports-images')
+        .upload(filePath, compressedImage);
       
       console.log('Upload response: ' + data);
       if (storeImageError) throw storeImageError;
 
       const publicUrl = this.supabase.getClient()
         .storage
-        .from('images-damage-report')
+        .from('damage-reports-images')
         .getPublicUrl(data.path).data.publicUrl;
     
       return { path: data.path, url: publicUrl };
@@ -42,7 +45,7 @@ export class StorageService {
 
       const { data: files, error: listError } = await this.supabase.getClient()
         .storage
-        .from('images-damage-report')
+        .from('damage-reports-images')
         .list(folderPath);
 
       if (listError) throw listError;
@@ -59,7 +62,7 @@ export class StorageService {
       const response: any = await this.supabase
         .getClient()
         .storage
-        .from('images-damage-report')
+        .from('damage-reports-images')
         .getPublicUrl(filePath);
   
       if (response && response.data && response.data.publicUrl) {
@@ -94,5 +97,17 @@ export class StorageService {
       console.log('Error fetching images: ' + error)
       return null;
     }
+  }
+
+  private async compressImage(image: File, targetMegaBytes: number){
+    const options = {
+      maxSizeMB: targetMegaBytes, 
+      maxWidthOrHeight: 1920, 
+      useWebWorker: true,
+    };
+
+    const compressedImage = await imageCompression(image, options);
+
+    return compressedImage;
   }
 }

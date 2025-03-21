@@ -8,6 +8,8 @@ import { ProfileService } from '../../services/profile.service';
 import { Profile } from '../../models/profile.interface';
 import { DamageReportCardComponent } from "../damage-report-card/damage-report-card.component";
 import { StorageService } from '../../services/storage.service';
+import { HelperService } from '../../services/helper.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-damage-reports',
@@ -19,11 +21,15 @@ export class DamageReportsComponent {
   homesForRepair: any[] = [];
   maintenanceProfiles: Profile[] = [];
   repairedHomes = new Map<number, boolean>();
+  openedImage = '';
+  isBackgroundDimmed = false;
 
   constructor(
     private mobileHomesService: MobileHomesService,
     private profileService: ProfileService,
     private storageService: StorageService,
+    private helperService: HelperService,
+    private router: Router
   ) {
         
   }
@@ -31,7 +37,17 @@ export class DamageReportsComponent {
   ngOnInit(){
     this.getMobileHomesForRepair();
     this.getAllProfilesByRole('maintenance');
-    this.storageService.getAllStoredImagesInBucket('images-damage-report');
+    this.storageService.getAllStoredImagesInBucket('damage-reports-images');
+    this.router.events.subscribe(() => {
+      this.helperService.dimBackground.next(false);
+    });
+    this.helperService.dimBackground.subscribe(res => {
+        this.isBackgroundDimmed = res;
+        if(!res){
+          this.openedImage = '';
+        }
+      }
+    );
   }
 
   async getMobileHomesForRepair(){
@@ -65,5 +81,15 @@ export class DamageReportsComponent {
     if (home) {
       this.repairedHomes.set(home.housetasks[0].taskId, event.isRepaired);
     }
+  }
+
+  onImageOpened(event: { imageUrl: string }){
+    this.openedImage = event.imageUrl;
+    this.helperService.dimBackground.next(true);
+  }
+
+  closeImage(){
+    this.openedImage = '';
+    this.helperService.dimBackground.next(false);
   }
 }

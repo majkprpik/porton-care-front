@@ -20,6 +20,7 @@ export class DamageReportCardComponent {
   @Input() houseTask!: any;
   @Input() maintenanceProfiles: Profile[] = [];
   @Output() taskRepaired = new EventEmitter<{ taskId: number, isRepaired: boolean }>();
+  @Output() openImage = new EventEmitter<{ imageUrl: string }>();
   
   selectedTab: string = 'images';
   comment: string = '';
@@ -229,5 +230,11 @@ export class DamageReportCardComponent {
     this.capturedImage = '';
     this.displaySaveImageError = false;
     this.saveImageError = '';
+  }
+
+  onOpenImage(imageUrl: string){
+    this.openImage.emit({
+      imageUrl: imageUrl
+    });
   }
 }
