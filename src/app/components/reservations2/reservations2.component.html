@@ -1,0 +1,246 @@
+<div class="reservations-container">
+  <!-- Loading indicator -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading reservation data...</p>
+  </div>
+
+  <!-- Error message -->
+  <div class="error-message" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+    <button (click)="loadMockData()">Retry</button>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content" *ngIf="!isLoading && !errorMessage">
+    <!-- Year header -->
+    <div class="year-header">
+      <h1>{{ currentDate.getFullYear() }} Reservations</h1>
+    </div>
+    
+    <!-- Virtual scroll table implementation -->
+    <div class="table-container">
+      <cdk-virtual-scroll-viewport class="viewport" itemSize="50">
+        <!-- Table header with fixed month/day headers -->
+        <div class="table-header-row">
+          <div class="cell room-cell" (click)="clearHighlighting()">Room</div>
+          <ng-container *ngFor="let month of months">
+            <ng-container *ngFor="let day of getMonthDays(month)">
+              <div class="cell date-cell" 
+                   [attr.data-date]="day + '.' + getMonthNumber(month.name)">
+                {{ day }}.{{ getMonthNumber(month.name) }}
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
+        
+        <!-- Table rows (one per house) -->
+        <div *cdkVirtualFor="let row of reservationRows" 
+             class="table-row" 
+             [class.dragging]="isDragging && dragHouseId === row.house_id"
+             [attr.data-house-id]="row.house_id">
+          <div class="cell room-cell" (click)="onRoomCellClick(row.house_id, $event)">{{ row.room }}</div>
+          @for (date of dates; track date) {
+            <div 
+              class="cell reservation-cell" 
+              [class.has-reservation]="row.dates.includes(date)"
+              [class.drag-selected]="isDragSelecting(row.house_id, date)"
+              [class.pending-reservation]="isPendingReservation(row.house_id, date)"
+              [class.isFirstDay]="row.dates.includes(date) && row.reservations[date].isFirstDay"
+              [class.isLastDay]="row.dates.includes(date) && row.reservations[date].isLastDay"
+              [attr.data-reservation-id]="row.dates.includes(date) ? row.reservations[date].reservationId : null"
+              [attr.data-date]="date"
+              (mouseover)="onCellHover(row.house_id, date, $event)" 
+              (mouseleave)="onCellLeave(row.house_id, date, $event)"
+              [ngStyle]="row.dates.includes(date) ? { 'background-color': row.reservations[date].color } : {}"
+              (mousedown)="onCellMouseDown(row.house_id, date, $event)"
+              (mousemove)="onCellMouseMove(row.house_id, date, $event)"
+              (mouseup)="onCellMouseUp(row.house_id, date, $event)"
+              (click)="onCellClick(row.house_id, date, $event)"
+            >
+              <ng-container *ngIf="row.dates.includes(date)">
+                <span class="reservation-content" *ngIf="row.reservations[date].isFirstDay">
+                  {{ row.reservations[date].guest }}
+                </span>
+                <div class="reservation-indicators" *ngIf="row.reservations[date].isFirstDay">
+                  <span class="indicator" *ngIf="row.reservations[date].adults > 0">👤{{ row.reservations[date].adults }}</span>
+                  <span class="indicator" *ngIf="row.reservations[date].children > 0">👶{{ row.reservations[date].children }}</span>
+                  <span class="indicator" *ngIf="row.reservations[date].pets > 0">🐕</span>
+                </div>
+              </ng-container>
+          </div>
+          }
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </div>
+    
+    <!-- Excel-style tabs at bottom -->
+    <div class="excel-tabs">
+      <div 
+        *ngFor="let type of houseTypes" 
+        class="excel-tab" 
+        [class.active]="currentHouseType === type"
+        (click)="changeHouseType(type)"
+      >
+        {{ type }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Reservation Details Popup -->
+  <div class="reservation-popup" *ngIf="showPopup" [ngStyle]="popupPosition">
+    <div class="popup-header">
+      <h3>Reservation Details</h3>
+      <button class="close-button" (click)="closePopup()">×</button>
+    </div>
+    
+    <div class="popup-content" *ngIf="selectedReservation">
+      <div class="popup-row">
+        <strong>Guest:</strong> {{ selectedReservation.guest }}
+      </div>
+      <div class="popup-row">
+        <strong>Phone:</strong> {{ selectedReservation.phone }}
+      </div>
+      <div class="popup-row">
+        <strong>Period:</strong> {{ selectedReservation.startDay }} {{ getMonthName(selectedReservation.startMonth) }} - {{ selectedReservation.endDay }} {{ getMonthName(selectedReservation.endMonth) }}
+      </div>
+      <div class="popup-row guest-info">
+        <div class="info-item">
+          <span class="icon">👤</span>
+          <strong>Adults:</strong> {{ selectedReservation.adults }}
+        </div>
+        <div class="info-item" *ngIf="selectedReservation.children > 0">
+          <span class="icon">👶</span>
+          <strong>Children:</strong> {{ selectedReservation.children }}
+        </div>
+      </div>
+      <div class="popup-row guest-info">
+        <div class="info-item" *ngIf="selectedReservation.extraBeds > 0">
+          <span class="icon">🛏️</span>
+          <strong>Extra Beds:</strong> {{ selectedReservation.extraBeds }}
+        </div>
+        <div class="info-item" *ngIf="selectedReservation.pets > 0">
+          <span class="icon">🐕</span>
+          <strong>Pets:</strong> {{ selectedReservation.pets }}
+        </div>
+      </div>
+      <div class="popup-row" *ngIf="selectedReservation.notes">
+        <strong>Notes:</strong> {{ selectedReservation.notes }}
+      </div>
+      
+      <div class="popup-actions">
+        <button class="edit-button" (click)="editReservation()">
+          <span class="action-icon">✏️</span> Edit
+        </button>
+        <button class="delete-button" (click)="removeReservation()">
+          <span class="action-icon">🗑️</span> Remove
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Reservation Popup -->
+  <div class="new-reservation-popup" *ngIf="showNewReservationPopup" [ngStyle]="newReservationPopupPosition">
+    <div class="popup-header">
+      <h3>{{ selectedReservation ? 'Edit Reservation' : 'Create New Reservation' }}</h3>
+      <button class="close-button" (click)="cancelNewReservation()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="popup-content">
+      <form (submit)="$event.preventDefault(); createNewReservation()">
+        <!-- Guest Details Section -->
+        <div class="form-row-group">
+          <mat-form-field appearance="outline">
+            <mat-label>Guest Name</mat-label>
+            <input matInput [(ngModel)]="newReservation.guest_name" name="guest_name" required>
+            <mat-error *ngIf="!newReservation.guest_name">Guest name is required</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
+            <input matInput type="tel" [(ngModel)]="newReservation.guest_phone" name="guest_phone">
+            <mat-icon matSuffix>phone</mat-icon>
+          </mat-form-field>
+        </div>
+        
+        <!-- Date Selection Section -->
+        <div class="date-range-container">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" [(ngModel)]="newReservation.start_date" 
+                  name="start_date" required (dateChange)="updatePendingReservation()">
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            <mat-error *ngIf="!newReservation.start_date">Start date is required</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="newReservation.end_date" 
+                  name="end_date" required (dateChange)="updatePendingReservation()">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            <mat-error *ngIf="!newReservation.end_date">End date is required</mat-error>
+          </mat-form-field>
+        </div>
+        
+        <!-- Date range indicator -->
+        <div class="date-range-indicator" *ngIf="newReservation.start_date && newReservation.end_date">
+          <mat-icon class="indicator-icon">date_range</mat-icon>
+          <span class="range-text">
+            <ng-container *ngIf="getDateDifference() > 0">
+              {{ getDateDifference() }} night{{ getDateDifference() > 1 ? 's' : '' }} stay
+            </ng-container>
+            <ng-container *ngIf="getDateDifference() <= 0">
+              Please select a valid date range
+            </ng-container>
+          </span>
+        </div>
+        
+        <!-- Guest Composition Section -->
+        <div class="number-inputs">
+          <mat-form-field appearance="outline">
+            <mat-label>Adults</mat-label>
+            <input matInput type="number" [(ngModel)]="newReservation.adults" name="adults" min="1" required>
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="!newReservation.adults">At least one adult is required</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Children</mat-label>
+            <input matInput type="number" [(ngModel)]="newReservation.children" name="children" min="0">
+            <mat-icon matSuffix>child_care</mat-icon>
+          </mat-form-field>
+        
+          <mat-form-field appearance="outline">
+            <mat-label>Extra Beds</mat-label>
+            <input matInput type="number" [(ngModel)]="newReservation.extraBeds" name="extraBeds" min="0">
+            <mat-icon matSuffix>bed</mat-icon>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Pets</mat-label>
+            <input matInput type="number" [(ngModel)]="newReservation.pets" name="pets" min="0">
+            <mat-icon matSuffix>pets</mat-icon>
+          </mat-form-field>
+        </div>
+        
+        <!-- Notes Section -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes</mat-label>
+          <textarea matInput [(ngModel)]="newReservation.notes" name="notes" rows="2"></textarea>
+        </mat-form-field>
+        
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="cancelNewReservation()">Cancel</button>
+          <button mat-flat-button color="primary" type="submit">
+            {{ selectedReservation ? 'Update Reservation' : 'Create Reservation' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 

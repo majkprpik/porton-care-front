@@ -1,0 +1,888 @@
+// Main container styles
+.reservations-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+// Loading state
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 20px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+// Error message
+.error-message {
+  padding: 20px;
+  background-color: #ffdddd;
+  border: 1px solid #f44336;
+  border-radius: 4px;
+  margin: 20px;
+  text-align: center;
+  
+  button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    
+    &:hover {
+      background-color: #d32f2f;
+    }
+  }
+}
+
+// Main content
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+// Year header
+.year-header {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  
+  h1 {
+    font-size: 24px;
+    margin: 0;
+    color: #333;
+  }
+}
+
+// Virtual scroll table
+.table-container {
+  flex-grow: 1;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  position: relative;
+  
+  .viewport {
+    height: calc(100vh - 200px);
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .table-header-row {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f1f1f1;
+    border-bottom: 2px solid #ccc;
+    min-width: max-content; // Ensure it extends to accommodate all columns
+  }
+  
+  .table-row {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    min-width: max-content; // Ensure it extends to accommodate all columns
+    height: 50px;
+    
+    &:hover {
+      background-color: #f9f9f9;
+    }
+    
+    &.dragging {
+      cursor: grabbing;
+    }
+  }
+  
+  .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 60px;
+    box-sizing: border-box;
+    border-right: 1px solid #eee;
+    flex-shrink: 0;
+    height: 100%;
+    transition: all 0.2s ease-out;
+  }
+  
+  .room-cell {
+    min-width: 80px;
+    font-weight: bold;
+    background-color: #f1f1f1;
+    position: sticky;
+    left: 0;
+    z-index: 17;
+    justify-content: flex-start;
+    padding-left: 16px;
+    cursor: pointer;
+    
+    &:hover {
+      background-color: #e5e5e5;
+    }
+  }
+  
+  .date-cell {
+    font-size: 12px;
+    cursor: pointer;
+    
+    &:hover {
+      background-color: #e5e5e5;
+    }
+  }
+  
+  .reservation-cell {
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, border 0.2s, transform 0.1s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    
+    // Empty cell hover effect only
+    &:not(.has-reservation):hover {
+      background-color: rgba(66, 133, 244, 0.1);
+      border: 2px dashed #4285f4;
+      box-shadow: inset 0 0 6px rgba(66, 133, 244, 0.2);
+      z-index: 3;
+    }
+    
+    &.drag-selected {
+      background-color: rgba(0, 123, 255, 0.25) !important;
+      border: 2px solid #007bff !important;
+      z-index: 2;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+      position: relative;
+    }
+    
+    &.pending-reservation {
+      background-color: rgba(144, 238, 144, 0.3) !important;
+      border: 2px dotted #4CAF50 !important;
+      z-index: 1;
+      position: relative;
+      box-sizing: border-box;
+      
+      animation: pulse-border 1.5s infinite;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #4CAF50;
+      }
+    }
+    
+    @keyframes pulse-border {
+      0% { border-color: rgba(76, 175, 80, 0.4); }
+      50% { border-color: rgba(76, 175, 80, 1); }
+      100% { border-color: rgba(76, 175, 80, 0.4); }
+    }
+    
+    &.has-reservation {
+      color: #333;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      border: 2px solid #444;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      z-index: 5;
+      
+      // Connect multi-day reservations visually with connector dots
+      &:not(:first-child):after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -2px;
+        width: 4px;
+        height: 4px;
+        background-color: inherit;
+        border-radius: 50%;
+        transform: translateY(-50%);
+      }
+      
+      // Add visual indicator for first and last days
+      &.isFirstDay {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+        border-left: 2px solid #444;
+        border-right-width: 0;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      
+      &.isLastDay {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border-right: 2px solid #444;
+        
+        &:not(.isFirstDay) {
+          border-left-width: 0;
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+        }
+      }
+      
+      // Styling for middle days of reservation
+      &:not(.isFirstDay):not(.isLastDay) {
+        border-left-width: 0;
+        border-right-width: 0;
+        border-radius: 0;
+      }
+      
+      // Single day reservation (both first and last)
+      &.isFirstDay.isLastDay {
+        border-width: 2px;
+        border-radius: 4px;
+      }
+      
+      // Common border style for connected reservation cells - only keep hover-specific effects
+      &.reservation-hover {
+        filter: brightness(0.95);
+        transform: translateY(-1px);
+      }
+      
+      .reservation-content {
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+      }
+      
+      .reservation-indicators {
+        display: flex;
+        gap: 3px;
+        font-size: 10px;
+        margin-top: 2px;
+        
+        .indicator {
+          display: inline-flex;
+          align-items: center;
+          font-size: 9px;
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+}
+
+// Excel-style tabs
+.excel-tabs {
+  display: flex;
+  border-top: 1px solid #ccc;
+  background-color: #f5f5f5;
+  overflow-x: auto;
+  
+  .excel-tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-right: 1px solid #ccc;
+    white-space: nowrap;
+    
+    &:hover {
+      background-color: #e0e0e0;
+    }
+    
+    &.active {
+      background-color: #fff;
+      border-top: 3px solid #4CAF50;
+      margin-top: -3px;
+      font-weight: bold;
+    }
+  }
+}
+
+// Popup styles for reservation details and new reservation
+.reservation-popup {
+  position: fixed;
+  width: 350px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  overflow: hidden;
+  animation: popup-fade-in 0.2s;
+  
+  @keyframes popup-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #eee;
+    
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #333;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      line-height: 1;
+      
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+  
+  .popup-content {
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+    
+    .popup-row {
+      margin-bottom: 8px;
+      font-size: 14px;
+      
+      strong {
+        margin-right: 5px;
+        color: #555;
+      }
+      
+      &.guest-info {
+        display: flex;
+        justify-content: flex-start;
+        gap: 16px;
+        
+        .info-item {
+          display: flex;
+          align-items: center;
+          background-color: #f5f5f5;
+          padding: 6px 10px;
+          border-radius: 4px;
+          
+          .icon {
+            margin-right: 6px;
+            font-size: 16px;
+          }
+        }
+      }
+    }
+    
+    .popup-actions {
+      display: flex;
+      margin-top: 16px;
+      border-top: 1px solid #eee;
+      padding-top: 16px;
+      
+      button {
+        margin-right: 8px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        
+        .action-icon {
+          margin-right: 5px;
+        }
+      }
+      
+      .edit-button {
+        background-color: #4CAF50;
+        color: white;
+        
+        &:hover {
+          background-color: #388E3C;
+        }
+      }
+      
+      .delete-button {
+        background-color: #F44336;
+        color: white;
+        
+        &:hover {
+          background-color: #D32F2F;
+        }
+      }
+    }
+  }
+}
+
+// New reservation popup with increased width and no scrolling
+.new-reservation-popup {
+  position: fixed;
+  width: 450px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  overflow: hidden;
+  animation: popup-fade-in 0.2s;
+  
+  @keyframes popup-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #eee;
+    
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #333;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #666;
+      line-height: 1;
+      
+      mat-icon {
+        font-size: 24px;
+      }
+      
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+  
+  .popup-content {
+    padding: 16px;
+    overflow-y: auto;
+    max-height: 80vh;
+    overflow-x: hidden;
+  }
+
+  .form-row-group {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    
+    .form-row {
+      flex: 1;
+    }
+    
+    // Full width on mobile
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  // Angular Material specific styles
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 0;
+  }
+  
+  // Date range picker styles
+  .date-range-container {
+    display: flex;
+    gap: 16px;
+    
+    mat-form-field {
+      flex: 1;
+    }
+    
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+  
+  // Number inputs with material
+  .number-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    
+    mat-form-field {
+      flex: 1;
+      min-width: calc(50% - 5px);
+    }
+    
+    @media screen and (max-width: 520px) {
+      flex-wrap: wrap;
+      
+      mat-form-field {
+        min-width: calc(50% - 5px);
+      }
+    }
+  }
+
+  // Other form elements
+  mat-checkbox, mat-radio-group {
+    display: block;
+    margin-bottom: 16px;
+  }
+  
+  mat-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    mat-radio-button {
+      margin-bottom: 8px;
+    }
+  }
+  
+  // Form actions with material buttons
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+    
+    button {
+      &.mat-flat-button {
+        min-width: 100px;
+      }
+    }
+  }
+}
+
+// Override some material default styles to match our design
+::ng-deep {
+  .new-reservation-popup {
+    .mat-mdc-form-field {
+      margin-bottom: 12px;
+      width: 100%;
+    }
+    
+    .mat-mdc-form-field-flex {
+      background-color: #fff;
+    }
+    
+    .mat-datepicker-toggle {
+      color: rgba(0, 0, 0, 0.54);
+    }
+    
+    .mat-mdc-select-panel {
+      max-height: 350px;
+    }
+    
+    .mat-mdc-option {
+      font-size: 14px;
+    }
+    
+    .mat-mdc-slide-toggle {
+      margin: 8px 0;
+    }
+    
+    // Ensure proper styling for textarea
+    .mat-mdc-form-field-textarea-control {
+      resize: vertical;
+      min-height: 60px;
+    }
+    
+    // Fix date picker width issues
+    .mat-datepicker-content {
+      max-width: 100vw;
+    }
+  }
+}
+
+// Additional responsive styles
+@media screen and (max-width: 520px) {
+  .new-reservation-popup {
+    width: calc(100% - 32px);
+    max-width: 400px;
+    
+    .popup-content {
+      padding: 16px;
+    }
+    
+    .number-inputs {
+      gap: 0;
+      
+      mat-form-field {
+        min-width: 100%;
+      }
+    }
+  }
+}
+
+// Form styles
+.form-row-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  
+  .form-row {
+    flex: 1;
+  }
+}
+
+.form-row {
+  margin-bottom: 16px;
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    
+    &:focus {
+      border-color: #4CAF50;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+  }
+}
+
+.number-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  
+  .number-field {
+    flex: 1;
+    min-width: calc(50% - 6px);
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  
+  button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .cancel-button {
+    background-color: #f5f5f5;
+    color: #333;
+    
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+  
+  .create-button {
+    background-color: #4CAF50;
+    color: white;
+    
+    &:hover {
+      background-color: #388E3C;
+    }
+  }
+}
+
+// Ensure table header alignment
+.table-header-row .date-cell,
+.table-row .reservation-cell {
+  width: 60px;
+}
+
+.date-range-indicator {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f0f7ff;
+  border: 1px solid #d0e3ff;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  
+  .indicator-icon {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  
+  .range-text {
+    font-size: 14px;
+    color: #0066cc;
+    font-weight: 500;
+  }
+}
+
+// Full width class for textareas and other elements
+.full-width {
+  width: 100%;
+}
+
+// Row and column highlighting styles
+.active-header {
+  background-color: #4285f4 !important;
+  color: white !important;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+  position: relative;
+  z-index: 20;
+  
+  &.room-cell {
+    // Add a subtle highlight indicator instead of text that might overlap
+    &:after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background-color: #fff;
+      animation: pulse-bg 1.5s infinite;
+    }
+  }
+  
+  &.date-cell {
+    // Add a subtle highlight indicator instead of text that might overlap
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background-color: #fff;
+      animation: pulse-bg 1.5s infinite;
+    }
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+  
+  @keyframes pulse-bg {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+  }
+}
+
+// Row highlight effect
+.row-highlight {
+  background-color: rgba(66, 133, 244, 0.08) !important; // More transparent
+  box-shadow: inset 0 0 3px rgba(66, 133, 244, 0.2);
+  z-index: 1; // Lower z-index so reservations appear on top
+  
+  &:not(.has-reservation) {
+    border: 1px solid rgba(66, 133, 244, 0.2) !important;
+  }
+  
+  &.has-reservation {
+    // Remove transform that could obscure content
+    filter: none;
+    transform: none;
+    // Apply a subtle outline instead that doesn't affect layout
+    outline: 2px solid rgba(66, 133, 244, 0.5);
+    outline-offset: -1px;
+  }
+}
+
+// Column highlight effect
+.column-highlight {
+  background-color: rgba(66, 133, 244, 0.08) !important; // More transparent
+  box-shadow: inset 0 0 3px rgba(66, 133, 244, 0.2);
+  z-index: 1; // Lower z-index so reservations appear on top
+  
+  &:not(.has-reservation) {
+    border: 1px solid rgba(66, 133, 244, 0.2) !important;
+  }
+  
+  &.has-reservation {
+    // Remove transform that could obscure content
+    filter: none;
+    transform: none;
+    // Apply a subtle outline instead that doesn't affect layout
+    outline: 2px solid rgba(66, 133, 244, 0.5);
+    outline-offset: -1px;
+  }
+}
+
+// Ensure reservations always appear on top
+.cell.reservation-cell.has-reservation {
+  z-index: 10 !important; // Higher z-index than row/column highlights
+  position: relative; // Ensure z-index works
+  
+  // When highlighted by row or column
+  &.row-highlight,
+  &.column-highlight {
+    // Increase visibility with a subtle border
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Preserve reservation highlighting precedence
+.reservation-hover {
+  z-index: 15 !important; // Ensure hovered reservations are always at the top
+  
+  &.row-highlight, 
+  &.column-highlight {
+    // Extra emphasis for cells that are both reservation AND in highlighted row/column
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25) !important;
+  }
+}
+
+// Extra emphasis for reservations that need to stand out over row/column highlighting
+.reservation-highlight-priority {
+  z-index: 20 !important; // Higher than anything else
+  position: relative;
+  box-shadow: 0 0 0 2px #4285f4, 0 0 8px rgba(66, 133, 244, 0.5) !important;
+  border-color: #4285f4 !important;
+  filter: brightness(1.05) !important; // Slightly brighter
+  transform: translateY(-1px) !important; // Slight lift effect
+} 

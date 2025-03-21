@@ -1,9 +1,11 @@
+// Test comment at the top of the file
 .reservations-container {
   padding: 20px;
-  width: 100%;
-  height: 100%;
+  height: 100vh;
+  max-height: calc(100vh - 94px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .reservations-header {
@@ -44,16 +46,150 @@
   }
 }
 
-.reservations-grid {
+// Loading indicator
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #3498db;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  p {
+    font-size: 16px;
+    color: #666;
+  }
+}
+
+// Error message
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  p {
+    margin: 0;
+  }
+  
+  button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #c82333;
+    }
+  }
+}
+
+// Structure for the main grid with tabs
+.grid-with-tabs {
   flex: 1;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-height: calc(100vh - 120px); /* Account for header and paddings */
+}
+
+// Feature hint tooltip
+.feature-hint {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #e8f4ff;
+  border-bottom: 1px solid #ccc;
+  font-size: 13px;
+  
+  .hint-icon {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  
+  .hint-text {
+    color: #444;
+    line-height: 1.4;
+    
+    strong {
+      color: #2d76f7;
+    }
+  }
+}
+
+.reservations-grid {
+  flex: 1;
+  overflow: hidden;
+  border-bottom: none;
+  max-height: 100%;
+  
+  /* Custom scrollbars for better visibility */
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f5f5f5;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+    
+    &:hover {
+      background-color: #aaa;
+    }
+  }
+  
+  &.dragging {
+    cursor: grabbing;
+    
+    .reservation-cell:not(.has-reservation) {
+      cursor: grabbing;
+    }
+  }
+}
+
+.grid-scroll-container {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  position: relative;
 }
 
 .grid-container {
   min-width: 100%;
+  width: max-content;
   display: table;
   border-collapse: collapse;
   font-size: 14px;
@@ -66,12 +202,30 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  height: 32px;
 
   .header-cell {
     background-color: #f2f2f2;
     position: sticky;
     top: 0;
     z-index: 10;
+    padding: 4px 2px;
+    text-align: center;
+  }
+  
+  .house-cell {
+    z-index: 11; /* Ensure the corner cell is above other cells */
+  }
+  
+  .month-cell {
+    background-color: #e6e6e6;
+    color: #444;
+    font-weight: 600;
+    font-size: 14px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    text-align: center;
+    padding: 4px 8px;
   }
 }
 
@@ -90,9 +244,9 @@
 .grid-cell {
   display: table-cell;
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 2px;
   min-width: 80px;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .house-cell {
@@ -103,46 +257,136 @@
   font-weight: bold;
   text-align: center;
   min-width: 100px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 3px;
+  
+  .house-name {
+    font-weight: bold;
+    font-size: 13px;
+  }
 }
 
 .day-cell {
   text-align: center;
-  min-width: 80px;
+  min-width: 35px;
+  max-width: 100px;
+  width: 100px;
+  font-size: 12px;
+  padding: 2px 0;
 }
 
 .reservation-cell {
-  height: 65px;
+  height: 26px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  padding: 2px;
+  user-select: none; /* Prevent text selection during drag */
+  min-width: 35px;
+  max-width: 35px;
+  width: 35px;
   
   &:hover {
-    border: 1px solid #999;
+    z-index: 2;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  &.drag-over {
+    background-color: rgba(66, 133, 244, 0.2);
+  }
+  
+  &.has-reservation {
+    overflow: hidden;
   }
 }
 
 .reservation-content {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   height: 100%;
   
   .guest-name {
     font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
   
   .phone-number {
-    font-size: 12px;
+    font-size: 10px;
     color: #555;
+  }
+}
+
+// Style for highlighted reservations
+.reservation-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+// Legend styles
+.reservation-legend {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  
+  h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    
+    .color-box {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #ddd;
+      margin-right: 8px;
+      border-radius: 3px;
+    }
+    
+    span {
+      font-size: 14px;
+    }
   }
 }
 
 /* Responsive styling */
 @media (max-width: 768px) {
+  .reservations-container {
+    padding: 10px;
+    height: 100vh;
+    max-height: 100vh;
+  }
+  
+  .grid-with-tabs {
+    max-height: calc(100vh - 90px);
+  }
+  
   .reservations-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+    margin-bottom: 10px;
   }
   
   .grid-cell {
@@ -153,5 +397,553 @@
   
   .house-cell {
     min-width: 80px;
+  }
+  
+  .reservation-legend {
+    .legend-item {
+      margin-bottom: 5px;
+      
+      .color-box {
+        width: 16px;
+        height: 16px;
+      }
+      
+      span {
+        font-size: 12px;
+      }
+    }
+  }
+  
+  .excel-tabs {
+    height: auto;
+    
+    .excel-tab {
+      padding: 4px 10px;
+      font-size: 11px;
+      line-height: 18px;
+    }
+  }
+}
+
+// Reservation popup styles
+.reservation-popup {
+  position: fixed;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  min-width: 400px;
+  max-width: 500px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: popup-fade-in 0.2s ease-out;
+  border: 1px solid #aaa;
+  
+  @keyframes popup-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      line-height: 1;
+      padding: 0 5px;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: #000;
+      }
+    }
+  }
+  
+  .popup-content {
+    padding: 10px 15px;
+    display: flex;
+    flex-wrap: wrap;
+    
+    .popup-row {
+      margin-bottom: 5px;
+      line-height: 1.3;
+      font-size: 13px;
+      width: 50%;
+      padding-right: 10px;
+      box-sizing: border-box;
+      
+      &:last-child {
+        width: 100%;
+      }
+      
+      strong {
+        font-weight: 500;
+        margin-right: 5px;
+        color: #555;
+      }
+    }
+    
+    .popup-actions {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+      
+      button {
+        display: flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid;
+        
+        .action-icon {
+          margin-right: 5px;
+          font-size: 14px;
+        }
+        
+        &.edit-button {
+          background-color: #f8f8f8;
+          border-color: #ddd;
+          color: #333;
+          
+          &:hover {
+            background-color: #efefef;
+            border-color: #ccc;
+          }
+        }
+        
+        &.delete-button {
+          background-color: #fff5f5;
+          border-color: #fdd;
+          color: #d33;
+          
+          &:hover {
+            background-color: #ffe5e5;
+            border-color: #fcc;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Responsive styles for popup */
+@media (max-width: 768px) {
+  .reservation-popup {
+    min-width: 280px;
+    max-width: 95vw;
+    
+    .popup-header h3 {
+      font-size: 14px;
+    }
+    
+    .popup-content {
+      padding: 8px 10px;
+      
+      .popup-row {
+        width: 100%;
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+      
+      .popup-actions {
+        margin-top: 8px;
+        padding-top: 8px;
+        
+        button {
+          padding: 5px 10px;
+          font-size: 12px;
+          
+          .action-icon {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// New reservation popup styles
+.new-reservation-popup {
+  position: fixed;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  min-width: 450px;
+  max-width: 600px;
+  width: 90%;
+  z-index: 1000;
+  overflow: hidden;
+  animation: popup-fade-in 0.2s ease-out;
+  border: 1px solid #aaa;
+  
+  @keyframes popup-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .close-button {
+      background: none; 
+      border: none;
+      font-size: 20px;
+      line-height: 1;
+      padding: 0 5px;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: #000;
+      }
+    }
+  }
+  
+  .popup-content {
+    padding: 12px 15px;
+    max-height: 80vh;
+    overflow-y: auto;
+    
+    // Date range info styles
+    .selected-range-info {
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      background-color: #f0f7ff;
+      border: 1px solid #d1e4fd;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      
+      .range-icon {
+        font-size: 18px;
+        margin-right: 10px;
+      }
+      
+      .range-text {
+        font-size: 13px;
+        color: #444;
+        line-height: 1.3;
+        
+        strong {
+          color: #2d76f7;
+        }
+        
+        .range-days {
+          display: inline-block;
+          margin-left: 5px;
+          padding: 2px 6px;
+          border-radius: 10px;
+          background-color: #4285f4;
+          color: white;
+          font-size: 11px;
+          font-weight: 500;
+        }
+      }
+    }
+    
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      
+      .form-row-group {
+        display: flex;
+        gap: 15px;
+        
+        .form-row {
+          flex: 1;
+        }
+
+        @media (max-width: 768px) {
+          flex-direction: column;
+          gap: 6px;
+        }
+      }
+      
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        
+        label {
+          font-size: 13px;
+          font-weight: 500;
+          color: #555;
+        }
+        
+        input, textarea {
+          padding: 7px 8px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-size: 14px;
+          
+          &:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+          }
+        }
+      }
+      
+      .number-inputs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        
+        .number-field {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+        
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+      }
+      
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 8px;
+        
+        button {
+          padding: 7px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.2s;
+          
+          &.cancel-button {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            color: #333;
+            
+            &:hover {
+              background-color: #e0e0e0;
+            }
+          }
+          
+          &.create-button {
+            background-color: #4285f4;
+            border: 1px solid #2d76f7;
+            color: white;
+            
+            &:hover {
+              background-color: #2d76f7;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Responsive styles for new reservation popup */
+@media (max-width: 768px) {
+  .new-reservation-popup {
+    min-width: 280px;
+    max-width: 95vw;
+    
+    .popup-content {
+      padding: 8px 10px;
+      max-height: 80vh;
+      overflow-y: auto;
+      
+      form {
+        gap: 6px;
+        
+        .form-row-group {
+          flex-direction: column;
+          gap: 6px;
+        }
+        
+        .form-row {
+          &.date-inputs {
+            flex-direction: column;
+            gap: 6px;
+          }
+          
+          &.number-inputs {
+            flex-wrap: wrap;
+            
+            .number-field {
+              flex: 1 1 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /* Ensure pulse animation is optimized for mobile */
+  @keyframes pulse-border {
+    0% {
+      border-color: rgba(66, 133, 244, 0.8);
+      box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.6);
+    }
+    50% {
+      border-color: rgba(66, 133, 244, 1);
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.4); /* Smaller shadow for mobile */
+    }
+    100% {
+      border-color: rgba(66, 133, 244, 0.8);
+      box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+    }
+  }
+}
+
+// Excel-style tabs at the bottom
+.excel-tabs {
+  display: flex;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ddd;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  height: 30px;
+  min-height: 30px;
+  
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    
+    &:hover {
+      background: #aaa;
+    }
+  }
+  
+  .excel-tab {
+    padding: 5px 15px;
+    font-size: 12px;
+    line-height: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-right: 1px solid #ddd;
+    transition: all 0.2s ease;
+    
+    &:first-child {
+      border-left: 1px solid #ddd;
+    }
+    
+    &:hover {
+      background-color: #e9e9e9;
+    }
+    
+    &.active {
+      background-color: white;
+      font-weight: 500;
+      border-bottom: 2px solid #4285f4;
+    }
+  }
+}
+
+// Animation for pulsing dotted border 
+@keyframes pulse-border {
+  0% {
+    border-color: rgba(66, 133, 244, 0.7);
+    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4);
+  }
+  50% {
+    border-color: rgba(66, 133, 244, 1);
+    box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.2);
+  }
+  100% {
+    border-color: rgba(66, 133, 244, 0.7);
+    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+  }
+}
+
+// Year header
+.year-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+  
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+/* Day numbers row */
+.grid-days-row {
+  display: table-row;
+  background-color: #f8f8f8;
+  position: sticky;
+  top: 32px; // Below the month headers
+  z-index: 9;
+  height: 28px;
+  
+  .day-header-cell {
+    background-color: #f8f8f8;
+    position: sticky;
+    top: 32px;
+    z-index: 9;
+    font-size: 12px;
+    text-align: center;
+    color: #555;
+    padding: 4px 2px;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  .house-cell {
+    z-index: 10; // Ensure the corner cell is above other cells
+    background-color: #f2f2f2;
+  }
+  
+  .day-cell {
+    min-width: 35px;
+    max-width: 35px;
+    width: 35px;
+    text-align: center;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
   }
 }
