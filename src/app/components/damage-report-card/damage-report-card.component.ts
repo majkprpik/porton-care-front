@@ -209,10 +209,11 @@ export class DamageReportCardComponent {
 
   saveImage(){
     if(this.imageToUpload && this.houseTask.taskId){
-      this.storageService.storeImageForTask(this.imageToUpload, this.houseTask.taskId)
+      const renamedFile = this.renameImageNameForSupabaseStorage();
+      this.storageService.storeImageForTask(renamedFile, this.houseTask.taskId)
         .then(result => {
           if(!result.error) {
-            this.images.push({ name: this.imageToUpload.name, url: result.url });
+            this.images.push({ name: renamedFile.name, url: result.url });
             this.capturedImage = '';
             this.displaySaveImageError = false;   
             this.saveImageError = '';
@@ -236,5 +237,16 @@ export class DamageReportCardComponent {
     this.openImage.emit({
       imageUrl: imageUrl
     });
+  }
+
+  private renameImageNameForSupabaseStorage(){
+    const sanitizedFileName = this.imageToUpload.name.replace(/\s+/g, '-');
+
+    const renamedFile = new File([this.imageToUpload], sanitizedFileName, { 
+      type: this.imageToUpload.type, 
+      lastModified: this.imageToUpload.lastModified 
+    });
+
+    return renamedFile;
   }
 }

@@ -201,6 +201,23 @@ export class TaskService {
     }
   }
 
+  async deleteTaskForHouse(taskId: number){
+    try{
+      const { error: updateTaskError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('tasks')
+        .delete()
+        .eq('task_id', taskId);
+
+      if(updateTaskError) throw updateTaskError
+
+      return true;
+    } catch (error){
+      console.error('Error updating task:', error);
+      return false;
+    }
+  }
+
   private getFormattedDateTimeNowForSupabase(){
     const now = new Date();
     const isoString = now.toISOString(); // Example: 2025-03-14T11:26:33.350Z

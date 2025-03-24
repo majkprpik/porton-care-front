@@ -92,4 +92,17 @@ export class DamageReportsComponent {
     this.openedImage = '';
     this.helperService.dimBackground.next(false);
   }
+
+  deleteOpenedImageForTask(){
+    const imagePath = this.getFilePathFromUrl(this.openedImage);
+    if(imagePath){
+      this.storageService.deleteStoredImageForTask(imagePath);
+      window.location.reload();
+    }
+  }
+
+  private getFilePathFromUrl(url: string){
+    const match = url.match(/damage-reports-images\/(task-\d+\/.+)$/);
+    return match ? match[1] : null;
+  }
 }

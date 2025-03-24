@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,8 @@ import { MobileHomesService } from '../../services/mobile-homes.service';
 import { MobileHome } from '../../models/mobile-home.interface';
 import { TaskService } from '../../services/task.service';
 import { WorkGroupService } from '../../services/work-group.service';
+import { HelperService } from '../../services/helper.service';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-repair-report',
@@ -29,18 +31,29 @@ import { WorkGroupService } from '../../services/work-group.service';
   styleUrls: ['./repair-report.component.scss']
 })
 export class RepairReportComponent {
+  @ViewChild('fileInput') fileInput!: ElementRef;
+
   mobileHomes: MobileHome[] = [];
   report = {
     description: '',
     location: ''
   };
+  imageToUpload : any;
+  capturedImage: string = '';
+  displaySaveImageError: boolean = false;
+  saveImageError: string = '';
+  imagesToUpload: any[] = [];
+  imagesToDisplay: any[] = [];
+  openedImage: string = '';
 
   constructor(
     private location: Location,
     private router: Router,
     private mobileHomesService: MobileHomesService,
     private taskService: TaskService,
-    private workGroupService: WorkGroupService
+    private workGroupService: WorkGroupService,
+    private helperService: HelperService,
+    private storageService: StorageService
   ) {}
 
   ngOnInit(){
@@ -54,10 +67,13 @@ export class RepairReportComponent {
       });
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.report.description && this.report.location) {
-      this.createTaskForHouse();
+      let createdTask = await this.createTaskForHouse();
       console.log(this.report);
+      if(createdTask && this.imagesToUpload.length > 0){
+        this.uploadImages(createdTask);
+      }
       this.router.navigate(['/']);
     }
   }
@@ -66,9 +82,78 @@ export class RepairReportComponent {
     let createdTask = await this.taskService.createTaskForHouse(this.report.location, this.report.description);
     let createdWorkGroup = await this.workGroupService.createWorkGroup();
     let createdWorkGroupTask = await this.workGroupService.createWorkGroupTask(createdWorkGroup.work_group_id, createdTask.task_id);
+
+    if(createdTask && createdWorkGroup && createdWorkGroupTask){
+      return createdTask;
+    }
   }
 
   goBack() {
     this.location.back();
+  }
+
+  handleImageCapture(event: any){
+    this.imageToUpload = event.target.files[0];
+    if (this.imageToUpload) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.capturedImage = reader.result as string; 
+      };
+      reader.readAsDataURL(this.imageToUpload);
+    }
+  }
+
+  openCamera() {
+    console.log('Opening default camera app...');
+    this.fileInput.nativeElement.click();
+  }
+
+  saveImage(){
+    this.imagesToUpload.push(this.imageToUpload);
+    this.imagesToDisplay.push(this.capturedImage);
+    this.capturedImage = '';
+    this.displaySaveImageError = false;
+    this.saveImageError = '';
+  }
+
+  discardImage(){
+    this.capturedImage = '';
+    this.displaySaveImageError = false;
+    this.saveImageError = '';
+  }
+
+  openImage(imageUrl: string){
+    this.openedImage = imageUrl;
+    this.helperService.dimBackground.next(true);
+  }
+
+  closeImage(){
+    this.openedImage = '';
+    this.helperService.dimBackground.next(false);
+  }
+
+  uploadImages(createdTask: any){
+    if(this.imagesToUpload.length > 0 && createdTask){
+      this.storageService.storeImagesForTask(this.imagesToUpload, createdTask.task_id)
+      .then(result => {
+        if ('error' in result) {  
+          this.displaySaveImageError = true;
+          this.saveImageError = result.error;
+          this.taskService.deleteTaskForHouse(createdTask.task_id);
+        } else {
+          this.capturedImage = '';
+          this.displaySaveImageError = false;   
+          this.saveImageError = '';
+        }
+      })
+      .catch(error => {
+        console.error('Unexpected error:', error);
+        this.displaySaveImageError = true;
+        this.saveImageError = "An unexpected error occurred.";
+        this.taskService.deleteTaskForHouse(createdTask.task_id);
+      });
+    } else{
+      console.log("No images to upload or incorrect task id");
+    }
   }
 } 

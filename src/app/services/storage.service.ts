@@ -8,7 +8,7 @@ import imageCompression from 'browser-image-compression';
 export class StorageService {
 
   constructor(
-      private supabase: SupabaseService,
+    private supabase: SupabaseService,
   ) { 
 
   }
@@ -39,6 +39,39 @@ export class StorageService {
     }
   }
 
+  async storeImagesForTask(images: any[], taskId: number) {
+    try {
+      const compressedImages = await Promise.all(
+        images.map(image => this.compressImage(image, 1))
+      );
+  
+      const uploadPromises = compressedImages.map(async (compressedImage) => {
+        const filePath = `task-${taskId}/${compressedImage.name}`;
+  
+        const { data, error: storeImageError } = await this.supabase.getClient()
+          .storage
+          .from('damage-reports-images')
+          .upload(filePath, compressedImage);
+  
+        if (storeImageError) throw storeImageError;
+  
+        const publicUrl = this.supabase.getClient()
+          .storage
+          .from('damage-reports-images')
+          .getPublicUrl(data.path).data.publicUrl;
+  
+        return { path: data.path, url: publicUrl };
+      });
+  
+      const uploadResults = await Promise.all(uploadPromises);
+  
+      return uploadResults;
+    } catch (error: any) {
+      console.error('Error storing images:', error);
+      return { error: error.message || "Error storing images in Supabase" };
+    }
+  }
+
   async getStoredImagesForTask(taskId: number){
     try {
       const folderPath = 'task-' + taskId;
@@ -54,6 +87,22 @@ export class StorageService {
     } catch(error) {
       console.log('Error fetching images: ' + error)
       return null;
+    }
+  }
+
+  async deleteStoredImageForTask(imagePath: string){
+    try {
+      const { data: data, error: deleteError } = await this.supabase.getClient()
+        .storage
+        .from('damage-reports-images')
+        .remove([imagePath]);
+
+      if (deleteError) throw deleteError;
+
+      return true;
+    } catch(error) {
+      console.log('Error fetching images: ' + error)
+      return false;
     }
   }
 

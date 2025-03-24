@@ -15,6 +15,7 @@
         <div class="opened-image-container" (click)="$event.stopPropagation()">
             <mat-icon (click)="closeImage(); $event.stopPropagation()">cancel</mat-icon>
             <img [src]="openedImage" alt="Opened image">
+            <button (click)="deleteOpenedImageForTask()">Delete</button>
         </div>
     </div>
 </div>

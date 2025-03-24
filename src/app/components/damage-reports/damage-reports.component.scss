@@ -36,13 +36,13 @@
             align-items: center;
             justify-content: center;
             max-width: 90vw;
-            max-height: 90vh;
+            max-height: 85vh;
     
             img {  
                 width: auto;
                 height: auto;
                 max-width: 100%;
-                max-height: 90vh;
+                max-height: 85vh;
                 object-fit: contain;
                 border-radius: 10px;
                 display: block; 
@@ -64,6 +64,22 @@
                 &:hover {
                     transform: scale(1.1);
                     cursor: pointer;
+                }
+            }
+
+            button{
+                border: none;
+                height: 30px;
+                width: 60px;
+                border-radius: 10px;
+                background-color: orangered;
+                position: absolute;
+                bottom: -40px;
+                transition: transform 0.3s ease;
+
+                &:hover{
+                    cursor: pointer;
+                    transform: scale(1.01);
                 }
             }
         }
