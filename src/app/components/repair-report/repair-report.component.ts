@@ -87,7 +87,7 @@ export class RepairReportComponent {
 
   async onSubmit() {
     if (this.report.description && this.report.location) {
-      let createdTask = await this.createTaskForHouse();
+      let createdTask = await this.createRepairTaskForHouse();
       console.log(this.report);
       if(createdTask && this.imagesToUpload.length > 0){
         this.uploadImages(createdTask);
@@ -96,8 +96,8 @@ export class RepairReportComponent {
     }
   }
 
-  async createTaskForHouse(){
-    let createdTask = await this.taskService.createTaskForHouse(this.report.location, this.report.description);
+  async createRepairTaskForHouse(){
+    let createdTask = await this.taskService.createTaskForHouse(this.report.location, this.report.description, 'Popravak');
     let createdWorkGroup = await this.workGroupService.createWorkGroup();
     let createdWorkGroupTask = await this.workGroupService.createWorkGroupTask(createdWorkGroup.work_group_id, createdTask.task_id);
 

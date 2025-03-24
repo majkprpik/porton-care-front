@@ -11,6 +11,7 @@ import { ProfileManagementComponent } from './components/profile-management/prof
 import { DamageReportsComponent } from './components/damage-reports/damage-reports.component';
 import { ReservationsComponent } from './components/reservations/reservations.component';
 import { Reservations2Component } from './components/reservations2/reservations2.component';
+import { ReportUnscheduledTaskComponent } from './components/report-unscheduled-task/report-unscheduled-task.component';
 
 
 export const routes: Routes = [
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'team/:id', component: TeamDetailComponent },
   { path: 'repair-reports', component: RepairReportsComponent },
   { path: 'report-repair', component: RepairReportComponent },
+  { path: 'report-unscheduled-task', component: ReportUnscheduledTaskComponent },
   { path: 'profiles', component: ProfileManagementComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '/dashboard' },
 ];

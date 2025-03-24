@@ -18,9 +18,9 @@ export class TaskService {
 
   }
 
-  async createTaskForHouse(houseId: string, description: string){
+  async createTaskForHouse(houseId: string, description: string, taskTypeName: string){
     try {
-      let taskTypeId = await this.getTaskTypeIdByTaskName('Popravak');
+      let taskTypeId = await this.getTaskTypeIdByTaskName(taskTypeName);
       let taskProgressTypeId = await this.getTaskProgressTypeIdByTaskProgressTypeName('Nije dodijeljeno');
 
       const { data, error } = await this.supabase.getClient()
@@ -43,7 +43,7 @@ export class TaskService {
 
       return data;
     } catch (error) {
-      console.error('Error fetching houses:', error);
+      console.error('Error fetching task for house:', error);
       return null;
     }
   }
@@ -78,6 +78,24 @@ export class TaskService {
       return mobileHomesForRepair;
     } catch (error) {
       console.error('Error fetching task type ids', error);
+      return [];
+    }
+  }
+
+  async getAllTaskTypes(){
+    try {
+      const { data: taskTypes, error: houseIdError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('task_types')
+        .select('*')
+
+      if (houseIdError) throw houseIdError;
+      
+      console.log('Task types:', taskTypes);
+
+      return taskTypes;
+    } catch (error) {
+      console.error('Error fetching task types:', error);
       return [];
     }
   }

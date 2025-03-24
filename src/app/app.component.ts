@@ -84,6 +84,10 @@ export class AppComponent {
     this.router.navigate(['/report-repair']);
   }
 
+  openUnscheduledTaskReport(){
+    this.router.navigate(['/report-unscheduled-task']);
+  }
+
   undimBackground(){
     this.helperService.dimBackground.next(false);
   }
