@@ -11,7 +11,16 @@
       <mat-form-field appearance="fill">
         <mat-label>Location</mat-label>
         <mat-select [(ngModel)]="report.location" name="location" required>
-          <mat-option *ngFor="let mobileHome of mobileHomes" [value]="mobileHome.house_id">
+          <mat-option  
+            [ngStyle]="{'background-color': '#D0D2DC'}"
+          >
+            <ngx-mat-select-search 
+              placeholderLabel="Find a house..." 
+              [formControl]="locationFilterCtrl"
+              [noEntriesFoundLabel]="'No houses found'"
+            ></ngx-mat-select-search>
+          </mat-option>
+          <mat-option *ngFor="let mobileHome of filteredMobileHomes" [value]="mobileHome.house_id">
             {{ mobileHome.housename }}
           </mat-option>
         </mat-select>

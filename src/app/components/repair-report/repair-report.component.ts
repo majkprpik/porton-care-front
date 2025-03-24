@@ -1,6 +1,6 @@
-import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule  } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,6 +14,8 @@ import { TaskService } from '../../services/task.service';
 import { WorkGroupService } from '../../services/work-group.service';
 import { HelperService } from '../../services/helper.service';
 import { StorageService } from '../../services/storage.service';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { MatOptionModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-repair-report',
@@ -25,7 +27,10 @@ import { StorageService } from '../../services/storage.service';
     MatFormFieldModule,
     MatSelectModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    NgxMatSelectSearchModule,
+    MatOptionModule,
+    ReactiveFormsModule
   ],
   templateUrl: './repair-report.component.html',
   styleUrls: ['./repair-report.component.scss']
@@ -45,6 +50,8 @@ export class RepairReportComponent {
   imagesToUpload: any[] = [];
   imagesToDisplay: any[] = [];
   openedImage: string = '';
+  filteredMobileHomes = [...this.mobileHomes];
+  locationFilterCtrl = new FormControl();
 
   constructor(
     private location: Location,
@@ -64,7 +71,18 @@ export class RepairReportComponent {
       .then(homes => {
         console.log('Fetched homes:', homes);
         this.mobileHomes = homes;
+        this.filteredMobileHomes = [...this.mobileHomes];
       });
+
+    this.locationFilterCtrl.valueChanges.subscribe((search) => {
+      if (!search) {
+        this.filteredMobileHomes = [...this.mobileHomes];
+        return;
+      }
+      this.filteredMobileHomes = this.mobileHomes.filter((home) =>
+        home.housename.toLowerCase().includes(search.toLowerCase())
+      );
+    });
   }
 
   async onSubmit() {
