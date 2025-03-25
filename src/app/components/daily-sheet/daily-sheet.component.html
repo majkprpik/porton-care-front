@@ -1,7 +1,27 @@
 <div class="daily-sheet-container">
   <!-- Left side - Task Cards -->
   <div class="tasks-section">
-    <h3>Tasks</h3>
+    <div class="header">
+      <h3>Tasks</h3>
+      
+      <!-- <div class="list-grid-icons">
+        <div 
+          class="list-view-container" 
+          (click)="toggleListGridView('list')" 
+          [ngStyle]="{'background-color': listGridView === 'list' ? 'white' : 'transparent'}"
+        >
+          <mat-icon>view_list</mat-icon>
+        </div>
+        <div 
+          class="grid-view-container" 
+          (click)="toggleListGridView('grid')"
+          [ngStyle]="{'background-color': listGridView === 'grid' ? 'white' : 'transparent'}"
+        >
+          <mat-icon>grid_on</mat-icon>
+        </div>
+      </div> -->
+    </div>
+
     <div
       class="tasks-list"
       cdkDropList
@@ -9,6 +29,7 @@
       [cdkDropListData]="taskCards"
       [cdkDropListConnectedTo]="getTeamTaskDropLists()"
       (cdkDropListDropped)="onDrop($event)"
+      *ngIf="listGridView == 'grid'"
     >
       <div 
         class="task-card"
@@ -16,13 +37,54 @@
         cdkDrag
         [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
       >
-        <div class="task-indicator">{{ getTaskIndicator(task) }}</div>
-        <div class="task-number">{{ task.houseNumber }}</div>
+      <div class="task-number">{{ task.houseNumber }}</div>
+      <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
       </div>
       <div class="placeholder" *ngIf="taskCards.length === 0">
         No tasks available
       </div>
     </div>
+    
+    <ng-container *ngIf="listGridView == 'list'">
+      <div *ngFor="let filteredTaskType of filteredTaskTypes">
+        <div class="title-container" (click)="toggleExpandMinimize(filteredTaskType.task_type_name)">
+          <h3>{{ filteredTaskType.task_type_name }}</h3>
+          
+          <mat-icon *ngIf="!expandedSections[filteredTaskType.task_type_name]" id="minimize-icon">minimize</mat-icon>
+          <mat-icon *ngIf="expandedSections[filteredTaskType.task_type_name]" id="expand-icon">crop_square</mat-icon>
+        </div>
+        <div
+          class="tasks-list"
+          cdkDropList
+          id="tasks-list-{{filteredTaskType.task_type_name}}"
+          [cdkDropListData]="taskCards | tasksFilter: [filteredTaskType.task_type_name]"
+          [cdkDropListConnectedTo]="getAllDropLists()"
+          (cdkDropListDropped)="onDrop($event)"
+          [ngStyle]="{'display': !expandedSections[filteredTaskType.task_type_name] ? 'flex' : 'none'}"
+        >
+          <div 
+            class="task-card"
+            *ngFor="let task of taskCards | tasksFilter: [filteredTaskType.task_type_name]"
+            cdkDrag
+            [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
+          >
+            <div class="task-number">{{ task.houseNumber }}</div>
+            <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
+            
+            <!-- Custom drag preview -->
+            <ng-template cdkDragPreview>
+              <div class="task-card task-card-preview">
+                <div class="task-number">{{ task.houseNumber }}</div>
+                <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
+              </div>
+            </ng-template>
+          </div>
+          <div class="placeholder" *ngIf="(taskCards | tasksFilter: [filteredTaskType.task_type_name]).length === 0">
+            No tasks available
+          </div>
+        </div>
+      </div>
+    </ng-container>
   </div>
 
   <!-- Middle - Teams -->
@@ -50,7 +112,7 @@
             cdkDropList
             [id]="'team-' + team.id + '-tasks'"
             [cdkDropListData]="team.tasks"
-            [cdkDropListConnectedTo]="isTeamLocked(team.id) ? [] : ['tasks-list']"
+            [cdkDropListConnectedTo]="getAllDropLists()"
             (cdkDropListDropped)="onDrop($event)"
             [cdkDropListDisabled]="isTeamLocked(team.id)"
           >
@@ -61,8 +123,16 @@
               [cdkDragDisabled]="isTeamLocked(team.id)"
               [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
             >
-              <div class="task-indicator">{{ getTaskIndicator(task) }}</div>
-              <div class="task-number">{{ task.houseNumber }}</div>
+            <div class="task-number">{{ task.houseNumber }}</div>
+              <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
+              
+              <!-- Custom drag preview -->
+              <ng-template cdkDragPreview>
+                <div class="task-card task-card-preview">
+                  <div class="task-number">{{ task.houseNumber }}</div>
+                  <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
+                </div>
+              </ng-template>
             </div>
             <div class="placeholder" *ngIf="team.tasks.length === 0">
               Drop tasks here
@@ -97,7 +167,7 @@
 
   <!-- Right side - Cleaning Staff -->
   <div class="staff-section">
-    <h3>Available Cleaninsssg Staff</h3>
+    <h3>Available Cleaning Staff</h3>
     <div
       class="staff-list"
       cdkDropList
