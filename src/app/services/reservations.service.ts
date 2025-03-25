@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { MobileHome, Reservation } from '../models/mobile-home.interface';
+import { ReservationInfo } from '../components/reservations2/reservations2.component';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +42,132 @@ export class ReservationsService {
       console.error('Error in getHouseAvailabilities:', error);
       return [];
     }
+  }
+ 
+  reservations: { [key: number]: { [key: string]: ReservationInfo }} = {}
+  generateMockReservations(mobileHomes: any, reservationColors: any): { [key: number]: { [key: string]: ReservationInfo } } {
+    // const reservations: { [key: number]: { [key: string]: ReservationInfo } } = {};
+
+    if(this.reservations != null && Object.keys(this.reservations).length > 0) {
+      return this.reservations;
+    }
+    
+    // Create guest names array for more variety
+    const guestNames = [
+      'Zimak', 'Simon', 'Becker', 'Unterrainer', 'Pressl', 'Monde',
+      'Johnson', 'Smith', 'Williams', 'Brown', 'Jones', 'Miller', 
+      'Davis', 'Garcia', 'Rodriguez', 'Wilson', 'Martinez', 'Anderson'
+    ];
+    
+    // Generate random reservations across all houses for relevant months (4-10)
+    for (let month = 4; month <= 10; month++) {
+      // Get days in this month
+      const daysInMonth = new Date(2025, month, 0).getDate();
+      
+      // Generate multiple reservations per month (about 40% occupancy)
+      const totalReservations = Math.floor(mobileHomes.length * 0.4);
+      
+      for (let i = 0; i < totalReservations; i++) {
+        // Random house from our array
+        const randomHouseIndex = Math.floor(Math.random() * mobileHomes.length);
+        const house = mobileHomes[randomHouseIndex];
+        
+        // Random start/end dates for this month
+        const startDay = Math.floor(Math.random() * (daysInMonth - 7)) + 1; // 1 to (daysInMonth-7)
+        const duration = Math.floor(Math.random() * 10) + 3; // 3-12 days
+        const endDay = Math.min(startDay + duration, daysInMonth); // Ensure we don't go beyond month
+        
+        // Random guest details
+        const guestName = guestNames[Math.floor(Math.random() * guestNames.length)];
+        const adults = Math.floor(Math.random() * 3) + 1; // 1-3 adults
+        const children = Math.floor(Math.random() * 4); // 0-3 children
+        const extraBeds = Math.floor(Math.random() * 2); // 0-1 extra beds
+        const pets = Math.random() > 0.8 ? 1 : 0; // 20% chance of pets
+        
+        // Notes options
+        const notesOptions = [
+          '', '', '', // Empty notes more likely
+          'Early check-in requested',
+          'Late check-out requested',
+          'Anniversary celebration',
+          'Birthday during stay',
+          'Business trip',
+          'Family vacation',
+          'Returning guest',
+          'Needs extra towels'
+        ];
+        const notes = notesOptions[Math.floor(Math.random() * notesOptions.length)];
+        
+        // Phone number generation
+        const areaCode = Math.floor(Math.random() * 900) + 100;
+        const prefix = Math.floor(Math.random() * 900) + 100;
+        const lineNum = Math.floor(Math.random() * 9000) + 1000;
+        const phone = `${areaCode}-${prefix}-${lineNum}`;
+        
+        // Only add if this house doesn't already have a reservation for these dates
+        let hasOverlap = false;
+        
+        // Check if this house already has any reservations
+        if (this.reservations[house.house_id]) {
+          for (let day = startDay; day <= endDay; day++) {
+            const dayStr = `${day}.${month}`;
+            if (this.reservations[house.house_id][dayStr]) {
+              hasOverlap = true;
+              break;
+            }
+          }
+        }
+        
+        // Add reservation if no overlap
+        if (!hasOverlap) {
+          // Generate unique reservation ID
+          const reservationId = `res-${house.house_id}-${month}-${startDay}`;
+          
+          // Find or create color for this guest
+          let colorEntry = reservationColors.find((c: any) => 
+            c.name.toLowerCase() === guestName.toLowerCase()
+          );
+          
+          // If no color found, generate a random pastel color
+          if (!colorEntry) {
+            const hue = Math.floor(Math.random() * 360);
+            const pastelColor = `hsl(${hue}, 70%, 85%)`;
+            colorEntry = { name: guestName, color: pastelColor };
+          }
+          
+          // Initialize house reservations if not exists
+          if (!this.reservations[house.house_id]) {
+            this.reservations[house.house_id] = {};
+          }
+          
+          // Add an entry for each day in the range
+          for (let day = startDay; day <= endDay; day++) {
+            const dayStr = `${day}.${month}`;
+            
+            this.reservations[house.house_id][dayStr] = {
+              reservationId: reservationId,
+              guest: guestName,
+              color: colorEntry.color,
+              phone: phone,
+              adults: adults,
+              children: children,
+              extraBeds: extraBeds,
+              pets: pets,
+              notes: notes,
+              startDay: startDay,
+              startMonth: month,
+              endDay: endDay,
+              endMonth: month,
+              isFirstDay: day === startDay,
+              isLastDay: day === endDay,
+              house_id: house.house_id
+            };
+          }
+        }
+      }
+    }
+    
+    return this.reservations;
   }
 
   /**
