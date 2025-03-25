@@ -33,7 +33,15 @@
 <main class="main-content" [class.with-header]="username">
   <router-outlet></router-outlet>
 
+  <button class="report-unscheduled-task" (click)="openUnscheduledTaskReport()">
+    <mat-icon>playlist_add</mat-icon>
+  </button>
+
   <button class="fab" (click)="openRepairReport()">
     <mat-icon>build</mat-icon>
   </button>
 </main>
+
+<div (click)="undimBackground()" *ngIf="isBackgroundDimmed" class="dim-overlay">
+
+</div>

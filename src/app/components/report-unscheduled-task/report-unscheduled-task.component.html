@@ -1,0 +1,65 @@
+<div class="repair-report-page">
+    <div class="header">
+      <button class="close-btn" (click)="goBack()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <h2>Report Unscheduled Task</h2>
+    </div>
+  
+    <div class="content">
+      <form (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill">
+          <mat-label>Location</mat-label>
+          <mat-select [(ngModel)]="report.location" name="location" required>
+            <mat-option  
+              [ngStyle]="{'background-color': '#D0D2DC'}"
+            >
+              <ngx-mat-select-search 
+                placeholderLabel="Find a house..." 
+                [formControl]="locationFilterCtrl"
+                [noEntriesFoundLabel]="'No houses found'"
+              ></ngx-mat-select-search>
+            </mat-option>
+            <mat-option *ngFor="let mobileHome of filteredMobileHomes" [value]="mobileHome.house_id">
+              {{ mobileHome.housename }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Task type</mat-label>
+          <mat-select [(ngModel)]="report.taskType" name="task-type" required>
+            <mat-option  
+              [ngStyle]="{'background-color': '#D0D2DC'}"
+            >
+              <ngx-mat-select-search 
+                placeholderLabel="Find a task type..." 
+                [formControl]="taskTypesFilterCtrl"
+                [noEntriesFoundLabel]="'No task types found'"
+              ></ngx-mat-select-search>
+            </mat-option>
+            <mat-option *ngFor="let taskType of filteredTaskTypes" [value]="taskType.task_type_name">
+              {{ taskType.task_type_name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Description</mat-label>
+          <textarea matInput
+                    [(ngModel)]="report.description"
+                    name="description"
+                    required
+                    rows="4"
+                    placeholder="Describe the issue..."></textarea>
+        </mat-form-field>
+  
+        <button mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="!report.description || !report.location">
+          Submit Report
+        </button>
+      </form>
+    </div>
+</div>

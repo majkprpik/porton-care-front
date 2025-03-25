@@ -154,6 +154,16 @@ body {
   margin-right: auto;
 }
 
+.dim-overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1001; 
+}
+
 // Mobile styles
 @media (max-width: $mobile-breakpoint) {
   .main-header {
@@ -236,8 +246,33 @@ body {
   z-index: 1000;
 
   &:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     background: #0056b3;
+  }
+
+  i {
+    font-size: 24px;
+  }
+}
+
+.report-unscheduled-task{
+  position: fixed;
+  bottom: 7rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgb(255, 34, 34);
+  border: none;
+  color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 1000;
+
+  &:hover {
+    transform: scale(1.05);
+    background: rgb(175, 1, 1);
   }
 
   i {

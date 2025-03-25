@@ -11,7 +11,16 @@
       <mat-form-field appearance="fill">
         <mat-label>Location</mat-label>
         <mat-select [(ngModel)]="report.location" name="location" required>
-          <mat-option *ngFor="let mobileHome of mobileHomes" [value]="mobileHome.house_id">
+          <mat-option  
+            [ngStyle]="{'background-color': '#D0D2DC'}"
+          >
+            <ngx-mat-select-search 
+              placeholderLabel="Find a house..." 
+              [formControl]="locationFilterCtrl"
+              [noEntriesFoundLabel]="'No houses found'"
+            ></ngx-mat-select-search>
+          </mat-option>
+          <mat-option *ngFor="let mobileHome of filteredMobileHomes" [value]="mobileHome.house_id">
             {{ mobileHome.housename }}
           </mat-option>
         </mat-select>
@@ -34,5 +43,46 @@
         Submit Report
       </button>
     </form>
+
+    <input type="file" accept="image/*" capture="environment" (change)="handleImageCapture($event)" hidden #fileInput>
+
+    <div class="image-upload-container">
+      <div class="image-upload" [ngStyle]="{'height': capturedImage ? '300px' : '200px', 'justify-content': imagesToUpload.length > 0 ? '' : 'center'}">
+        <ng-container *ngIf="!capturedImage">
+          <img (click)="openImage(imageToDisplay)" *ngFor="let imageToDisplay of imagesToDisplay" [src]="imageToDisplay" [alt]="imageToDisplay">
+        </ng-container>
+        <div class="upload-image"
+             (click)="openCamera()"
+             *ngIf="!capturedImage"
+        >
+          <span class="camera-icon">📷</span>
+          <span class="camera-icon-label">Upload image...</span>
+        </div>
+
+        <div 
+          class="save-captured-image"
+          *ngIf="capturedImage"    
+        >  
+          <span>Save captured image?</span>
+          <img [src]="capturedImage" alt="Captured Photo">
+          <div class="save-image-error" *ngIf="displaySaveImageError">
+            <span>
+              {{ saveImageError }}
+            </span>
+          </div>
+          <div class="save-captured-image-buttons">
+            <button (click)="saveImage()">Save</button>
+            <button (click)="discardImage()">Discard</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div> 
+
+<div *ngIf="openedImage" class="opened-image" (click)="closeImage()">
+  <div class="opened-image-container" (click)="$event.stopPropagation()">
+      <mat-icon (click)="closeImage(); $event.stopPropagation()">cancel</mat-icon>
+      <img [src]="openedImage" alt="Opened image">
+  </div>
+</div>

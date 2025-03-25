@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { StatsHeaderComponent } from './components/stats-header/stats-header.component';
 import { ProfileService } from './services/profile.service';
+import { HelperService } from './services/helper.service';
 
 @Component({
   selector: 'app-root',
@@ -24,11 +25,13 @@ export class AppComponent {
   title = 'PortonCare';
   isMenuOpen = false;
   username: string | null = null;
+  isBackgroundDimmed = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    public helperService: HelperService
   ) {}
 
   ngOnInit() {
@@ -46,6 +49,9 @@ export class AppComponent {
       })
     }
 
+    this.helperService.dimBackground.subscribe(res => {
+      this.isBackgroundDimmed = res;
+    })
   }
 
   toggleMenu() {
@@ -76,5 +82,13 @@ export class AppComponent {
 
   openRepairReport() {
     this.router.navigate(['/report-repair']);
+  }
+
+  openUnscheduledTaskReport(){
+    this.router.navigate(['/report-unscheduled-task']);
+  }
+
+  undimBackground(){
+    this.helperService.dimBackground.next(false);
   }
 }

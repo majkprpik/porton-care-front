@@ -20,6 +20,7 @@ export class DamageReportCardComponent {
   @Input() houseTask!: any;
   @Input() maintenanceProfiles: Profile[] = [];
   @Output() taskRepaired = new EventEmitter<{ taskId: number, isRepaired: boolean }>();
+  @Output() openImage = new EventEmitter<{ imageUrl: string }>();
   
   selectedTab: string = 'images';
   comment: string = '';
@@ -208,10 +209,11 @@ export class DamageReportCardComponent {
 
   saveImage(){
     if(this.imageToUpload && this.houseTask.taskId){
-      this.storageService.storeImageForTask(this.imageToUpload, this.houseTask.taskId)
+      const renamedFile = this.renameImageNameForSupabaseStorage();
+      this.storageService.storeImageForTask(renamedFile, this.houseTask.taskId)
         .then(result => {
           if(!result.error) {
-            this.images.push({ name: this.imageToUpload.name, url: result.url });
+            this.images.push({ name: renamedFile.name, url: result.url });
             this.capturedImage = '';
             this.displaySaveImageError = false;   
             this.saveImageError = '';
@@ -229,5 +231,22 @@ export class DamageReportCardComponent {
     this.capturedImage = '';
     this.displaySaveImageError = false;
     this.saveImageError = '';
+  }
+
+  onOpenImage(imageUrl: string){
+    this.openImage.emit({
+      imageUrl: imageUrl
+    });
+  }
+
+  private renameImageNameForSupabaseStorage(){
+    const sanitizedFileName = this.imageToUpload.name.replace(/\s+/g, '-');
+
+    const renamedFile = new File([this.imageToUpload], sanitizedFileName, { 
+      type: this.imageToUpload.type, 
+      lastModified: this.imageToUpload.lastModified 
+    });
+
+    return renamedFile;
   }
 }
