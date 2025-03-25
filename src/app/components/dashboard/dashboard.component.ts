@@ -28,7 +28,7 @@ interface CategorizedHomes {
     CommonModule, 
     MobileHomeCardComponent, 
     MatCardModule, 
-    HomesFilterPipe, 
+    // HomesFilterPipe, 
     FormsModule, 
     NewsFeedComponent
   ]

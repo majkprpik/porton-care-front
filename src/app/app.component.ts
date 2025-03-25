@@ -15,7 +15,7 @@ import { ProfileService } from './services/profile.service';
     RouterLink,
     RouterLinkActive,
     MatIconModule,
-    StatsHeaderComponent
+    // StatsHeaderComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

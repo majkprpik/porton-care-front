@@ -59,7 +59,7 @@
               (mousemove)="onCellMouseMove(row.house_id, date, $event)"
               (mouseup)="onCellMouseUp(row.house_id, date, $event)"
               (click)="onCellClick(row.house_id, date, $event)"
-              draggable="{{row.dates.includes(date) && row.reservations[date].isFirstDay}}"
+              [draggable]="row.dates.includes(date) && row.reservations[date].isFirstDay === true"
               (dragstart)="onReservationDragStart(row.house_id, date, $event)"
               (dragend)="onReservationDragEnd($event)"
               (dragover)="onReservationDragOver(row.house_id, date, $event)"

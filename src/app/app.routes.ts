@@ -9,7 +9,7 @@ import { TeamViewComponent } from './components/team-view/team-view.component';
 import { DailySheetComponent } from './components/daily-sheet/daily-sheet.component';
 import { ProfileManagementComponent } from './components/profile-management/profile-management.component';
 import { DamageReportsComponent } from './components/damage-reports/damage-reports.component';
-import { ReservationsComponent } from './components/reservations/reservations.component';
+// import { ReservationsComponent } from './components/reservations/reservations.component';
 import { Reservations2Component } from './components/reservations2/reservations2.component';
 
 
@@ -19,7 +19,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'daily-sheet', component: DailySheetComponent, canActivate: [AuthGuard] },
   { path: 'damage-reports', component: DamageReportsComponent, canActivate: [AuthGuard] },
-  { path: 'reservations', component: ReservationsComponent, canActivate: [AuthGuard] },
+  // { path: 'reservations', component: ReservationsComponent, canActivate: [AuthGuard] },
   { path: 'reservations2', component: Reservations2Component, canActivate: [AuthGuard] },
   { path: 'teams', component: TeamViewComponent, canActivate: [AuthGuard] },
   { path: 'team/:id', component: TeamDetailComponent },

@@ -18,7 +18,7 @@ export class StorageService {
   
       const { data, error: storeImageError } = await this.supabase.getClient()
         .storage
-        .from('images-damage-report')
+        .from('damage')
         .upload(filePath, image);
       
       console.log('Upload response: ' + data);
@@ -26,7 +26,7 @@ export class StorageService {
 
       const publicUrl = this.supabase.getClient()
         .storage
-        .from('images-damage-report')
+        .from('damage')
         .getPublicUrl(data.path).data.publicUrl;
     
       return { path: data.path, url: publicUrl };
@@ -42,7 +42,7 @@ export class StorageService {
 
       const { data: files, error: listError } = await this.supabase.getClient()
         .storage
-        .from('images-damage-report')
+        .from('damage')
         .list(folderPath);
 
       if (listError) throw listError;
@@ -59,7 +59,7 @@ export class StorageService {
       const response: any = await this.supabase
         .getClient()
         .storage
-        .from('images-damage-report')
+        .from('damage')
         .getPublicUrl(filePath);
   
       if (response && response.data && response.data.publicUrl) {

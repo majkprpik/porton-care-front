@@ -1260,12 +1260,17 @@ export class Reservations2Component implements OnInit, OnDestroy {
   
   // Handle start of dragging a reservation
   onReservationDragStart(houseId: number, date: string, event: DragEvent): void {
+    console.log('Drag start event triggered', houseId, date);
+    
     // Only allow dragging from the first day of a reservation
     const reservation = this.getReservation(houseId, date);
     if (!reservation || !reservation.isFirstDay || !event.dataTransfer) {
+      console.log('Drag prevented: not first day or no dataTransfer', reservation);
       event.preventDefault();
       return;
     }
+    
+    console.log('Valid drag start for reservation', reservation.reservationId);
     
     // Set drag data
     this.draggedReservationId = reservation.reservationId;
@@ -1321,9 +1326,10 @@ export class Reservations2Component implements OnInit, OnDestroy {
   
   // Handle dragging over a potential drop target
   onReservationDragOver(houseId: number, date: string, event: DragEvent): void {
-    if (!this.draggedReservationId || !event.dataTransfer) return;
-    
+    // Always prevent default to allow drop
     event.preventDefault();
+    
+    if (!this.draggedReservationId || !event.dataTransfer) return;
     
     // Check if this would be a valid drop
     const isValid = this.isValidDropTarget(houseId, date);
@@ -1337,21 +1343,25 @@ export class Reservations2Component implements OnInit, OnDestroy {
   
   // Handle entering a potential drop target
   onReservationDragEnter(houseId: number, date: string, event: DragEvent): void {
-    if (!this.draggedReservationId) return;
-    
     event.preventDefault();
+    
+    if (!this.draggedReservationId) return;
     
     // Check if this would be a valid drop
     const isValid = this.isValidDropTarget(houseId, date);
+    console.log('Drag enter', { houseId, date, isValid });
     
     // Add appropriate visual class
     const cell = event.target as HTMLElement;
+    
+    // First remove both classes
+    cell.classList.remove('drag-over-valid', 'drag-over-invalid');
+    
+    // Then add the appropriate one
     if (isValid) {
       cell.classList.add('drag-over-valid');
-      cell.classList.remove('drag-over-invalid');
     } else {
       cell.classList.add('drag-over-invalid');
-      cell.classList.remove('drag-over-valid');
     }
   }
   
@@ -1459,6 +1469,7 @@ export class Reservations2Component implements OnInit, OnDestroy {
   // Helper method to check if a drop target is valid
   isValidDropTarget(houseId: number, date: string): boolean {
     if (!this.draggedStartDate || !this.draggedEndDate || !this.draggedDuration) {
+      console.log('Invalid drop: missing drag data');
       return false;
     }
     
@@ -1471,8 +1482,16 @@ export class Reservations2Component implements OnInit, OnDestroy {
     const newEndDate = new Date(newStartDate);
     newEndDate.setDate(newStartDate.getDate() + this.draggedDuration - 1);
     
+    // Same house as origin? (not invalid, but no point in allowing it)
+    if (houseId === this.draggedFromHouseId) {
+      console.log('Same house drop - not invalid but not useful');
+      return false;
+    }
+    
     // Check if the new date range is valid
-    return !this.hasOverlappingReservations(houseId, newStartDate, newEndDate, this.draggedReservationId || undefined);
+    const hasOverlap = this.hasOverlappingReservations(houseId, newStartDate, newEndDate, this.draggedReservationId || undefined);
+    console.log('Drop target validation:', { houseId, date, hasOverlap, draggedDuration: this.draggedDuration });
+    return !hasOverlap;
   }
   
   // Check if there are overlapping reservations for a date range in a house
@@ -1608,13 +1627,16 @@ export class Reservations2Component implements OnInit, OnDestroy {
   updateDragGhostPosition(event: DragEvent): void {
     if (!this.dragGhostVisible) return;
     
-    this.dragGhostPosition = {
-      top: `${event.clientY + 15}px`,
-      left: `${event.clientX + 15}px`
-    };
-    
-    // Force change detection to update the position
-    this.changeDetectorRef.detectChanges();
+    // Use requestAnimationFrame for smoother performance
+    requestAnimationFrame(() => {
+      this.dragGhostPosition = {
+        top: `${event.clientY + 15}px`,
+        left: `${event.clientX + 15}px`
+      };
+      
+      // Force change detection to update the position
+      this.changeDetectorRef.detectChanges();
+    });
   }
   
   // Show a status message during drag operations
