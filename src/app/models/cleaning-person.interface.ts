@@ -1,6 +1,8 @@
 export interface CleaningPerson {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  role: string;
   available: boolean;
   currentTask?: string;
 } 
