@@ -37,13 +37,13 @@
 
 .mobile-home-card {
   min-width: 150px;
-  height: 28px; /* Collapsed height - only for the top row */
+  height: 40px; /* Collapsed height - only for the top row */
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  margin: 8px;
+  // margin: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: height 0.3s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease;
   position: relative;
@@ -105,7 +105,7 @@
     justify-content: space-between;
     align-items: center;
     position: relative;
-    padding: 0 4px;
+    padding: 8px 8px;
   }
   
   // House info container (number + counts)

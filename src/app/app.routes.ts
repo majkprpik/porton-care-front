@@ -12,7 +12,7 @@ import { DamageReportsComponent } from './components/damage-reports/damage-repor
 // import { ReservationsComponent } from './components/reservations/reservations.component';
 import { Reservations2Component } from './components/reservations2/reservations2.component';
 import { ReportUnscheduledTaskComponent } from './components/report-unscheduled-task/report-unscheduled-task.component';
-
+import { DesignSystemComponent } from './components/design-system/design-system.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -28,5 +28,6 @@ export const routes: Routes = [
   { path: 'report-repair', component: RepairReportComponent },
   { path: 'report-unscheduled-task', component: ReportUnscheduledTaskComponent },
   { path: 'profiles', component: ProfileManagementComponent, canActivate: [AuthGuard] },
+  { path: 'design-system', component: DesignSystemComponent },
   { path: '**', redirectTo: '/dashboard' },
 ];
