@@ -3,21 +3,21 @@
       <button class="close-btn" (click)="goBack()">
         <mat-icon>close</mat-icon>
       </button>
-      <h2>Report Unscheduled Task</h2>
+      <h2>Prijava izvanrednog zadatka</h2>
     </div>
   
     <div class="content">
       <form (ngSubmit)="onSubmit()">
         <mat-form-field appearance="fill">
-          <mat-label>Location</mat-label>
+          <mat-label>Lokacija</mat-label>
           <mat-select [(ngModel)]="report.location" name="location" required>
             <mat-option  
               [ngStyle]="{'background-color': '#D0D2DC'}"
             >
               <ngx-mat-select-search 
-                placeholderLabel="Find a house..." 
+                placeholderLabel="Pronađi kućicu..." 
                 [formControl]="locationFilterCtrl"
-                [noEntriesFoundLabel]="'No houses found'"
+                [noEntriesFoundLabel]="'Nema pronađenih kućica'"
               ></ngx-mat-select-search>
             </mat-option>
             <mat-option *ngFor="let mobileHome of filteredMobileHomes" [value]="mobileHome.house_id">
@@ -27,15 +27,15 @@
         </mat-form-field>
 
         <mat-form-field appearance="fill">
-          <mat-label>Task type</mat-label>
+          <mat-label>Vrsta zadatka</mat-label>
           <mat-select [(ngModel)]="report.taskType" name="task-type" required>
             <mat-option  
               [ngStyle]="{'background-color': '#D0D2DC'}"
             >
               <ngx-mat-select-search 
-                placeholderLabel="Find a task type..." 
+                placeholderLabel="Pronađi vrstu zadatka..." 
                 [formControl]="taskTypesFilterCtrl"
-                [noEntriesFoundLabel]="'No task types found'"
+                [noEntriesFoundLabel]="'Nema pronađenih vrsta zadataka'"
               ></ngx-mat-select-search>
             </mat-option>
             <mat-option *ngFor="let taskType of filteredTaskTypes" [value]="taskType.task_type_name">
@@ -45,20 +45,20 @@
         </mat-form-field>
   
         <mat-form-field appearance="fill">
-          <mat-label>Description</mat-label>
+          <mat-label>Opis</mat-label>
           <textarea matInput
                     [(ngModel)]="report.description"
                     name="description"
                     required
                     rows="4"
-                    placeholder="Describe the issue..."></textarea>
+                    placeholder="Opiši zadatak..."></textarea>
         </mat-form-field>
   
         <button mat-raised-button
                 color="primary"
                 type="submit"
                 [disabled]="!report.description || !report.location">
-          Submit Report
+          Prijavi zadatak
         </button>
       </form>
     </div>

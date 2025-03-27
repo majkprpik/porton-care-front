@@ -4,6 +4,7 @@ import { TeamsService } from '../../services/teams.service';
 import { LockedTeam, Task } from '../../interfaces/team.interface';
 import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../../services/supabase.service';
+import { MatIconModule } from '@angular/material/icon';
 
 enum TaskProgressType {
   ASSIGNED = 'Dodijeljeno',
@@ -14,7 +15,7 @@ enum TaskProgressType {
 @Component({
   selector: 'app-team-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './team-detail.component.html',
   styleUrls: ['./team-detail.component.scss'],
 })
@@ -159,5 +160,24 @@ export class TeamDetailComponent implements OnInit {
     } catch (error) {
       console.error('Error updating task progress in Supabase:', error);
     }
+  }
+
+  getTaskIcon(task: Task): string {
+    if (!task.taskType) return 'task_alt';
+    
+    const taskType = task.taskType.toLowerCase();
+    if (taskType.includes('čišćenje') && taskType.includes('terase')) {
+      return 'deck';
+    }
+    if (taskType.includes('čišćenje') && taskType.includes('kućice')) {
+      return 'cleaning_services';
+    }
+    if (taskType.includes('mijenjanje') && taskType.includes('ručnika')) {
+      return 'dry_cleaning';
+    }
+    if (taskType.includes('mijenjanje') && taskType.includes('posteljine')) {
+      return 'bed';
+    }
+    return 'task_alt';
   }
 }

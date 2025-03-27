@@ -30,7 +30,7 @@ interface CategorizedHomes {
     MatCardModule, 
     // HomesFilterPipe, 
     FormsModule, 
-    NewsFeedComponent
+    // NewsFeedComponent
   ]
 })
 export class DashboardComponent implements OnInit, OnDestroy {

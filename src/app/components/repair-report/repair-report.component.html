@@ -3,21 +3,21 @@
     <button class="close-btn" (click)="goBack()">
       <mat-icon>close</mat-icon>
     </button>
-    <h2>Report Repair Need</h2>
+    <h2>Prijava kvara</h2>
   </div>
 
   <div class="content">
     <form (ngSubmit)="onSubmit()">
       <mat-form-field appearance="fill">
-        <mat-label>Location</mat-label>
+        <mat-label>Lokacija</mat-label>
         <mat-select [(ngModel)]="report.location" name="location" required>
           <mat-option  
             [ngStyle]="{'background-color': '#D0D2DC'}"
           >
             <ngx-mat-select-search 
-              placeholderLabel="Find a house..." 
+              placeholderLabel="Pronađi kućicu..." 
               [formControl]="locationFilterCtrl"
-              [noEntriesFoundLabel]="'No houses found'"
+              [noEntriesFoundLabel]="'Nema pronađenih kućica'"
             ></ngx-mat-select-search>
           </mat-option>
           <mat-option *ngFor="let mobileHome of filteredMobileHomes" [value]="mobileHome.house_id">
@@ -27,13 +27,13 @@
       </mat-form-field>
 
       <mat-form-field appearance="fill">
-        <mat-label>Description</mat-label>
+        <mat-label>Opis</mat-label>
         <textarea matInput
                   [(ngModel)]="report.description"
                   name="description"
                   required
                   rows="4"
-                  placeholder="Describe the issue..."></textarea>
+                  placeholder="Opiši kvar..."></textarea>
       </mat-form-field>
 
       <button mat-raised-button
@@ -56,14 +56,14 @@
              *ngIf="!capturedImage"
         >
           <span class="camera-icon">📷</span>
-          <span class="camera-icon-label">Upload image...</span>
+          <span class="camera-icon-label">Učitaj sliku...</span>
         </div>
 
         <div 
           class="save-captured-image"
           *ngIf="capturedImage"    
         >  
-          <span>Save captured image?</span>
+          <span>Spremi slikanu fotografiju?</span>
           <img [src]="capturedImage" alt="Captured Photo">
           <div class="save-image-error" *ngIf="displaySaveImageError">
             <span>
@@ -71,8 +71,8 @@
             </span>
           </div>
           <div class="save-captured-image-buttons">
-            <button (click)="saveImage()">Save</button>
-            <button (click)="discardImage()">Discard</button>
+            <button (click)="saveImage()">Spremi</button>
+            <button (click)="discardImage()">Odbaci</button>
           </div>
         </div>
       </div>

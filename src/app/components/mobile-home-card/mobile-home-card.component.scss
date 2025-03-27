@@ -18,13 +18,13 @@
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(11, 204, 34, 0.983);
+    // box-shadow 0 0 0 0 rgba(11, 204, 34, 0.983);
   }
   70% {
-    box-shadow: 0 0 0 5px rgba(0, 0, 0, 0);
+    // box-shadow 0 0 0 5px rgba(0, 0, 0, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    // box-shadow 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
 
@@ -44,7 +44,7 @@
   justify-content: flex-start;
   align-items: center;
   // margin: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  // box-shadow 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: height 0.3s ease-in-out, box-shadow 0.3s ease, transform 0.3s ease;
   position: relative;
   cursor: pointer;
@@ -81,7 +81,7 @@
   }
   
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    // box-shadow 0 4px 8px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
   }
   
@@ -118,6 +118,7 @@
   
   // House number styles
   .house-number {
+    margin-left: 10px !important;
     padding-top: 3px;
     padding-left: 3px;
     font-size: 19px;
@@ -148,28 +149,30 @@
     align-items: center;
     justify-content: center;
     margin-left: 2px;
+
+    margin-right: 6px;
     
     mat-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
-      color: #0066cc; // Default blue color
+      color: #37323E; // Default blue color
       text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
     }
     
     // Repair task icon style - black color
-    &.repair-task mat-icon {
-      color: #000000; // Black color for repair tasks
-    }
+    // &.repair-task mat-icon {
+    //   color: #000000; // Black color for repair tasks
+    // }
     
-    // Cleaning task icon styles
-    &.cleaning-task-red mat-icon {
-      color: #cc0000; // Red color for some cleaning tasks
-    }
+    // // Cleaning task icon styles
+    // &.cleaning-task-red mat-icon {
+    //   color: #cc0000; // Red color for some cleaning tasks
+    // }
     
-    &.cleaning-task-blue mat-icon {
-      color: #0066cc; // Blue color for other cleaning tasks
-    }
+    // &.cleaning-task-blue mat-icon {
+    //   color: #0066cc; // Blue color for other cleaning tasks
+    // }
     
     &.rotating mat-icon {
       animation: rotate 6s ease-in-out infinite;
@@ -198,14 +201,14 @@
     .task-icon-corner {
       margin-left: 2px;
       
-      &.small mat-icon {
-        color: #0066cc;
-        text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
-      }
+      // &.small mat-icon {
+      //   color: #0066cc;
+      //   text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+      // }
       
-      &.second mat-icon {
-        color: #0066cc;
-      }
+      // &.second mat-icon {
+      //   color: #0066cc;
+      // }
     }
   }
   

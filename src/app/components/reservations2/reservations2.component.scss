@@ -171,7 +171,7 @@
     &:not(.has-reservation):hover {
       background-color: rgba(66, 133, 244, 0.1);
       border: 2px dashed #4285f4;
-      box-shadow: inset 0 0 6px rgba(66, 133, 244, 0.2);
+      // box-shadow inset 0 0 6px rgba(66, 133, 244, 0.2);
       z-index: 3;
     }
     
@@ -179,7 +179,7 @@
       background-color: rgba(0, 123, 255, 0.25) !important;
       border: 2px solid #007bff !important;
       z-index: 2;
-      box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+      // box-shadow 0 0 5px rgba(0, 123, 255, 0.4);
       position: relative;
     }
     
@@ -218,7 +218,7 @@
       text-overflow: ellipsis;
       position: relative;
       border: 2px solid #444;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      // box-shadow 0 0 5px rgba(0, 0, 0, 0.2);
       z-index: 5;
       
       // Make reservations draggable with visual cues
@@ -227,7 +227,7 @@
         transition: transform 0.1s, box-shadow 0.1s;
         
         &:hover {
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+          // box-shadow 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
         &:active {
@@ -240,20 +240,20 @@
       &.dragging {
         opacity: 0.7;
         transform: scale(0.98);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        // box-shadow 0 5px 15px rgba(0, 0, 0, 0.3);
         pointer-events: none;
         cursor: grabbing !important;
       }
       
       // Style for valid drop target
       &.drag-over-valid, .reservation-cell.drag-over-valid {
-        box-shadow: inset 0 0 0 2px #4CAF50;
+        // box-shadow inset 0 0 0 2px #4CAF50;
         background-color: rgba(76, 175, 80, 0.1);
       }
       
       // Style for invalid drop target
       &.drag-over-invalid, .reservation-cell.drag-over-invalid {
-        box-shadow: inset 0 0 0 2px #F44336;
+        // box-shadow inset 0 0 0 2px #F44336;
         background-color: rgba(244, 67, 54, 0.1);
       }
       
@@ -368,7 +368,7 @@
   width: 350px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  // box-shadow 0 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   overflow: hidden;
   animation: popup-fade-in 0.2s;
@@ -487,7 +487,7 @@
   width: 450px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  // box-shadow 0 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   overflow: hidden;
   animation: popup-fade-in 0.2s;
@@ -718,7 +718,7 @@
     &:focus {
       border-color: #4CAF50;
       outline: none;
-      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+      // box-shadow 0 0 0 2px rgba(76, 175, 80, 0.2);
     }
   }
 }
@@ -804,7 +804,7 @@
   background-color: #4285f4 !important;
   color: white !important;
   font-weight: bold;
-  box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+  // box-shadow 0 0 5px rgba(66, 133, 244, 0.5);
   position: relative;
   z-index: 20;
   
@@ -852,7 +852,7 @@
 // Row highlight effect
 .row-highlight {
   background-color: rgba(66, 133, 244, 0.08) !important; // More transparent
-  box-shadow: inset 0 0 3px rgba(66, 133, 244, 0.2);
+  // box-shadow inset 0 0 3px rgba(66, 133, 244, 0.2);
   z-index: 1; // Lower z-index so reservations appear on top
   
   &:not(.has-reservation) {
@@ -872,7 +872,7 @@
 // Column highlight effect
 .column-highlight {
   background-color: rgba(66, 133, 244, 0.08) !important; // More transparent
-  box-shadow: inset 0 0 3px rgba(66, 133, 244, 0.2);
+  // box-shadow inset 0 0 3px rgba(66, 133, 244, 0.2);
   z-index: 1; // Lower z-index so reservations appear on top
   
   &:not(.has-reservation) {
@@ -898,7 +898,7 @@
   &.row-highlight,
   &.column-highlight {
     // Increase visibility with a subtle border
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    // box-shadow 0 0 0 1px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -909,7 +909,7 @@
   &.row-highlight, 
   &.column-highlight {
     // Extra emphasis for cells that are both reservation AND in highlighted row/column
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25) !important;
+    // box-shadow 0 0 0 2px rgba(0, 0, 0, 0.25) !important;
   }
 }
 
@@ -917,7 +917,7 @@
 .reservation-highlight-priority {
   z-index: 20 !important; // Higher than anything else
   position: relative;
-  box-shadow: 0 0 0 2px #4285f4, 0 0 8px rgba(66, 133, 244, 0.5) !important;
+  // box-shadow 0 0 0 2px #4285f4, 0 0 8px rgba(66, 133, 244, 0.5) !important;
   border-color: #4285f4 !important;
   filter: brightness(1.05) !important; // Slightly brighter
   transform: translateY(-1px) !important; // Slight lift effect
@@ -926,13 +926,13 @@
 // Empty cells need drag-over states too
 .reservation-cell:not(.has-reservation) {
   &.drag-over-valid {
-    box-shadow: inset 0 0 0 2px #4CAF50;
+    // box-shadow inset 0 0 0 2px #4CAF50;
     background-color: rgba(76, 175, 80, 0.1);
     z-index: 5;
   }
   
   &.drag-over-invalid {
-    box-shadow: inset 0 0 0 2px #F44336;
+    // box-shadow inset 0 0 0 2px #F44336;
     background-color: rgba(244, 67, 54, 0.1);
     z-index: 5;
   }
@@ -958,7 +958,7 @@
   border: 2px solid #444;
   border-radius: 4px;
   padding: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  // box-shadow 0 5px 15px rgba(0, 0, 0, 0.3);
   font-weight: bold;
   color: #333;
   max-width: 200px;
@@ -990,7 +990,7 @@
   border-radius: 4px;
   z-index: 1010;
   font-size: 14px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  // box-shadow 0 3px 10px rgba(0, 0, 0, 0.2);
   opacity: 0;
   transform: translateY(-20px);
   transition: opacity 0.3s, transform 0.3s;
