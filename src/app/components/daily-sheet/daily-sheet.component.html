@@ -25,6 +25,7 @@
     <div
       class="tasks-list"
       cdkDropList
+      cdkDropListOrientation="mixed"
       id="tasks-list"
       [cdkDropListData]="taskCards"
       [cdkDropListConnectedTo]="getTeamTaskDropLists()"
@@ -56,6 +57,7 @@
         <div
           class="tasks-list"
           cdkDropList
+          cdkDropListOrientation="mixed"
           id="tasks-list-{{filteredTaskType.task_type_name}}"
           [cdkDropListData]="taskCards | tasksFilter: [filteredTaskType.task_type_name]"
           [cdkDropListConnectedTo]="getAllDropLists()"
@@ -72,12 +74,12 @@
             <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
             
             <!-- Custom drag preview -->
-            <ng-template cdkDragPreview>
+            <!-- <ng-template cdkDragPreview>
               <div class="task-card task-card-preview">
                 <div class="task-number">{{ task.houseNumber }}</div>
                 <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
               </div>
-            </ng-template>
+            </ng-template> -->
           </div>
           <div class="placeholder" *ngIf="(taskCards | tasksFilter: [filteredTaskType.task_type_name]).length === 0">
             No tasks available
@@ -105,34 +107,36 @@
       </div>
       
       <div class="team-box" *ngFor="let team of assignedTeams">
-        <h4>Team {{ team.id }} <span *ngIf="isTeamLocked(team.id)" class="locked-indicator">(Locked)</span></h4>
+        <h4>Team {{ team.id }} 
+          <span *ngIf="teamStatus[team.id] === 'published'" class="locked-indicator">(Published)</span>
+          <span *ngIf="teamStatus[team.id] === 'edited'" class="edited-indicator">(Edited)</span>
+        </h4>
         <div class="team-content" [ngClass]="{'locked': isTeamLocked(team.id)}">
           <div
             class="team-tasks"
             cdkDropList
+            cdkDropListOrientation="mixed"
             [id]="'team-' + team.id + '-tasks'"
             [cdkDropListData]="team.tasks"
             [cdkDropListConnectedTo]="getAllDropLists()"
             (cdkDropListDropped)="onDrop($event)"
-            [cdkDropListDisabled]="isTeamLocked(team.id)"
           >
             <div 
               class="task-card"
               *ngFor="let task of team.tasks"
               cdkDrag
-              [cdkDragDisabled]="isTeamLocked(team.id)"
               [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
             >
             <div class="task-number">{{ task.houseNumber }}</div>
               <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
               
               <!-- Custom drag preview -->
-              <ng-template cdkDragPreview>
+              <!-- <ng-template cdkDragPreview>
                 <div class="task-card task-card-preview">
                   <div class="task-number">{{ task.houseNumber }}</div>
                   <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
                 </div>
-              </ng-template>
+              </ng-template> -->
             </div>
             <div class="placeholder" *ngIf="team.tasks.length === 0">
               Drop tasks here
@@ -144,17 +148,15 @@
             cdkDropList
             [id]="'team-' + team.id + '-members'"
             [cdkDropListData]="team.members"
-            [cdkDropListConnectedTo]="isTeamLocked(team.id) ? [] : ['staff-list']"
+            [cdkDropListConnectedTo]="getTeamMemberDropLists()"
             (cdkDropListDropped)="onDrop($event)"
-            [cdkDropListDisabled]="isTeamLocked(team.id)"
           >
             <div
               class="member-card"
               *ngFor="let member of team.members"
               cdkDrag
-              [cdkDragDisabled]="isTeamLocked(team.id)"
             >
-              {{ member.name }}
+              {{ member.firstName }} {{ member.lastName }}
             </div>
             <div class="placeholder" *ngIf="team.members.length === 0">
               Drop staff here
@@ -168,24 +170,33 @@
   <!-- Right side - Cleaning Staff -->
   <div class="staff-section">
     <h3>Available Cleaning Staff</h3>
-    <div
-      class="staff-list"
-      cdkDropList
-      id="staff-list"
-      [cdkDropListData]="availableStaff"
-      [cdkDropListConnectedTo]="getTeamMemberDropLists()"
-      (cdkDropListDropped)="onDrop($event)"
-    >
-      <div
-        class="staff-card"
-        *ngFor="let person of availableStaff"
-        cdkDrag
-        [class.unavailable]="!person.available"
-      >
-        {{ person.name }}
+    <div class="staff-roles" *ngFor="let role of getStaffRoles()">    
+      <div class="title-container" (click)="toggleExpandCollapseStaffWindow(role)">
+        <h4>{{ role }}</h4>
+        <mat-icon *ngIf="!expandedStaffWindows[role]" id="minimize-icon">minimize</mat-icon>
+        <mat-icon *ngIf="expandedStaffWindows[role]" id="expand-icon">crop_square</mat-icon>
       </div>
-      <div class="placeholder" *ngIf="availableStaff.length === 0">
-        No available staff members
+      <div
+        class="staff-list"
+        cdkDropList
+        cdkDropListOrientation="vertical"
+        [id]="'staff-list-' + role"
+        [cdkDropListData]="availableStaff | staffRoles: role"
+        [cdkDropListConnectedTo]="getStaffDropLists(role)"
+        (cdkDropListDropped)="onDrop($event)"
+        [ngStyle]="{'display': !expandedStaffWindows[role] ? 'flex' : 'none'}"
+      >
+        <div
+          class="staff-card"
+          *ngFor="let person of availableStaff | staffRoles: role"
+          cdkDrag
+          [class.unavailable]="!person.available"
+        >
+          {{ person.firstName }} {{ person.lastName }}
+        </div>
+        <div class="placeholder" *ngIf="availableStaff.length === 0">
+          No available staff members
+        </div>
       </div>
     </div>
   </div>

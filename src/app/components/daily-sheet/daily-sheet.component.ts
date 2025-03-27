@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
+import { StaffRolesPipe } from '../../pipes/staff-roles.pipe';
 
 // Create a new interface for task cards
 interface TaskCard {
@@ -53,7 +54,8 @@ interface Team {
     FormsModule,       
     MatFormFieldModule,
     MatSelectModule,   
-    MatOptionModule    
+    MatOptionModule,
+    StaffRolesPipe
   ],
   templateUrl: './daily-sheet.component.html',
   styleUrls: ['./daily-sheet.component.scss']
@@ -73,6 +75,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   showTaskTypesFilter = false;
   sortAscendingOrDescending = '';
   expandedSections: { [key: string]: boolean } = {};
+  teamStatus: { [key: string]: 'created' | 'published' | 'edited' } = {};
+  expandedStaffWindows: { [key: string]: boolean } = {};
   listGridView: string = 'list';
 
   // Computed property to get available staff (not assigned to any team)
@@ -136,6 +140,11 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   toggleExpandMinimize(taskTypeName: string) {
     this.expandedSections[taskTypeName] = !this.expandedSections[taskTypeName];
   }
+
+  toggleExpandCollapseStaffWindow(role: string) {
+    this.expandedStaffWindows[role] = !this.expandedStaffWindows[role];
+  }
+
 
   toggleListGridView(view: string){
     this.listGridView = view;
@@ -254,7 +263,9 @@ export class DailySheetComponent implements OnInit, OnDestroy {
                 // If not found, create a new CleaningPerson object
                 team.members.push({
                   id: member.id,
-                  name: member.name,
+                  firstName: member.name,
+                  lastName: '',
+                  role: 'cleaner',
                   available: true
                 });
               }
@@ -307,6 +318,9 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         // Set the assignedTeams and locked team IDs
         this.assignedTeams = componentTeams;
         this.lockedTeamIds = lockedIds;
+        this.lockedTeamIds.forEach(teamId => {
+          this.teamStatus[teamId] = 'published';
+        });
         
         // Force update of availableStaff by triggering change detection
         this.cleaningStaff = [...this.cleaningStaff];
@@ -350,73 +364,79 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   }
 
   onDrop(event: CdkDragDrop<any[]>) {
-  const containerId = event.container.id;
-  const teamId = this.getTeamIdFromContainerId(containerId);
+    const containerId = event.container.id;
+    const teamId = this.getTeamIdFromContainerId(containerId);
 
-  if (event.previousContainer === event.container) {
-    moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-  } else {
-    const prevContainerId = event.previousContainer.id;
-    const prevTeamId = this.getTeamIdFromContainerId(prevContainerId);
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      const prevContainerId = event.previousContainer.id;
+      const prevTeamId = this.getTeamIdFromContainerId(prevContainerId);
 
-    if (prevTeamId && this.isTeamLocked(prevTeamId)) {
-      console.warn('Cannot modify a locked team');
-      return;
-    }
-
-    // Handle the transfer
-    transferArrayItem(
-      event.previousContainer.data,
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex,
-    );
-
-    const droppedTask = event.container.data[event.currentIndex];
-
-    // Remove the task from the taskCards array if it was moved to a team
-    if (teamId && containerId.includes('team-') && containerId.includes('-tasks')) {
-      this.taskCards = this.taskCards.filter(task => task.id !== droppedTask.id);
-    }
-
-    // Add the task back to the taskCards array if it was moved back to the main task list
-    if (!teamId && (containerId === 'tasks-list' || containerId === droppedTask.originalTaskListId)) {
-      this.taskCards.push(droppedTask);
-    }
-
-    // Check if the item is a task and was dropped into a locked team
-    const isTaskContainer = containerId && containerId.includes('-tasks');
-    const isTeamLocked = teamId && this.isTeamLocked(teamId);
-
-    if (isTaskContainer && teamId) {
-      // If the task was dropped into a locked team, update its progress type to "Dodijeljeno"
-      if (isTeamLocked && droppedTask && droppedTask.taskId) {
-        this.mobileHomesService.updateTaskStatus(droppedTask.taskId, 'Dodijeljeno')
-          .then(() => {
-            // Update the local task card's progress type
-            droppedTask.taskProgressType = 'Dodijeljeno';
-            console.log(`Task ${droppedTask.taskId} marked as "Dodijeljeno"`);
-          })
-          .catch(error => {
-            console.error(`Error updating task ${droppedTask.taskId} status:`, error);
-          });
+      if (prevTeamId && this.isTeamLocked(prevTeamId)) {
+        this.teamStatus[prevTeamId] = 'edited'; 
       }
-    }
 
-    // If the task was dropped in an invalid container, revert it back to its original position
-    if (!teamId && containerId !== 'tasks-list' && containerId !== droppedTask.originalTaskListId) {
+      if(teamId && this.isTeamLocked(teamId)){
+        this.teamStatus[teamId] = 'edited'; 
+      }
+
+      console.log(this.availableStaff);
+      console.log(this.assignedTeams);
+
+      // Handle the transfer
       transferArrayItem(
-        event.container.data,
         event.previousContainer.data,
-        event.currentIndex,
+        event.container.data,
         event.previousIndex,
+        event.currentIndex,
       );
-    }
 
-    // Force update of availableStaff by triggering change detection
-    this.cleaningStaff = [...this.cleaningStaff];
+      const droppedTask = event.container.data[event.currentIndex];
+
+      // Remove the task from the taskCards array if it was moved to a team
+      if (teamId && containerId.includes('team-') && containerId.includes('-tasks')) {
+        this.taskCards = this.taskCards.filter(task => task.id !== droppedTask.id);
+      }
+
+      // Add the task back to the taskCards array if it was moved back to the main task list
+      if (!teamId && (containerId === 'tasks-list' || containerId === droppedTask.originalTaskListId)) {
+        this.taskCards.push(droppedTask);
+      }
+
+      // Check if the item is a task and was dropped into a locked team
+      const isTaskContainer = containerId && containerId.includes('-tasks');
+      const isTeamLocked = teamId && this.isTeamLocked(teamId);
+
+      // if (isTaskContainer && teamId) {
+      //   // If the task was dropped into a locked team, update its progress type to "Dodijeljeno"
+      //   if (isTeamLocked && droppedTask && droppedTask.taskId) {
+      //     this.mobileHomesService.updateTaskStatus(droppedTask.taskId, 'Dodijeljeno')
+      //       .then(() => {
+      //         // Update the local task card's progress type
+      //         droppedTask.taskProgressType = 'Dodijeljeno';
+      //         console.log(`Task ${droppedTask.taskId} marked as "Dodijeljeno"`);
+      //       })
+      //       .catch(error => {
+      //         console.error(`Error updating task ${droppedTask.taskId} status:`, error);
+      //       });
+      //   }
+      // }
+
+      // If the task was dropped in an invalid container, revert it back to its original position
+      if (!teamId && containerId !== 'tasks-list' && containerId !== droppedTask.originalTaskListId && !containerId.includes('staff-list')) {
+        transferArrayItem(
+          event.container.data,
+          event.previousContainer.data,
+          event.currentIndex,
+          event.previousIndex,
+        );
+      }
+
+      // Force update of availableStaff by triggering change detection
+      this.cleaningStaff = [...this.cleaningStaff];
+    }
   }
-}
 
   // Helper method to extract team ID from container ID
   private getTeamIdFromContainerId(containerId: string): string | null {
@@ -498,7 +518,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       this.teamCounter++;
       
       // Force update of availableStaff by triggering change detection
-      this.cleaningStaff = [...this.cleaningStaff];
+      // this.cleaningStaff = [...this.cleaningStaff];
     }
   }
 
@@ -511,11 +531,29 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   }
 
   getTeamTaskDropLists(): string[] {
-    return this.assignedTeams.map(t => `team-${t.id}-tasks`);
+    return ['tasks-list', ...this.assignedTeams.map(t => `team-${t.id}-tasks`)];
   }
 
   getTeamMemberDropLists(): string[] {
-    return this.assignedTeams.map(team => `team-${team.id}-members`);
+    let staffRoles1 = this.getStaffRoles();
+    staffRoles1 = staffRoles1.map(role => `staff-list-${role.charAt(0).toUpperCase()}${role.slice(1)}`);
+    return [...staffRoles1, ...this.assignedTeams.map(team => `team-${team.id}-members`)];
+  }
+
+  getStaffDropLists(role: string): string[] {
+    const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1);
+    return ['staff-list-' + capitalizedRole, ...this.assignedTeams.map(t => `team-${t.id}-members`)];
+  }
+
+  getStaffRoles(): string[] {
+    const roles = new Set<string>();
+    this.availableStaff.forEach(staff => {
+      if (staff.role) { 
+        const capitalizedRole = staff.role.charAt(0).toUpperCase() + staff.role.slice(1);
+        roles.add(capitalizedRole);
+      }
+    });
+    return Array.from(roles);
   }
 
   async publishTeams() {
@@ -524,7 +562,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       // Convert CleaningPerson[] to Staff[]
       const staffMembers: Staff[] = team.members.map(member => ({
         id: member.id,
-        name: member.name
+        name: member.firstName
       }));
       
       // Create task objects for each task in the team
@@ -640,6 +678,6 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   getAllDropLists(): string[] {
     const taskLists = this.filteredTaskTypes.map(taskType => `tasks-list-${taskType.task_type_name}`);
     const teamTaskLists = this.assignedTeams.map(team => `team-${team.id}-tasks`);
-    return [...taskLists, ...teamTaskLists];
+    return ['tasks-list', ...taskLists, ...teamTaskLists];
   }
 }

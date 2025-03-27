@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of, from } from 'rxjs';
 import { CleaningPerson } from '../models/cleaning-person.interface';
 import { SupabaseService } from './supabase.service';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -24,14 +24,16 @@ export class CleaningStaffService {
       const { data, error } = await this.supabase.getClient()
         .schema('porton')
         .from('profiles')
-        .select('id, first_name, last_name');
-        // .eq('is_cleaning_staff', true);
+        .select('id, first_name, last_name, role')
+        .in('role', ['cleaner', 'maintenance']);
 
       if (error) throw error;
 
       return data.map(profile => ({
         id: profile.id.toString(),
-        name: `${profile.first_name} ${profile.last_name}`,
+        firstName: profile.first_name,
+        lastName: profile.last_name,
+        role: profile.role,
         available: true // Default to true if null
       }));
     } catch (error) {
@@ -42,11 +44,11 @@ export class CleaningStaffService {
 
   getMockCleaningStaff(): Observable<CleaningPerson[]> {
     const mockStaff: CleaningPerson[] = [
-      { id: '1', name: 'Ana K.', available: true },
-      { id: '2', name: 'Marko P.', available: true },
-      { id: '3', name: 'Ivan M.', available: true },
-      { id: '4', name: 'Petra S.', available: false, currentTask: '103' },
-      { id: '5', name: 'Luka R.', available: true },
+      { id: '1', firstName: 'Ana', lastName: 'K.', role: 'cleaner', available: true },
+      { id: '2', firstName: 'Marko', lastName: 'P.', role: 'cleaner', available: true },
+      { id: '3', firstName: 'Ivan', lastName: 'M.', role: 'cleaner', available: true },
+      { id: '4', firstName: 'Petra', lastName: 'S.', role: 'cleaner', available: false, currentTask: '103' },
+      { id: '5', firstName: 'Luka', lastName: 'R.', role: 'cleaner', available: true },
     ];
     return of(mockStaff);
   }
