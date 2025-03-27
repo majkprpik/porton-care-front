@@ -1,0 +1,7 @@
+<div class="modal-container">
+    <span mat-dialog-content>Delete <b>Team {{ data.teamId }}</b>?</span>
+    <div class="buttons" mat-dialog-actions>
+        <button class="cancel-button" mat-button (click)="onNoClick()">Cancel</button>
+        <button class="delete-button" mat-button [mat-dialog-close]="true" cdkFocusInitial>Delete</button>
+    </div>
+</div>

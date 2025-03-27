@@ -5,7 +5,7 @@ import { CleaningStaffService } from '../../services/cleaning-staff.service';
 import { MobileHome } from '../../models/mobile-home.interface';
 import { CleaningPerson } from '../../models/cleaning-person.interface';
 import { TeamsService } from '../../services/teams.service';
-import { LockedTeam, Staff, Home, Task } from '../../interfaces/team.interface';
+import { LockedTeam, Staff, Task } from '../../interfaces/team.interface';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -17,6 +17,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { StaffRolesPipe } from '../../pipes/staff-roles.pipe';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteTeamModalComponent } from '../delete-team-modal/delete-team-modal.component';
+import { WorkGroupService } from '../../services/work-group.service';
+import { Router } from '@angular/router';
 
 // Create a new interface for task cards
 interface TaskCard {
@@ -78,6 +82,22 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   teamStatus: { [key: string]: 'created' | 'published' | 'edited' } = {};
   expandedStaffWindows: { [key: string]: boolean } = {};
   listGridView: string = 'list';
+  roleIcon: Record<string, string> = {
+    'Cleaner': 'cleaning_services',
+    'cleaner': 'cleaning_services',
+    'Maintenance': 'build',
+    'maintenance': 'build',
+  };
+  taskTypeIcon: Record<string, string> = {
+    'Čišćenje kućice': 'cleaning_services',
+    'Čišćenje terase': 'deck',
+    'Mijenjanje ručnika': 'dry_cleaning',
+    'Mijenjanje posteljine': 'bed',
+    'Maintenance': 'build',
+    'Inspection': 'visibility',
+    'Checkout': 'exit_to_app',
+    'Checkin': 'input',
+  }
 
   // Computed property to get available staff (not assigned to any team)
   get availableStaff(): CleaningPerson[] {
@@ -97,13 +117,17 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     private mobileHomesService: MobileHomesService,
     private cleaningStaffService: CleaningStaffService,
     private teamsService: TeamsService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private dialog: MatDialog,
+    private workGroupService: WorkGroupService,
+    private router: Router
   ) {}
 
-  ngOnInit() {
-    this.loadTodayData();
+  async ngOnInit() {
+    await this.loadTodayData();
     this.loadExistingTeams();
     this.getAllTaskTypes();
+    this.availableStaff;
   }
 
   ngOnDestroy() {
@@ -369,6 +393,9 @@ export class DailySheetComponent implements OnInit, OnDestroy {
 
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      if(teamId && this.isTeamLocked(teamId)){
+        this.teamStatus[teamId] = 'edited'; 
+      }
     } else {
       const prevContainerId = event.previousContainer.id;
       const prevTeamId = this.getTeamIdFromContainerId(prevContainerId);
@@ -679,5 +706,27 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     const taskLists = this.filteredTaskTypes.map(taskType => `tasks-list-${taskType.task_type_name}`);
     const teamTaskLists = this.assignedTeams.map(team => `team-${team.id}-tasks`);
     return ['tasks-list', ...taskLists, ...teamTaskLists];
+  }
+
+  deleteTeam(teamId: string){
+    let dialogRef = this.dialog.open(DeleteTeamModalComponent, {
+      height: '180px',
+      width: '400px',
+      data: { teamId: teamId }
+    })
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if(result){
+        let deleteResult = await this.workGroupService.deleteWorkGroup(teamId);
+        if(deleteResult){
+          window.location.reload();
+        }
+      }
+    });
+  }
+
+  logData(data1: any, data2: any){
+    console.log("Data 1" + data1);
+    console.log("Data 2" + data2);
   }
 }

@@ -241,3 +241,25 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.house_availability_types TO
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.house_availabilities TO authenticated, anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.houses TO authenticated, anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.house_types TO authenticated, anon;
+
+
+-- ALTER TABLE porton.work_group_profiles 
+-- DROP CONSTRAINT work_group_profiles_work_group_id_fkey,
+-- ADD CONSTRAINT work_group_profiles_work_group_id_fkey
+-- FOREIGN KEY (work_group_id)
+-- REFERENCES porton.work_groups(work_group_id)
+-- ON DELETE CASCADE;
+
+-- ALTER TABLE porton.work_group_houses 
+-- DROP CONSTRAINT work_group_houses_work_group_id_fkey,
+-- ADD CONSTRAINT work_group_houses_work_group_id_fkey
+-- FOREIGN KEY (work_group_id)
+-- REFERENCES porton.work_groups(work_group_id)
+-- ON DELETE CASCADE;
+
+-- ALTER TABLE porton.work_group_tasks
+-- DROP CONSTRAINT work_group_tasks_work_group_id_fkey,
+-- ADD CONSTRAINT work_group_tasks_work_group_id_fkey
+-- FOREIGN KEY (work_group_id)
+-- REFERENCES porton.work_groups(work_group_id)
+-- ON DELETE CASCADE;

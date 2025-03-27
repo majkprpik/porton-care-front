@@ -123,6 +123,23 @@ export class WorkGroupService {
     }
   }
 
+  async deleteWorkGroup(teamId: string){
+    try{
+      const { error: updateTaskError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_groups')
+        .delete()
+        .eq('work_group_id', teamId);
+
+      if(updateTaskError) throw updateTaskError
+
+      return true;
+    } catch(error) {
+      console.log(error);
+      return false;
+    }
+  }
+
   async submitTechnicianForRepairTask(workGroupId: number, profileId: string){
     try{
       const { data: newTechnicianForRepairTask, error: newTechnicianForRepairTaskError } = await this.supabaseService.getClient()

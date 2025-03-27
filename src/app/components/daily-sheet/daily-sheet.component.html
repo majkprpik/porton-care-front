@@ -23,7 +23,7 @@
     </div>
 
     <div
-      class="tasks-list"
+      class="tasks-list tasks-list-grid"
       cdkDropList
       cdkDropListOrientation="mixed"
       id="tasks-list"
@@ -49,6 +49,7 @@
     <ng-container *ngIf="listGridView == 'list'">
       <div *ngFor="let filteredTaskType of filteredTaskTypes">
         <div class="title-container" (click)="toggleExpandMinimize(filteredTaskType.task_type_name)">
+          <mat-icon id="task-icon">{{ taskTypeIcon[filteredTaskType.task_type_name] }}</mat-icon>
           <h3>{{ filteredTaskType.task_type_name }}</h3>
           
           <mat-icon *ngIf="!expandedSections[filteredTaskType.task_type_name]" id="minimize-icon">minimize</mat-icon>
@@ -68,7 +69,6 @@
             class="task-card"
             *ngFor="let task of taskCards | tasksFilter: [filteredTaskType.task_type_name]"
             cdkDrag
-            [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
           >
             <div class="task-number">{{ task.houseNumber }}</div>
             <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
@@ -107,10 +107,14 @@
       </div>
       
       <div class="team-box" *ngFor="let team of assignedTeams">
-        <h4>Team {{ team.id }} 
-          <span *ngIf="teamStatus[team.id] === 'published'" class="locked-indicator">(Published)</span>
-          <span *ngIf="teamStatus[team.id] === 'edited'" class="edited-indicator">(Edited)</span>
-        </h4>
+        <div class="header-container">
+          <h4>
+            Team {{ team.id }} 
+            <span *ngIf="teamStatus[team.id] === 'published'" class="locked-indicator">(Published)</span>
+            <span *ngIf="teamStatus[team.id] === 'edited'" class="edited-indicator">(Edited)</span>
+          </h4>
+          <button class="delete-btn" (click)="deleteTeam(team.id)">Delete</button>
+        </div>
         <div class="team-content" [ngClass]="{'locked': isTeamLocked(team.id)}">
           <div
             class="team-tasks"
@@ -128,7 +132,7 @@
               [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
             >
             <div class="task-number">{{ task.houseNumber }}</div>
-              <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
+            <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
               
               <!-- Custom drag preview -->
               <!-- <ng-template cdkDragPreview>
@@ -155,8 +159,10 @@
               class="member-card"
               *ngFor="let member of team.members"
               cdkDrag
+              (click)="logData(roleIcon[member.role], member.role)"
             >
               {{ member.firstName }} {{ member.lastName }}
+              <mat-icon id="role-icon">{{ roleIcon[member.role] }}</mat-icon>
             </div>
             <div class="placeholder" *ngIf="team.members.length === 0">
               Drop staff here
@@ -172,6 +178,7 @@
     <h3>Available Cleaning Staff</h3>
     <div class="staff-roles" *ngFor="let role of getStaffRoles()">    
       <div class="title-container" (click)="toggleExpandCollapseStaffWindow(role)">
+        <mat-icon id="role-icon">{{ roleIcon[role] }}</mat-icon>
         <h4>{{ role }}</h4>
         <mat-icon *ngIf="!expandedStaffWindows[role]" id="minimize-icon">minimize</mat-icon>
         <mat-icon *ngIf="expandedStaffWindows[role]" id="expand-icon">crop_square</mat-icon>
@@ -192,7 +199,8 @@
           cdkDrag
           [class.unavailable]="!person.available"
         >
-          {{ person.firstName }} {{ person.lastName }}
+        {{ person.firstName }} {{ person.lastName }} 
+        <mat-icon id="role-icon">{{ roleIcon[role] }}</mat-icon>
         </div>
         <div class="placeholder" *ngIf="availableStaff.length === 0">
           No available staff members
