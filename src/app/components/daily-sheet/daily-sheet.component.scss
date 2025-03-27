@@ -609,6 +609,23 @@
   }
 }
 
+.member-card.cdk-drag-preview, .staff-card.cdk-drag-preview {
+  background: #e3e3e3; /* Match the original background of staff-card */
+  color: inherit; /* Ensure text color remains the same */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle shadow */
+}
+
+.staff-card.cdk-drag-preview mat-icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
 .cdk-drag-placeholder {
   opacity: 0.3;
 }

@@ -12,7 +12,12 @@
     <div class="team-homes">
       <h3>Zadaci</h3>
       <div class="homes-grid">
-        <div *ngFor="let task of team.tasks" class="home-card" [ngClass]="{'in-progress': isTaskInProgress(task), 'completed': isTaskCompleted(task)}">
+        <div 
+            *ngFor="let task of team.tasks" 
+            class="home-card" 
+            [ngClass]="{'in-progress': isTaskInProgress(task), 'completed': isTaskCompleted(task)}"
+            [ngStyle]="{'background-color': hasToBeCleaned(task) ? 'gray' : '#FF6347'}"
+          >
           <div class="task-header">
             <div class="home-number">{{task.house || task.number}}</div>
             <mat-icon class="task-icon">{{getTaskIcon(task)}}</mat-icon>
@@ -35,7 +40,8 @@
                   Pauziraj
                 </button>
                 <button (click)="finishTask(task)" 
-                        class="btn-finish">
+                        class="btn-finish"
+                >
                   Završi
                 </button>
               </div>
@@ -44,9 +50,14 @@
             <!-- Show only Finish button for other cleaning tasks -->
             <ng-container *ngIf="task.taskType !== 'Čišćenje kućice' && !isTaskCompleted(task)">
               <button (click)="finishTask(task)" 
-                      class="btn-finish">
+                      class="btn-finish"
+                      *ngIf="!hasToBeCleaned(task)"
+              >
                 Završi
               </button>
+              <span
+                  *ngIf="hasToBeCleaned(task)"
+              >Potrebno čišćenje kućice</span>
             </ng-container>
             
             <!-- Show status label when task is completed -->

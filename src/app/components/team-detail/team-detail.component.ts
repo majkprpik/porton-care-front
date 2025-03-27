@@ -22,6 +22,8 @@ enum TaskProgressType {
 export class TeamDetailComponent implements OnInit {
   team: LockedTeam | undefined;
   TaskProgressType = TaskProgressType; // Make enum available in template
+  housesWithCleaningHouseAndDeckTasks: any[] = [];
+  teams: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -32,11 +34,15 @@ export class TeamDetailComponent implements OnInit {
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     this.teamsService.lockedTeams$.subscribe((teams) => {
+      this.teams = teams;
       this.team = teams.find((t) => t.id === id);
-
       // Initialize tasks array if it doesn't exist
       if (this.team && !this.team.tasks) {
         this.team.tasks = [];
+      }
+
+      if(id && teams && Object.keys(teams).length > 0){
+        this.housesWithCleaningHouseAndDeckTasks = this.findTasksWithBothCleaningTypes(teams);
       }
 
       console.log(this.team);
@@ -49,6 +55,48 @@ export class TeamDetailComponent implements OnInit {
         });
       }
     });
+  }
+
+  hasToBeCleaned(task: any): boolean {
+    if (!task || !task.house || !this.teams) return false;
+
+    if(task.taskType !== 'Čišćenje terase'){
+      return false;
+    }
+  
+    // Find the matching house in all teams
+    const houseTasks = this.teams.flatMap((team: any) => team.tasks).filter((t: any) => t.house === task.house);
+  
+    // Find the 'Čišćenje kućice' task in the same house
+    const cleaningHouseTask = houseTasks.find((t: any) => t.taskType === 'Čišćenje kućice');
+
+    if(!cleaningHouseTask){
+      return false;
+    }
+  
+    return cleaningHouseTask?.progressType !== 'Završeno';
+  }
+
+  findTasksWithBothCleaningTypes(teams: any[]): any[] {
+    // Map to store house numbers and their tasks
+    const houseTaskMap = new Map<number, { house: number, tasks: any[] }>();
+  
+    teams.forEach(team => {
+      team.tasks.forEach((task: any) => {
+        if (!houseTaskMap.has(task.house)) {
+          houseTaskMap.set(task.house, { house: task.house, tasks: [] });
+        }
+        houseTaskMap.get(task.house)?.tasks.push(task);
+      });
+    });
+  
+    // Filter for houses that have both 'Čišćenje kućice' and 'Čišćenje terase'
+    return Array.from(houseTaskMap.values())
+      .filter(({ tasks }) => {
+        const taskTypes = new Set(tasks.map(task => task.taskType));
+        return taskTypes.has('Čišćenje kućice') && taskTypes.has('Čišćenje terase');
+      })
+      .flatMap(({ tasks }) => tasks); // Return all tasks for matching houses
   }
 
   startTask(task: Task) {

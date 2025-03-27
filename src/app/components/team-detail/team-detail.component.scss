@@ -90,6 +90,12 @@
       flex-direction: column;
       gap: 6px;
 
+      span{
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+      }
+
       button {
         width: 100%;
         padding: 6px;
