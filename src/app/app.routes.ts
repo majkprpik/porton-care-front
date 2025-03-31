@@ -13,6 +13,7 @@ import { DamageReportsComponent } from './components/damage-reports/damage-repor
 import { Reservations2Component } from './components/reservations2/reservations2.component';
 import { ReportUnscheduledTaskComponent } from './components/report-unscheduled-task/report-unscheduled-task.component';
 import { DesignSystemComponent } from './components/design-system/design-system.component';
+import { ArrivalsAndDeparturesComponent } from './components/arrivals-and-departures/arrivals-and-departures.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -29,5 +30,6 @@ export const routes: Routes = [
   { path: 'report-unscheduled-task', component: ReportUnscheduledTaskComponent },
   { path: 'profiles', component: ProfileManagementComponent, canActivate: [AuthGuard] },
   { path: 'design-system', component: DesignSystemComponent },
+  { path: 'arrivals-and-departures', component: ArrivalsAndDeparturesComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '/dashboard' },
 ];

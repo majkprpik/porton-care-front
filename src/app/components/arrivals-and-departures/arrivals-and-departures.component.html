@@ -1,0 +1,43 @@
+<div class="arrivals-and-departures-container">
+    <div class="arrivals-and-departures">
+        <div class="departures-wrapper">
+            <div class="departures-header">
+                <h2>Departures</h2>
+            </div>
+    
+            <div class="departures-container">
+                <div class="departures" *ngFor="let departure of departures; let i = index">
+                    <input 
+                        id="departure-checkbox-{{ i }}" 
+                        type="checkbox" 
+                        (change)="submitDepartures($event, departure.house_availability_id)"
+                        [checked]="departure.has_departed"
+                    >
+                    <label for="departure-checkbox-{{ i }}">House: {{ departure.house_number }} at: {{ getTimeFromDate(departure.house_availability_start_date) }}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrivals-wrapper">
+            <div class="arrivals-header">
+                <h2>Arrivals</h2>
+            </div>
+    
+            <div class="arrivals-container">
+                <div class="arrivals" *ngFor="let arrival of arrivals; let i = index">
+                    <input 
+                        id="arrival-checkbox-{{ i }}" 
+                        type="checkbox" 
+                        (change)="submitArrivals($event, arrival.house_availability_id)"
+                        [checked]="arrival.has_arrived"
+                    >
+                    <label for="arrival-checkbox-{{ i }}">House: {{ arrival.house_number }} at: {{ getTimeFromDate(arrival.house_availability_start_date) }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="current-date-and-time">
+        {{ currentDateTime | date: 'dd/MM/yyyy HH:mm:ss' }}
+    </div>
+</div>
