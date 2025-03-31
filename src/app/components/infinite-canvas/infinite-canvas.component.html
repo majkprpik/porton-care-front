@@ -1,0 +1,40 @@
+<div class="canvas-container">
+  <div #canvas class="canvas">
+    @for (page of pages; track page.id) {
+      <div class="page-container" 
+           [style.left.px]="page.x" 
+           [style.top.px]="page.y"
+           [style.width.px]="viewportWidth"
+           [style.height.px]="viewportHeight">
+        <div class="page-frame">
+          <h2 class="page-title">{{page.name}}</h2>
+          <router-outlet [name]="page.id"></router-outlet>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Navigation buttons -->
+  <!-- <div class="navigation-controls">
+    <button class="nav-button nav-left" 
+            *ngIf="canNavigatePrev()"
+            (click)="navigateToPage('prev')">
+      ←
+    </button>
+    <button class="nav-button nav-right" 
+            *ngIf="canNavigateNext()"
+            (click)="navigateToPage('next')">
+      →
+    </button>
+    <button class="nav-button nav-up" 
+            *ngIf="canNavigateUp()"
+            (click)="navigateToPage('up')">
+      ↑
+    </button>
+    <button class="nav-button nav-down" 
+            *ngIf="canNavigateDown()"
+            (click)="navigateToPage('down')">
+      ↓
+    </button>
+  </div> -->
+</div> 

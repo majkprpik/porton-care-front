@@ -26,13 +26,18 @@ export class AppComponent {
   isMenuOpen = false;
   username: string | null = null;
   isBackgroundDimmed = false;
+  isCanvasV2Route = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private profileService: ProfileService,
     public helperService: HelperService
-  ) {}
+  ) {
+    this.router.events.subscribe(() => {
+      this.isCanvasV2Route = this.router.url.includes('/infinite-canvas');
+    });
+  }
 
   ngOnInit() {
     this.authService.getUsername().subscribe(username => {

@@ -1,0 +1,223 @@
+.canvas-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.canvas-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.reservations-sidebar {
+  width: 50%;
+  height: 100%;
+  border-right: 1px solid #e0e0e0;
+  overflow: hidden;
+
+  ::ng-deep {
+    .reservations-container {
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    .table-container {
+      height: 100vh;
+    }
+
+    .viewport {
+      height: 100vh !important;
+    }
+  }
+}
+
+.canvas-main {
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+
+  ::ng-deep {
+    app-daily-sheet {
+      display: block;
+      height: 100vh;
+      overflow: auto;
+    }
+  }
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0);
+  background-size: 20px 20px;
+  background-position: center center;
+
+  &.panning {
+    transition: none;
+  }
+}
+
+.page-container {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .page-frame {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-title {
+    margin: 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    font-size: 24px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .page-preview {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .page-content {
+    text-align: center;
+  }
+
+  .preview-icon {
+    font-size: 64px;
+    color: #007bff;
+    margin-bottom: 20px;
+    opacity: 0.8;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .open-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #0056b3;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+}
+
+.navigation-controls {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+
+  .nav-button {
+    position: fixed;
+    padding: 15px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 20px;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &.nav-left {
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    &.nav-right {
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    &.nav-up {
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &.nav-down {
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+.zoom-controls {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #666;
+  
+  .zoom-level {
+    font-weight: 500;
+  }
+}
