@@ -1,0 +1,133 @@
+.team-task-card {
+  width: 140px;
+  height: 130px;
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FF6347;
+  transition: all 0.3s ease;
+  
+  &.in-progress {
+    background-color: #FF6347;
+  }
+  
+  &.completed {
+    background-color: #4CAF50;
+  }
+
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 6px;
+
+    .home-number {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .task-icon {
+      font-size: 20px;
+    }
+  }
+
+  .task-type {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+  }
+
+  .home-actions {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+
+    span{
+      font-size: 12px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    button {
+      width: 65px;
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      height: 30px;
+
+      &.btn-start {
+        background-color: #ffffff;
+        color: #2196F3;
+
+        &:hover {
+          background-color: #e3f2fd;
+        }
+      }
+
+      &.btn-pause {
+        background-color: #ffffff;
+        color: #FFA000;
+
+        &:hover {
+          background-color: #fff8e1;
+        }
+      }
+
+      &.btn-finish {
+        background-color: #ffffff;
+        color: #4CAF50;
+
+        &:hover {
+          background-color: #e8f5e9;
+        }
+      }
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 6px;
+
+      button {
+        flex: 1;
+      }
+    }
+
+    .status-complete {
+      text-align: center;
+      padding: 6px;
+      margin: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 12px;
+    }
+  }
+}
+
+.is-urgent{
+  border: 3px solid red;
+  animation: flashing-border 1s infinite;
+}
+
+@keyframes flashing-border {
+  0% {
+    border-color: red; /* Initial color */
+  }
+  50% {
+    border-color: yellow; /* Midway color */
+  }
+  100% {
+    border-color: red; /* Back to initial color */
+  }
+}

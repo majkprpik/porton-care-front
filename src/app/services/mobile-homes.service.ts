@@ -29,6 +29,170 @@ export class MobileHomesService {
     }
   }
 
+  async getHomesWithTodaysStartDate(){
+    try {
+      const today = new Date();
+      const specificDateStr = today.toISOString().split('T')[0];
+
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_availabilities')
+        .select('*') 
+        .eq('house_availability_start_date', specificDateStr)
+
+      if (error) throw error;
+      
+      console.log('Fetched houses for today: ', data);
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching houses for today: ', error);
+      return [];
+    }
+  }
+
+  async getHomesWithYesterdaysEndDate(){
+    try {
+      const today = new Date(); 
+      today.setHours(0, 0, 0, 0);
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      
+      const specificDateStr = yesterday.toISOString().split('T')[0];
+
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_availabilities')
+        .select('*') 
+        .eq('house_availability_end_date', specificDateStr)
+
+      if (error) throw error;
+      
+      console.log('Fetched houses for today: ', data);
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching houses for today: ', error);
+      return [];
+    }
+  }
+
+  async getHouseAvailabilityTypeByName(name: string){
+    try {
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_availability_types')
+        .select('*')
+        .eq('house_availability_type_name', name)
+        .single();
+
+      if (error) throw error;
+
+      console.log('Updated house availability:', data);
+      return data;
+    } catch (error) {
+      console.error('Error updating house availability:', error);
+      return null;
+    }
+  }
+
+  async setHouseAvailabilityDeparted(houseAvailabilityId: number, state: boolean){
+    let houseAvailability;
+
+    if(state){
+      houseAvailability = await this.getHouseAvailabilityTypeByName('Free');
+    } else{
+      houseAvailability = await this.getHouseAvailabilityTypeByName('Occupied');
+    }
+
+    if(!houseAvailability)
+      return;
+
+    try {
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_availabilities')
+        .update({ 
+          has_departed: state,
+          house_availability_type_id: houseAvailability.house_availability_type_id
+         })
+        .eq('house_availability_id', houseAvailabilityId);
+
+      if (error) throw error;
+
+      console.log('Updated house availability:', data);
+    } catch (error) {
+      console.error('Error updating house availability:', error);
+    }
+  }
+
+  async setHouseAvailabilityArrived(houseAvailabilityId: number, state: boolean){
+    let houseAvailability; 
+
+    if(state){
+      houseAvailability = await this.getHouseAvailabilityTypeByName('Occupied');
+    } else{
+      houseAvailability = await this.getHouseAvailabilityTypeByName('Free');
+    }
+    
+    if(!houseAvailability)
+      return;
+
+    try {
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_availabilities')
+        .update({ 
+          has_arrived: state,
+          house_availability_type_id: houseAvailability.house_availability_type_id
+         })
+        .eq('house_availability_id', houseAvailabilityId);
+
+      if (error) throw error;
+
+      console.log('Updated house availability:', data);
+    }
+    catch (error) {
+      console.error('Error updating house availability:', error);
+    }
+  }
+
+  async getHouseNumberByHouseId(houseId: number){
+    try{
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('houses')
+        .select('house_number')
+        .eq('house_id', houseId)
+        .single();
+
+      if (error) throw error;
+
+      return data ? data.house_number : null;
+    } catch (error) {
+      console.error('Error fetching house number:', error);
+      return null;
+    }
+  }
+
+  async getHouseIdByHouseNumber(houseNumber: string): Promise<number | null> {
+    try{
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('houses')
+        .select('house_id')
+        .eq('house_number', houseNumber)
+        .single();
+
+      if (error) throw error;
+
+      return data.house_id || null;
+    } catch (error) {
+      console.error('Error fetching house number:', error);
+      return null;
+    }
+  }
+
   async getHomesWithRepairTasks(){
     try {
       const { data, error } = await this.supabase.getClient()
@@ -75,6 +239,46 @@ export class MobileHomesService {
     }
     
     return house.housetasks.filter(task => task.endTime === null);
+  }
+
+  async getHouseAvailabilityByHouseId(houseId: number) {
+    try {
+      const today = new Date(); 
+      today.setHours(0, 0, 0, 0);
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1); // Set yesterday's date
+  
+      // Manually format both today's and yesterday's date to YYYY-MM-DD
+      const yesterdayString = yesterday.getFullYear() + '-' + 
+                              String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(yesterday.getDate()).padStart(2, '0');
+  
+      const { data, error } = await this.supabase.getClient()
+        .schema('porton')
+        .from('house_availabilities')
+        .select('*')
+        .eq('house_id', houseId);
+  
+      if (error) throw error;
+  
+      const filteredData = data?.filter(item => {
+        const startDate = new Date(item.house_availability_start_date);
+        const endDate = new Date(item.house_availability_end_date);
+  
+        // Format endDate to YYYY-MM-DD (local time)
+        const endDateString = endDate.getFullYear() + '-' + 
+                              String(endDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(endDate.getDate()).padStart(2, '0');
+  
+        // Check if the availability end date is yesterday
+        return (today >= startDate && today <= endDate) || yesterdayString === endDateString;
+      });
+  
+      return filteredData.length ? filteredData : null;
+    } catch (error) {
+      console.error('Error fetching house availability:', error);
+      return null;
+    }
   }
 
   // Helper method to get the status as enum

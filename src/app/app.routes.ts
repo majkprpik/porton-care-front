@@ -14,6 +14,7 @@ import { Reservations2Component } from './components/reservations2/reservations2
 import { ReportUnscheduledTaskComponent } from './components/report-unscheduled-task/report-unscheduled-task.component';
 import { DesignSystemComponent } from './components/design-system/design-system.component';
 import { CanvasV2Component } from './components/canvas-v2/canvas-v2.component';
+import { ArrivalsAndDeparturesComponent } from './components/arrivals-and-departures/arrivals-and-departures.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -31,5 +32,6 @@ export const routes: Routes = [
   { path: 'profiles', component: ProfileManagementComponent, canActivate: [AuthGuard] },
   { path: 'design-system', component: DesignSystemComponent },
   { path: 'infinite-canvas', component: CanvasV2Component },
-  { path: '**', redirectTo: '/dashboard' }
+  { path: 'arrivals-and-departures', component: ArrivalsAndDeparturesComponent, canActivate: [AuthGuard] },
+  { path: '**', redirectTo: '/dashboard' },
 ];
