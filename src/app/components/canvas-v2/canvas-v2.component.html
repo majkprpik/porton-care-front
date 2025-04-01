@@ -1,9 +1,14 @@
 <div class="canvas-container">
+  <button class="sidebar-toggle" (click)="toggleReservationsSidebar()">
+    <mat-icon>{{ isReservationsSidebarCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+  </button>
   <div class="canvas-layout">
-    <div class="reservations-sidebar">
-      <app-reservations2></app-reservations2>
+    <div class="reservations-sidebar-container" [class.collapsed]="isReservationsSidebarCollapsed">
+      <div class="reservations-sidebar">
+        <app-reservations2></app-reservations2>
+      </div>
     </div>
-    <div class="canvas-main">
+    <div class="canvas-main" [class.visible]="isReservationsSidebarCollapsed">
       <app-daily-sheet></app-daily-sheet>
     </div>
   </div>

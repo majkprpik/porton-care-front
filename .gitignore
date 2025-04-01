@@ -8,6 +8,9 @@
 
 # Node
 /node_modules
+/scripts/node_modules
+/sheet_server/uploads
+/sheet_server/node_modules
 npm-debug.log
 yarn-error.log
 

@@ -100,13 +100,14 @@
     background-color: #f1f1f1;
     border-bottom: 2px solid #ccc;
     min-width: max-content; // Ensure it extends to accommodate all columns
+    height: 40px; // Match table row height
   }
   
   .table-row {
     display: flex;
     border-bottom: 1px solid #eee;
     min-width: max-content; // Ensure it extends to accommodate all columns
-    height: 50px;
+    height: 40px; // Match mobile home card height
     
     &:hover {
       background-color: #f9f9f9;
@@ -121,7 +122,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
+    padding: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 60px;
@@ -133,18 +134,46 @@
   }
   
   .room-cell {
-    min-width: 80px;
+    min-width: 150px;
     font-weight: bold;
     background-color: #f1f1f1;
     position: sticky;
     left: 0;
     z-index: 17;
     justify-content: flex-start;
-    padding-left: 16px;
+    padding: 0;
     cursor: pointer;
     
     &:hover {
       background-color: #e5e5e5;
+    }
+
+    ::ng-deep {
+      app-mobile-home-card {
+        width: 100%;
+        height: 100%;
+
+        .mobile-home-card {
+          border-radius: 0;
+          height: 100%;
+          transform: none !important;
+          transition: none !important;
+          cursor: default !important;
+          box-shadow: none !important;
+
+          &:hover {
+            transform: none !important;
+            box-shadow: none !important;
+          }
+
+          .card-content {
+            height: 100% !important;
+            max-height: none !important;
+            transform: none !important;
+            transition: none !important;
+          }
+        }
+      }
     }
   }
   

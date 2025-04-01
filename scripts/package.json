@@ -1,0 +1,9 @@
+{
+  "name": "reservation-import",
+  "version": "1.0.0",
+  "description": "Script to import reservations to Supabase",
+  "main": "import-reservations.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+} 

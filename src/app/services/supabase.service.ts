@@ -20,20 +20,10 @@ export class SupabaseService {
   }
 
   // Example: Fetch data from a table
-  async getData(table: string) {
-    // Check if table includes schema
-    let schema = 'public';
-    let tableName = table;
-    
-    if (table.includes('.')) {
-      const parts = table.split('.');
-      schema = parts[0];
-      tableName = parts[1];
-    }
-    
+  async getData(table: string, schema: string = 'public') {
     const { data, error } = await this.supabase
       .schema(schema)
-      .from(tableName)
+      .from(table)
       .select('*');
 
     if (error) {
@@ -45,25 +35,32 @@ export class SupabaseService {
   }
 
   // Example: Insert data into a table
-  async insertData(table: string, newData: any) {
-    // Check if table includes schema
-    let schema = 'public';
-    let tableName = table;
-    
-    if (table.includes('.')) {
-      const parts = table.split('.');
-      schema = parts[0];
-      tableName = parts[1];
-    }
-    
+  async insertData(table: string, newData: any, schema: string = 'public') {
     const { data, error } = await this.supabase
       .schema(schema)
-      .from(tableName)
+      .from(table)
       .insert([newData])
       .select();
 
     if (error) {
       console.error('Error inserting data:', error.message);
+      return null;
+    }
+
+    return data;
+  }
+
+  // Update data in a table
+  async updateData(table: string, updates: any, match: string, schema: string = 'public') {
+    const { data, error } = await this.supabase
+      .schema(schema)
+      .from(table)
+      .update(updates)
+      .match({ id: match })
+      .select();
+
+    if (error) {
+      console.error('Error updating data:', error.message);
       return null;
     }
 

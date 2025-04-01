@@ -1,75 +1,86 @@
--- Delete existing data
 DELETE FROM porton.house_availabilities;
+DELETE FROM porton.work_group_tasks;
+DELETE FROM porton.work_group_profiles;
 DELETE FROM porton.house_availability_types;
 DELETE FROM porton.tasks;
-DELETE FROM porton.task_types;
 DELETE FROM porton.task_progress_types;
+DELETE FROM porton.task_types;
 DELETE FROM porton.houses;
 DELETE FROM porton.house_types;
 
+
 -- Insert House Types
 INSERT INTO porton.house_types (house_type_name) VALUES
-('Family1'),
-('Family2'),
-('Couple'),
-('Test');
+('family 1'),
+('family 2'),
+('couple'),
+('mobilne');
 
 -- Insert Couple Houses with house_name
 INSERT INTO porton.houses (house_number, house_name, house_type_id) 
 VALUES 
-(641, '641', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(642, '642', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(643, '643', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(644, '644', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(645, '645', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(646, '646', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(647, '647', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(648, '648', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(649, '649', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple')),
-(650, '650', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Couple'));
+(641, '641', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(642, '642', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(643, '643', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(644, '644', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(645, '645', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(646, '646', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(647, '647', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(648, '648', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(649, '649', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple')),
+(650, '650', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'couple'));
 
 -- Insert Family1 Houses with house_name
 INSERT INTO porton.houses (house_number, house_name, house_type_id) 
 VALUES 
-(205, '205', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(206, '206', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(301, '301', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(418, '418', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(514, '514', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(515, '515', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(516, '516', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(517, '517', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(518, '518', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(519, '519', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(520, '520', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(521, '521', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(522, '522', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1')),
-(523, '523', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family1'));
+(205, '205', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(206, '206', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(301, '301', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(418, '418', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(514, '514', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(515, '515', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(516, '516', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(517, '517', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(518, '518', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(519, '519', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(520, '520', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(521, '521', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(522, '522', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1')),
+(523, '523', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 1'));
 
 -- Insert Family2 Houses with house_name
 INSERT INTO porton.houses (house_number, house_name, house_type_id) 
 VALUES 
-(201, '201', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(202, '202', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(203, '203', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(204, '204', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(401, '401', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(402, '402', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(403, '403', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(404, '404', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(405, '405', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(406, '406', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(407, '407', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(408, '408', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(409, '409', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(410, '410', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(411, '411', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(412, '412', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(413, '413', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(414, '414', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(415, '415', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(416, '416', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2')),
-(417, '417', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'Family2'));
+(201, '201', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(202, '202', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(203, '203', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(204, '204', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(401, '401', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(402, '402', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(403, '403', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(404, '404', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(405, '405', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(406, '406', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(407, '407', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(408, '408', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(409, '409', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(410, '410', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(411, '411', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(412, '412', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(413, '413', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(414, '414', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(415, '415', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(416, '416', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2')),
+(417, '417', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'family 2'));
+
+-- Insert Mobilne Houses with house_name
+INSERT INTO porton.houses (house_number, house_name, house_type_id) 
+VALUES 
+(630, '630', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'mobilne')),
+(631, '631', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'mobilne')),
+(632, '632', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'mobilne')),
+(638, '638', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'mobilne')),
+(157, '157', (SELECT house_type_id FROM porton.house_types WHERE house_type_name = 'mobilne'));
 
 
 INSERT INTO porton.house_availability_types (house_availability_type_name) 
@@ -170,62 +181,93 @@ BEGIN
     FROM porton.task_progress_types 
     WHERE task_progress_type_name = 'Nije dodijeljeno';
 
-    -- 1️⃣ Assign "Punjenje", "Čišćenje kućice", "Čišćenje terase" 
-    -- If guests left YESTERDAY OR new guests are arriving today
+    -- 1️⃣ Assign "Čišćenje kućice" for checkouts (ended yesterday)
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT DISTINCT ON (ha.house_id, tt.task_type_id)  -- Prevents duplicate inserts for the same house/task
-        tt.task_type_id, 
+    SELECT DISTINCT ON (ha.house_id)
+        (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Čišćenje kućice'),
         task_status_id, 
         ha.house_id, 
         NOW()
     FROM porton.house_availabilities ha
-    CROSS JOIN porton.task_types tt
-    WHERE (
-        ha.house_availability_end_date::DATE = yesterday  -- Left today (stayed until yesterday)
-        OR ha.house_availability_start_date::DATE = today -- Arriving today
-    )
-    AND tt.task_type_name IN ('Punjenje', 'Čišćenje kućice', 'Čišćenje terase')
-    AND NOT EXISTS (  -- Prevent duplicate tasks
+    WHERE DATE(ha.house_availability_end_date) = yesterday
+    AND NOT EXISTS (
         SELECT 1 FROM porton.tasks t 
         WHERE t.house_id = ha.house_id 
-        AND t.task_type_id = tt.task_type_id
-        AND t.start_time::DATE = today
+        AND t.task_type_id = (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Čišćenje kućice')
+        AND DATE(t.start_time) = today
     );
 
-    -- 2️⃣ Assign "Mijenjanje ručnika" for houses occupied **more than 2 days** 
-    -- but **not their last day**
+    -- 1️⃣.1 Assign "Čišćenje terase" for checkouts (ended yesterday)
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT DISTINCT ON (ha.house_id)  -- Ensures one task per house
+    SELECT DISTINCT ON (ha.house_id)
+        (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Čišćenje terase'),
+        task_status_id, 
+        ha.house_id, 
+        NOW()
+    FROM porton.house_availabilities ha
+    WHERE DATE(ha.house_availability_end_date) = yesterday
+    AND NOT EXISTS (
+        SELECT 1 FROM porton.tasks t 
+        WHERE t.house_id = ha.house_id 
+        AND t.task_type_id = (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Čišćenje terase')
+        AND DATE(t.start_time) = today
+    );
+
+    -- 1️⃣.2 Assign "Čišćenje terase" for check-ins where last checkout was more than 3 days ago
+    INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
+    SELECT DISTINCT ON (new_arrival.house_id)
+        (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Čišćenje terase'),
+        task_status_id, 
+        new_arrival.house_id, 
+        NOW()
+    FROM porton.house_availabilities new_arrival
+    WHERE DATE(new_arrival.house_availability_start_date) = today
+    AND (
+        -- Get the last checkout date for this house
+        SELECT MAX(DATE(last_checkout.house_availability_end_date))
+        FROM porton.house_availabilities last_checkout
+        WHERE last_checkout.house_id = new_arrival.house_id
+        AND DATE(last_checkout.house_availability_end_date) < today
+    ) <= today - INTERVAL '3 days'
+    AND NOT EXISTS (
+        SELECT 1 FROM porton.tasks t 
+        WHERE t.house_id = new_arrival.house_id 
+        AND t.task_type_id = (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Čišćenje terase')
+        AND DATE(t.start_time) = today
+    );
+
+    -- 2️⃣ Assign "Mijenjanje ručnika" for houses occupied more than 2 days but not their last day
+    INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
+    SELECT DISTINCT ON (ha.house_id)
         (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje ručnika'),
         task_status_id, 
         ha.house_id, 
         NOW()
     FROM porton.house_availabilities ha
-    WHERE ha.house_availability_start_date <= today - INTERVAL '2 days' -- Occupied for more than 2 days
-    AND ha.house_availability_end_date > today  -- Not their last day
-    AND NOT EXISTS (  -- Prevent duplicate tasks
+    WHERE DATE(ha.house_availability_start_date) <= today - INTERVAL '2 days'
+    AND DATE(ha.house_availability_end_date) > today
+    AND NOT EXISTS (
         SELECT 1 FROM porton.tasks t 
         WHERE t.house_id = ha.house_id 
         AND t.task_type_id = (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje ručnika')
-        AND t.start_time::DATE = today
+        AND DATE(t.start_time) = today
     );
 
-    -- 3️⃣ Assign "Mijenjanje posteljine" for houses occupied **more than 4 days** 
-    -- but **not their last day**
+    -- 3️⃣ Assign "Mijenjanje posteljine" for houses occupied more than 4 days but not their last day
     INSERT INTO porton.tasks (task_type_id, task_progress_type_id, house_id, start_time)
-    SELECT DISTINCT ON (ha.house_id)  -- Ensures one task per house
+    SELECT DISTINCT ON (ha.house_id)
         (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje posteljine'),
         task_status_id, 
         ha.house_id, 
         NOW()
     FROM porton.house_availabilities ha
-    WHERE ha.house_availability_start_date <= today - INTERVAL '4 days' -- Occupied for more than 4 days
-    AND ha.house_availability_end_date > today  -- Not their last day
-    AND NOT EXISTS (  -- Prevent duplicate tasks
+    WHERE DATE(ha.house_availability_start_date) <= today - INTERVAL '4 days'
+    AND DATE(ha.house_availability_end_date) > today
+    AND NOT EXISTS (
         SELECT 1 FROM porton.tasks t 
         WHERE t.house_id = ha.house_id 
         AND t.task_type_id = (SELECT task_type_id FROM porton.task_types WHERE task_type_name = 'Mijenjanje posteljine')
-        AND t.start_time::DATE = today
+        AND DATE(t.start_time) = today
     );
 END $$;
 
@@ -263,3 +305,19 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE porton.house_types TO authenticate
 -- FOREIGN KEY (work_group_id)
 -- REFERENCES porton.work_groups(work_group_id)
 -- ON DELETE CASCADE;
+
+
+
+-- grant usage on schema "porton" to anon;
+-- grant usage on schema "porton" to authenticated;
+-- GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA "porton" TO authenticated;
+-- GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA "porton" TO anon;
+
+
+-- GRANT USAGE ON SCHEMA "porton" TO anon, authenticated, service_role;
+-- GRANT ALL ON ALL TABLES IN SCHEMA "porton" TO anon, authenticated, service_role;
+-- GRANT ALL ON ALL ROUTINES IN SCHEMA "porton" TO anon, authenticated, service_role;
+-- GRANT ALL ON ALL SEQUENCES IN SCHEMA "porton" TO anon, authenticated, service_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA "porton" GRANT ALL ON TABLES TO anon, authenticated, service_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA "porton" GRANT ALL ON ROUTINES TO anon, authenticated, service_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA "porton" GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;

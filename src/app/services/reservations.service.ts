@@ -3,10 +3,97 @@ import { SupabaseService } from './supabase.service';
 import { MobileHome, Reservation } from '../models/mobile-home.interface';
 import { ReservationInfo } from '../components/reservations2/reservations2.component';
 
+const reservationColors = [
+  { name: 'Zimak', color: '#f8c9c9' },  // Light red
+  { name: 'Simon', color: '#ffffa5' },  // Light yellow
+  { name: 'Becker', color: '#d8d8d8' }, // Light gray
+  { name: 'Unterrainer', color: '#ffcccc' }, // Light pink
+  { name: 'Pressl', color: '#ffffcc' }, // Light yellow
+  { name: 'Monde', color: '#ccffff' }   // Light blue
+];
+
+export interface CreateReservationParams {
+  house_id: number;
+  availability_type_id: number;
+  start_date: string;
+  end_date: string;
+  guest_name: string;
+  last_name?: string;
+  guest_phone?: string;
+  reservation_number?: string;
+  adults?: number;
+  babies?: number;
+  cribs?: number;
+  dogs_d?: number;
+  dogs_s?: number;
+  dogs_b?: number;
+  notes?: string;
+  has_arrived?: boolean;
+  has_departed?: boolean;
+  prev_connected?: boolean;
+  next_connected?: boolean;
+  color_theme?: number;
+  color_tint?: number;
+}
+
+interface DbUpdates {
+  house_id?: number;
+  house_availability_type_id?: number;
+  house_availability_start_date?: string;
+  house_availability_end_date?: string;
+  guest_name?: string;
+  last_name?: string;
+  guest_phone?: string;
+  reservation_number?: string;
+  adults?: number;
+  babies?: number;
+  cribs?: number;
+  dogs_d?: number;
+  dogs_s?: number;
+  dogs_b?: number;
+  notes?: string;
+  has_arrived?: boolean;
+  has_departed?: boolean;
+  prev_connected?: boolean;
+  next_connected?: boolean;
+  color_theme?: number;
+  color_tint?: number;
+  [key: string]: any; // Add index signature
+}
+
+interface DbReservationInfo {
+  id: number;
+  house_id: number;
+  start_date: string;
+  end_date: string;
+  guest_name?: string;
+  last_name?: string;
+  guest_phone?: string;
+  reservation_number?: string;
+  adults?: number;
+  babies?: number;
+  cribs?: number;
+  dogs_d?: number;
+  dogs_s?: number;
+  dogs_b?: number;
+  notes?: string;
+  has_arrived?: boolean;
+  has_departed?: boolean;
+  prev_connected?: boolean;
+  next_connected?: boolean;
+  color_theme?: number;
+  color_tint?: number;
+  children?: number;
+  reservationId?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ReservationsService {
+  private currentDate: Date = new Date();
+  reservations: { [key: number]: { [key: string]: Partial<DbReservationInfo> }} = {};
+
   constructor(private supabase: SupabaseService) {}
 
   /**
@@ -44,12 +131,9 @@ export class ReservationsService {
     }
   }
  
-  reservations: { [key: number]: { [key: string]: ReservationInfo }} = {}
-  generateMockReservations(mobileHomes: any, reservationColors: any): { [key: number]: { [key: string]: ReservationInfo } } {
-    // const reservations: { [key: number]: { [key: string]: ReservationInfo } } = {};
-
+  async generateMockReservations(houses: MobileHome[]): Promise<Partial<DbReservationInfo>[]> {
     if(this.reservations != null && Object.keys(this.reservations).length > 0) {
-      return this.reservations;
+      return Object.values(this.reservations).flatMap(obj => Object.values(obj));
     }
     
     // Create guest names array for more variety
@@ -65,12 +149,12 @@ export class ReservationsService {
       const daysInMonth = new Date(2025, month, 0).getDate();
       
       // Generate multiple reservations per month (about 40% occupancy)
-      const totalReservations = Math.floor(mobileHomes.length * 0.4);
+      const totalReservations = Math.floor(houses.length * 0.4);
       
       for (let i = 0; i < totalReservations; i++) {
         // Random house from our array
-        const randomHouseIndex = Math.floor(Math.random() * mobileHomes.length);
-        const house = mobileHomes[randomHouseIndex];
+        const randomHouseIndex = Math.floor(Math.random() * houses.length);
+        const house = houses[randomHouseIndex];
         
         // Random start/end dates for this month
         const startDay = Math.floor(Math.random() * (daysInMonth - 7)) + 1; // 1 to (daysInMonth-7)
@@ -145,29 +229,23 @@ export class ReservationsService {
             const dayStr = `${day}.${month}`;
             
             this.reservations[house.house_id][dayStr] = {
-              reservationId: reservationId,
-              guest: guestName,
-              color: colorEntry.color,
-              phone: phone,
+              id: parseInt(reservationId.split('-')[2]),
+              house_id: house.house_id,
+              start_date: `${this.currentDate.getFullYear()}-${month.toString().padStart(2, '0')}-${startDay.toString().padStart(2, '0')}`,
+              end_date: `${this.currentDate.getFullYear()}-${month.toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`,
+              guest_name: guestName,
+              guest_phone: phone,
               adults: adults,
               children: children,
-              extraBeds: extraBeds,
-              pets: pets,
               notes: notes,
-              startDay: startDay,
-              startMonth: month,
-              endDay: endDay,
-              endMonth: month,
-              isFirstDay: day === startDay,
-              isLastDay: day === endDay,
-              house_id: house.house_id
+              reservationId: parseInt(reservationId)
             };
           }
         }
       }
     }
     
-    return this.reservations;
+    return Object.values(this.reservations).flatMap(obj => Object.values(obj));
   }
 
   /**
@@ -227,27 +305,33 @@ export class ReservationsService {
    * @param reservation Reservation data
    * @returns Promise with created reservation
    */
-  async createReservation(reservation: {
-    house_id: number,
-    availability_type_id: number,
-    start_date: string,
-    end_date: string,
-    guest_name: string,
-    guest_phone?: string,
-    notes?: string
-  }): Promise<any> {
+  async createReservation(reservation: CreateReservationParams): Promise<any> {
     try {
       const { data, error } = await this.supabase.getClient()
         .schema('porton')
         .from('house_availabilities')
         .insert({
           house_id: reservation.house_id,
-          availability_type_id: reservation.availability_type_id,
+          house_availability_type_id: reservation.availability_type_id,
           house_availability_start_date: reservation.start_date,
           house_availability_end_date: reservation.end_date,
           guest_name: reservation.guest_name,
+          last_name: reservation.last_name,
           guest_phone: reservation.guest_phone,
-          notes: reservation.notes
+          reservation_number: reservation.reservation_number,
+          adults: reservation.adults || 1,
+          babies: reservation.babies || 0,
+          cribs: reservation.cribs || 0,
+          dogs_d: reservation.dogs_d || 0,
+          dogs_s: reservation.dogs_s || 0,
+          dogs_b: reservation.dogs_b || 0,
+          notes: reservation.notes,
+          has_arrived: reservation.has_arrived || false,
+          has_departed: reservation.has_departed || false,
+          prev_connected: reservation.prev_connected || false,
+          next_connected: reservation.next_connected || false,
+          color_theme: reservation.color_theme || 0,
+          color_tint: reservation.color_tint || 0
         })
         .select()
         .single();
@@ -270,12 +354,44 @@ export class ReservationsService {
    * @param updates Fields to update
    * @returns Promise with updated reservation
    */
-  async updateReservation(reservationId: number, updates: any): Promise<any> {
+  async updateReservation(reservationId: number, updates: Partial<CreateReservationParams>): Promise<any> {
     try {
+      // Convert field names to match database schema
+      const dbUpdates: DbUpdates = {
+        house_id: updates.house_id,
+        house_availability_type_id: updates.availability_type_id,
+        house_availability_start_date: updates.start_date,
+        house_availability_end_date: updates.end_date,
+        guest_name: updates.guest_name,
+        last_name: updates.last_name,
+        guest_phone: updates.guest_phone,
+        reservation_number: updates.reservation_number,
+        adults: updates.adults,
+        babies: updates.babies,
+        cribs: updates.cribs,
+        dogs_d: updates.dogs_d,
+        dogs_s: updates.dogs_s,
+        dogs_b: updates.dogs_b,
+        notes: updates.notes,
+        has_arrived: updates.has_arrived,
+        has_departed: updates.has_departed,
+        prev_connected: updates.prev_connected,
+        next_connected: updates.next_connected,
+        color_theme: updates.color_theme,
+        color_tint: updates.color_tint
+      };
+
+      // Remove undefined values
+      Object.keys(dbUpdates).forEach(key => {
+        if (dbUpdates[key] === undefined) {
+          delete dbUpdates[key];
+        }
+      });
+
       const { data, error } = await this.supabase.getClient()
         .schema('porton')
         .from('house_availabilities')
-        .update(updates)
+        .update(dbUpdates)
         .eq('house_availability_id', reservationId)
         .select()
         .single();

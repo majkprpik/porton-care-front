@@ -15,6 +15,7 @@ import { ReportUnscheduledTaskComponent } from './components/report-unscheduled-
 import { DesignSystemComponent } from './components/design-system/design-system.component';
 import { CanvasV2Component } from './components/canvas-v2/canvas-v2.component';
 import { ArrivalsAndDeparturesComponent } from './components/arrivals-and-departures/arrivals-and-departures.component';
+import { MainComponent } from './components/main/main.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -33,5 +34,6 @@ export const routes: Routes = [
   { path: 'design-system', component: DesignSystemComponent },
   { path: 'infinite-canvas', component: CanvasV2Component },
   { path: 'arrivals-and-departures', component: ArrivalsAndDeparturesComponent, canActivate: [AuthGuard] },
+  { path: 'main', component: MainComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '/dashboard' },
 ];

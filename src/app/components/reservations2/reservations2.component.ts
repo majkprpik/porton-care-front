@@ -14,6 +14,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { ReservationsService } from '../../services/reservations.service';
 import { MobileHome } from '../../models/mobile-home.interface';
+import { MobileHomeCardComponent } from '../../components/mobile-home-card/mobile-home-card.component';
 
 export interface ReservationRow {
   house_id: number;
@@ -26,12 +27,19 @@ export interface ReservationRow {
 export interface ReservationInfo {
   reservationId: string;
   guest: string;
+  lastName: string;
+  reservationNumber: string;
+  reservationLength: number;
   color: string;
+  colorTheme: number;
+  colorTint: number;
   phone: string;
   adults: number;
-  children: number;
-  extraBeds: number;
-  pets: number;
+  babies: number;
+  cribs: number;
+  dogsSmall: number;
+  dogsMedium: number;
+  dogsLarge: number;
   notes: string;
   startDay: number;
   startMonth: number;
@@ -40,6 +48,10 @@ export interface ReservationInfo {
   isFirstDay: boolean;
   isLastDay: boolean;
   house_id: number;
+  hasArrived: boolean;
+  hasDeparted: boolean;
+  prevConnected: boolean;
+  nextConnected: boolean;
 }
 
 // Interface for drag ghost data
@@ -67,7 +79,8 @@ interface DragGhostData {
     MatIconModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatRadioModule
+    MatRadioModule,
+    MobileHomeCardComponent
   ],
   templateUrl: './reservations2.component.html',
   styleUrl: './reservations2.component.scss',
@@ -105,14 +118,24 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
   newReservation = {
     house_id: 0,
     guest_name: '',
+    last_name: '',
     guest_phone: '',
+    reservation_number: '',
     start_date: '',
     end_date: '',
     adults: 1,
-    children: 0,
-    extraBeds: 0,
-    pets: 0,
-    notes: ''
+    babies: 0,
+    cribs: 0,
+    dogs_small: 0,
+    dogs_medium: 0,
+    dogs_large: 0,
+    notes: '',
+    has_arrived: false,
+    has_departed: false,
+    prev_connected: false,
+    next_connected: false,
+    color_theme: 0,
+    color_tint: 0
   };
   showNewReservationPopup: boolean = false;
   newReservationPopupPosition = { top: '0px', left: '0px' };
@@ -178,13 +201,8 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngOnInit(): void {
-    console.log(this.time.getMilliseconds());
     this.generateYearCalendar();
-    this.time = new Date();
-    console.log(this.time.getMilliseconds());
-    this.loadMockData();
-    this.time = new Date();
-    console.log(this.time.getMilliseconds());
+    this.initializeData();
     
     // Add document click handler to clear highlighting when clicking outside the reservation grid
     this.documentClickHandler = (event: MouseEvent) => {
@@ -230,94 +248,140 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     this.displayedColumns = ['room', ...this.dates];
   }
 
-  loadMockData(): void {
+  private async initializeData(): Promise<void> {
     this.isLoading = true;
+    this.errorMessage = '';
     
-    // Generate mock houses (similar to original component)
-    this.mobileHomes = [];
-    
-    // Generate houses for each type
-    const houseTypes = [1, 2, 3, 4]; // House type IDs
-    const houseTypeNames = ['Type 1', 'Type 2', 'Type 3', 'Type 4'];
-    
-    let houseId = 641;
-    
-    // For each house type, create about 15 houses
-    houseTypes.forEach((typeId, typeIndex) => {
-      const typeName = houseTypeNames[typeId - 1];
+    try {
+      // Get the date range for the current year
+      const startDate = new Date(this.currentDate.getFullYear(), 0, 1).toISOString().split('T')[0];
+      const endDate = new Date(this.currentDate.getFullYear(), 11, 31).toISOString().split('T')[0];
       
-      // Create 15 houses of this type
-      for (let i = 0; i < 15; i++) {
-        this.mobileHomes.push({
-          house_id: houseId,
-          housename: `Room ${houseId}`,
-          housetype: typeId,
-          housetypename: typeName,
-          availabilityid: 1,
-          availabilityname: 'Available',
-          housetasks: []
-        });
-        houseId++;
-      }
-
-      // Add 12 empty rows for this type
-      for (let i = 0; i < 12; i++) {
-        this.mobileHomes.push({
-          house_id: houseId,
-          housename: `Room ${houseId} (Empty)`,
-          housetype: typeId,
-          housetypename: typeName,
-          availabilityid: 1,
-          availabilityname: 'Available',
-          housetasks: []
-        });
-        houseId++;
-      }
-    });
-
-    // Convert mobile homes to reservation rows
-    this.reservationRows = this.mobileHomes
-      .filter(house => house.housetypename === this.currentHouseType)
-      .map(home => ({
-        house_id: home.house_id,
-        room: home.housename.split(' ')[1], // Just the number part
-        type: home.housetypename,
-        dates: [],
-        reservations: {}
+      // Fetch houses and their availability status
+      const houses = await this.reservationsService.getHousesWithAvailabilityStatus(startDate, endDate);
+      
+      // Convert houses to mobile homes format
+      this.mobileHomes = houses.map(house => ({
+        house_id: house.house_id,
+        housename: house.house_name,
+        housetype: house.house_type_id,
+        housetypename: house.house_type_name,
+        availabilityid: house.availabilityid,
+        availabilityname: house.availabilityname,
+        housetasks: []
       }));
 
-    // Add some mock reservations
-    this.addMockReservations();
-    
-    this.isLoading = false;
-    this.changeDetectorRef.detectChanges();
+      // Convert mobile homes to reservation rows
+      this.reservationRows = this.mobileHomes
+        .filter(house => house.housetypename === this.currentHouseType)
+        .map(home => ({
+          house_id: home.house_id,
+          room: home.housename.split(' ')[1], // Just the number part
+          type: home.housetypename,
+          dates: [],
+          reservations: {}
+        }));
+
+      // Process availabilities to create reservations
+      this.processAvailabilities(houses);
+      
+      this.isLoading = false;
+      this.changeDetectorRef.detectChanges();
+    } catch (error) {
+      console.error('Error loading data:', error);
+      this.errorMessage = 'Failed to load reservation data. Please try again.';
+      this.isLoading = false;
+      this.changeDetectorRef.detectChanges();
+    }
   }
 
-  private addMockReservations(): void {
-    // Generate mock reservations
-    const mockReservations = this.reservationsService.generateMockReservations(this.mobileHomes, this.reservationColors);
-    
-    // Update reservation rows with the mock data
-    this.reservationRows.forEach(row => {
-      if (mockReservations[row.house_id]) {
-        const reservedDates: string[] = [];
-        const houseReservations = mockReservations[row.house_id];
-        
-        // Add reserved dates to the array
-        Object.keys(houseReservations).forEach(date => {
-          reservedDates.push(date);
+  private processAvailabilities(houses: any[]): void {
+    houses.forEach(house => {
+      if (house.availabilities) {
+        house.availabilities.forEach((availability: any) => {
+          // Only process occupied availabilities
+          if (availability.house_availability_type_name === 'Occupied') {
+            const startDate = new Date(availability.house_availability_start_date);
+            const endDate = new Date(availability.house_availability_end_date);
+            
+            // Generate a unique reservation ID
+            const reservationId = `res-${house.house_id}-${availability.house_availability_id}`;
+            
+            // Find or create color for this guest
+            let colorEntry = this.reservationColors.find(c => 
+              c.name.toLowerCase() === (availability.guest_name || 'Unknown').toLowerCase()
+            );
+            
+            // If no color found, generate a random pastel color
+            if (!colorEntry) {
+              const hue = Math.floor(Math.random() * 360);
+              const pastelColor = `hsl(${hue}, 70%, 85%)`;
+              colorEntry = { name: availability.guest_name || 'Unknown', color: pastelColor };
+            }
+            
+            // Add reservation for each day in the range
+            const currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+              const day = currentDate.getDate();
+              const month = currentDate.getMonth() + 1;
+              const dayStr = `${day}.${month}`;
+              
+              const isFirstDay = currentDate.getTime() === startDate.getTime();
+              const isLastDay = currentDate.getTime() === endDate.getTime();
+              
+              // Find the row for this house
+              const row = this.reservationRows.find(r => r.house_id === house.house_id);
+              if (row) {
+                // Add this date to the dates array if not already there
+                if (!row.dates.includes(dayStr)) {
+                  row.dates.push(dayStr);
+                }
+                
+                // Add the reservation info
+                row.reservations[dayStr] = {
+                  reservationId: reservationId,
+                  guest: availability.guest_name || 'Unknown',
+                  lastName: availability.last_name || '',
+                  reservationNumber: availability.reservation_number || '',
+                  reservationLength: availability.reservation_length || 0,
+                  color: colorEntry.color,
+                  colorTheme: availability.color_theme || 0,
+                  colorTint: availability.color_tint || 0,
+                  phone: availability.guest_phone || '',
+                  adults: availability.adults || 1,
+                  babies: availability.babies || 0,
+                  cribs: availability.cribs || 0,
+                  dogsSmall: availability.dogs_d || 0,
+                  dogsMedium: availability.dogs_s || 0,
+                  dogsLarge: availability.dogs_b || 0,
+                  notes: availability.notes || '',
+                  startDay: startDate.getDate(),
+                  startMonth: startDate.getMonth() + 1,
+                  endDay: endDate.getDate(),
+                  endMonth: endDate.getMonth() + 1,
+                  isFirstDay: isFirstDay,
+                  isLastDay: isLastDay,
+                  house_id: house.house_id,
+                  hasArrived: availability.has_arrived || false,
+                  hasDeparted: availability.has_departed || false,
+                  prevConnected: availability.prev_connected || false,
+                  nextConnected: availability.next_connected || false
+                };
+              }
+              
+              // Move to the next day
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+          }
         });
-        
-        row.dates = reservedDates;
-        row.reservations = houseReservations;
       }
     });
   }
 
-  // Filter houses by type
-  changeHouseType(type: string): void {
+  // Update the changeHouseType method to use real data
+  async changeHouseType(type: string): Promise<void> {
     this.currentHouseType = type;
-    this.loadMockData(); // Reload data with new filter
+    await this.initializeData();
   }
 
   // Get reservation details for a specific cell
@@ -563,14 +627,24 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     this.newReservation = {
       house_id: this.dragHouseId,
       guest_name: '',
+      last_name: '',
       guest_phone: '',
+      reservation_number: '',
       start_date: formattedStartDate,
       end_date: formattedEndDate,
       adults: 1,
-      children: 0,
-      extraBeds: 0,
-      pets: 0,
-      notes: ''
+      babies: 0,
+      cribs: 0,
+      dogs_small: 0,
+      dogs_medium: 0,
+      dogs_large: 0,
+      notes: '',
+      has_arrived: false,
+      has_departed: false,
+      prev_connected: false,
+      next_connected: false,
+      color_theme: 0,
+      color_tint: 0
     };
     
     // Calculate position for the popup (use middle of screen)
@@ -652,14 +726,24 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     this.newReservation = {
       house_id: houseId,
       guest_name: '',
+      last_name: '',
       guest_phone: '',
+      reservation_number: '',
       start_date: `${this.currentDate.getFullYear()}-${monthNum.toString().padStart(2, '0')}-${dayNum.toString().padStart(2, '0')}`,
       end_date: `${this.currentDate.getFullYear()}-${monthNum.toString().padStart(2, '0')}-${dayNum.toString().padStart(2, '0')}`,
       adults: 1,
-      children: 0,
-      extraBeds: 0,
-      pets: 0,
-      notes: ''
+      babies: 0,
+      cribs: 0,
+      dogs_small: 0,
+      dogs_medium: 0,
+      dogs_large: 0,
+      notes: '',
+      has_arrived: false,
+      has_departed: false,
+      prev_connected: false,
+      next_connected: false,
+      color_theme: 0,
+      color_tint: 0
     };
     
     // Show popup first, then position it
@@ -823,140 +907,122 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     this.newReservation = {
       house_id: 0,
       guest_name: '',
+      last_name: '',
       guest_phone: '',
+      reservation_number: '',
       start_date: '',
       end_date: '',
       adults: 1,
-      children: 0,
-      extraBeds: 0,
-      pets: 0,
-      notes: ''
+      babies: 0,
+      cribs: 0,
+      dogs_small: 0,
+      dogs_medium: 0,
+      dogs_large: 0,
+      notes: '',
+      has_arrived: false,
+      has_departed: false,
+      prev_connected: false,
+      next_connected: false,
+      color_theme: 0,
+      color_tint: 0
     };
   }
 
-  // Create a new reservation
-  createNewReservation(): void {
-    // Parse dates
-    const startDate = new Date(this.newReservation.start_date);
-    const endDate = new Date(this.newReservation.end_date);
-    
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      alert('Please enter valid start and end dates');
+  async createNewReservation(): Promise<void> {
+    if (!this.newReservation.start_date || !this.newReservation.end_date || !this.newReservation.house_id) {
       return;
     }
-    
-    if (endDate < startDate) {
-      alert('End date cannot be before start date');
-      return;
-    }
-    
-    // Get day and month info
-    const startDay = startDate.getDate();
-    const startMonth = startDate.getMonth() + 1;
-    const endDay = endDate.getDate();
-    const endMonth = endDate.getMonth() + 1;
-    
-    // Check for overlapping reservations
-    let hasOverlap = false;
-    const checkDate = new Date(startDate);
-    
-    while (checkDate <= endDate) {
-      const day = checkDate.getDate();
-      const month = checkDate.getMonth() + 1;
-      const dayStr = `${day}.${month}`;
+
+    try {
+      // Get the availability type for "Occupied"
+      const availabilityTypes = await this.reservationsService.getAvailabilityTypes();
+      const occupiedType = availabilityTypes.find(type => type.house_availability_type_name === 'Occupied');
       
-      if (this.hasReservation(this.newReservation.house_id, dayStr)) {
-        hasOverlap = true;
-        break;
+      if (!occupiedType) {
+        throw new Error('Could not find Occupied availability type');
       }
+
+      // Create the reservation in the database
+      const reservation = await this.reservationsService.createReservation({
+        house_id: this.newReservation.house_id,
+        availability_type_id: occupiedType.house_availability_type_id,
+        start_date: this.newReservation.start_date,
+        end_date: this.newReservation.end_date,
+        guest_name: this.newReservation.guest_name,
+        last_name: this.newReservation.last_name,
+        guest_phone: this.newReservation.guest_phone,
+        reservation_number: this.newReservation.reservation_number,
+        adults: this.newReservation.adults,
+        babies: this.newReservation.babies,
+        cribs: this.newReservation.cribs,
+        dogs_d: this.newReservation.dogs_small,
+        dogs_s: this.newReservation.dogs_medium,
+        dogs_b: this.newReservation.dogs_large,
+        notes: this.newReservation.notes,
+        has_arrived: this.newReservation.has_arrived,
+        has_departed: this.newReservation.has_departed,
+        prev_connected: this.newReservation.prev_connected,
+        next_connected: this.newReservation.next_connected,
+        color_theme: this.newReservation.color_theme,
+        color_tint: this.newReservation.color_tint
+      });
+
+      // Reload the data to show the new reservation
+      await this.initializeData();
+
+      // Close the popup
+      this.showNewReservationPopup = false;
       
-      checkDate.setDate(checkDate.getDate() + 1);
+      // Reset new reservation data
+      this.newReservation = {
+        house_id: 0,
+        guest_name: '',
+        last_name: '',
+        guest_phone: '',
+        reservation_number: '',
+        start_date: '',
+        end_date: '',
+        adults: 1,
+        babies: 0,
+        cribs: 0,
+        dogs_small: 0,
+        dogs_medium: 0,
+        dogs_large: 0,
+        notes: '',
+        has_arrived: false,
+        has_departed: false,
+        prev_connected: false,
+        next_connected: false,
+        color_theme: 0,
+        color_tint: 0
+      };
+    } catch (error) {
+      console.error('Error creating reservation:', error);
+      // You might want to show an error message to the user here
     }
-    
-    if (hasOverlap) {
-      alert('Cannot create reservation: The selected range overlaps with existing reservations');
+  }
+
+  async removeReservation(): Promise<void> {
+    if (!this.selectedReservation || !confirm('Are you sure you want to remove this reservation?')) {
       return;
     }
     
-    // Generate unique reservation ID
-    const reservationId = `res-${this.newReservation.house_id}-${startMonth}-${startDay}-${Date.now()}`;
-    
-    // Get color for guest
-    let colorEntry = this.reservationColors.find(c => 
-      c.name.toLowerCase() === this.newReservation.guest_name.toLowerCase()
-    );
-    
-    if (!colorEntry) {
-      const hue = Math.floor(Math.random() * 360);
-      const pastelColor = `hsl(${hue}, 70%, 85%)`;
-      colorEntry = { name: this.newReservation.guest_name, color: pastelColor };
-    }
-    
-    // Find the row for this house
-    const rowIndex = this.reservationRows.findIndex(r => r.house_id === this.newReservation.house_id);
-    
-    if (rowIndex !== -1) {
-      const row = this.reservationRows[rowIndex];
+    try {
+      // Extract the reservation ID from the format "res-{houseId}-{availabilityId}"
+      const reservationId = parseInt(this.selectedReservation.reservationId.split('-')[2]);
       
-      // Create reservation for each day in the range
-      const reservationDate = new Date(startDate);
-      while (reservationDate <= endDate) {
-        const day = reservationDate.getDate();
-        const month = reservationDate.getMonth() + 1;
-        const dayStr = `${day}.${month}`;
-        
-        const isFirstDay = reservationDate.getTime() === startDate.getTime();
-        const isLastDay = reservationDate.getTime() === endDate.getTime();
-        
-        // Add this date to the dates array if not already there
-        if (!row.dates.includes(dayStr)) {
-          row.dates.push(dayStr);
-        }
-        
-        // Add the reservation info
-        row.reservations[dayStr] = {
-          reservationId: reservationId,
-          guest: this.newReservation.guest_name,
-          color: colorEntry.color,
-          phone: this.newReservation.guest_phone,
-          adults: this.newReservation.adults,
-          children: this.newReservation.children,
-          extraBeds: this.newReservation.extraBeds,
-          pets: this.newReservation.pets,
-          notes: this.newReservation.notes,
-          startDay: startDay,
-          startMonth: startMonth,
-          endDay: endDay,
-          endMonth: endMonth,
-          isFirstDay: isFirstDay,
-          isLastDay: isLastDay,
-          house_id: this.newReservation.house_id
-        };
-        
-        // Move to the next day
-        reservationDate.setDate(reservationDate.getDate() + 1);
-      }
+      // Delete the reservation from the database
+      await this.reservationsService.deleteReservation(reservationId);
       
-      // Update the row in the array
-      this.reservationRows[rowIndex] = { ...row };
+      // Reload the data to reflect the deletion
+      await this.initializeData();
+      
+      // Close the popup
+      this.closePopup();
+    } catch (error) {
+      console.error('Error removing reservation:', error);
+      // You might want to show an error message to the user here
     }
-    
-    // Close the popup
-    this.showNewReservationPopup = false;
-    
-    // Reset new reservation data
-    this.newReservation = {
-      house_id: 0,
-      guest_name: '',
-      guest_phone: '',
-      start_date: '',
-      end_date: '',
-      adults: 1,
-      children: 0,
-      extraBeds: 0,
-      pets: 0,
-      notes: ''
-    };
   }
 
   // Edit an existing reservation
@@ -967,14 +1033,24 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     this.newReservation = {
       house_id: this.selectedReservation.house_id || 0,
       guest_name: this.selectedReservation.guest || '',
+      last_name: this.selectedReservation.lastName || '',
       guest_phone: this.selectedReservation.phone || '',
+      reservation_number: this.selectedReservation.reservationNumber || '',
       start_date: `${this.currentDate.getFullYear()}-${this.selectedReservation.startMonth.toString().padStart(2, '0')}-${this.selectedReservation.startDay.toString().padStart(2, '0')}`,
       end_date: `${this.currentDate.getFullYear()}-${this.selectedReservation.endMonth.toString().padStart(2, '0')}-${this.selectedReservation.endDay.toString().padStart(2, '0')}`,
       adults: this.selectedReservation.adults || 1,
-      children: this.selectedReservation.children || 0,
-      extraBeds: this.selectedReservation.extraBeds || 0,
-      pets: this.selectedReservation.pets || 0,
-      notes: this.selectedReservation.notes || ''
+      babies: this.selectedReservation.babies || 0,
+      cribs: this.selectedReservation.cribs || 0,
+      dogs_small: this.selectedReservation.dogsSmall || 0,
+      dogs_medium: this.selectedReservation.dogsMedium || 0,
+      dogs_large: this.selectedReservation.dogsLarge || 0,
+      notes: this.selectedReservation.notes || '',
+      has_arrived: this.selectedReservation.hasArrived || false,
+      has_departed: this.selectedReservation.hasDeparted || false,
+      prev_connected: this.selectedReservation.prevConnected || false,
+      next_connected: this.selectedReservation.nextConnected || false,
+      color_theme: this.selectedReservation.colorTheme || 0,
+      color_tint: this.selectedReservation.colorTint || 0
     };
     
     // Close details popup and show edit form
@@ -986,42 +1062,6 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     
     // Force change detection to update the UI
     this.changeDetectorRef.detectChanges();
-  }
-
-  // Remove an existing reservation
-  removeReservation(): void {
-    if (!this.selectedReservation || !confirm('Are you sure you want to remove this reservation?')) {
-      return;
-    }
-    
-    const reservationId = this.selectedReservation.reservationId;
-    
-    // Find all entries with this reservation ID and remove them
-    this.reservationRows.forEach(row => {
-      // Collect days to remove
-      const daysToRemove: string[] = [];
-      
-      // Find all days with this reservation
-      Object.keys(row.reservations).forEach(day => {
-        if (row.reservations[day].reservationId === reservationId) {
-          daysToRemove.push(day);
-        }
-      });
-      
-      // Remove the reservation for each day
-      daysToRemove.forEach(day => {
-        delete row.reservations[day];
-        
-        // Also remove from dates array
-        const dateIndex = row.dates.indexOf(day);
-        if (dateIndex !== -1) {
-          row.dates.splice(dateIndex, 1);
-        }
-      });
-    });
-    
-    // Close the popup
-    this.closePopup();
   }
 
   // Clean up event listeners when component is destroyed
@@ -1052,7 +1092,7 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     // First check if the cell has a reservation
     if (this.hasReservation(houseId, day)) {
       const reservation = this.getReservation(houseId, day);
-      return reservation ? `${reservation.guest} (${reservation.adults} adults, ${reservation.children} children)` : 'Reserved';
+      return reservation ? `${reservation.guest} (${reservation.adults} adults, ${reservation.babies} babies)` : 'Reserved';
     }
     
     // Check if it's part of a pending reservation
@@ -1287,73 +1327,44 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
   }
   
   // Handle dropping a reservation
-  onReservationDrop(houseId: number, date: string, event: DragEvent): void {
-    if (!this.draggedReservationId || !event.dataTransfer || !this.draggedFromHouseId || 
-        !this.draggedStartDate || !this.draggedEndDate) {
-      return;
-    }
-    
+  async onReservationDrop(targetHouseId: number, targetDate: string, event: DragEvent): Promise<void> {
     event.preventDefault();
     
-    // Check if this is a valid drop target
-    if (!this.isValidDropTarget(houseId, date)) {
-      this.showStatusMessage('Invalid drop location - Reservation not moved', false);
+    if (!this.draggedReservationId || !this.draggedFromHouseId || !this.draggedFromDate) {
       return;
     }
-    
-    // Same house, no need to move
-    if (houseId === this.draggedFromHouseId) {
-      this.showStatusMessage('Reservation is already in this room', false);
-      return;
+
+    try {
+      // Extract the original reservation ID from the format "res-{houseId}-{availabilityId}"
+      const originalReservationId = parseInt(this.draggedReservationId.split('-')[2]);
+      
+      // Get the target date components
+      const [day, month] = targetDate.split('.').map(Number);
+      const year = this.currentDate.getFullYear();
+      
+      // Create new dates
+      const newStartDate = new Date(year, month - 1, day);
+      const newEndDate = new Date(newStartDate);
+      newEndDate.setDate(newStartDate.getDate() + this.draggedDuration);
+      
+      // Update the reservation in the database
+      await this.reservationsService.updateReservation(originalReservationId, {
+        house_id: targetHouseId,
+        start_date: newStartDate.toISOString().split('T')[0],
+        end_date: newEndDate.toISOString().split('T')[0]
+      });
+      
+      // Reload the data to show the updated reservation
+      await this.initializeData();
+      
+      // Show success message
+      this.showDragStatus('Reservation moved successfully', true);
+    } catch (error) {
+      console.error('Error moving reservation:', error);
+      this.showDragStatus('Failed to move reservation', false);
+    } finally {
+      this.resetDragState();
     }
-    
-    // Parse the target date
-    const [dayNum, monthNum] = date.split('.').map(Number);
-    const targetDate = new Date(this.currentDate.getFullYear(), monthNum - 1, dayNum);
-    
-    // Find the source reservation information
-    const sourceReservation = this.findReservationById(this.draggedReservationId);
-    if (!sourceReservation) {
-      this.showStatusMessage('Error: Reservation not found', false);
-      return;
-    }
-    
-    // Calculate new start and end dates, maintaining the same duration
-    const newStartDate = new Date(targetDate);
-    const newEndDate = new Date(newStartDate);
-    newEndDate.setDate(newStartDate.getDate() + this.draggedDuration - 1);
-    
-    // Check for overlaps in target house
-    const newStartDay = newStartDate.getDate();
-    const newStartMonth = newStartDate.getMonth() + 1;
-    const newEndDay = newEndDate.getDate();
-    const newEndMonth = newEndDate.getMonth() + 1;
-    
-    // Check for overlaps
-    if (this.hasOverlappingReservations(houseId, newStartDate, newEndDate)) {
-      this.showStatusMessage('Cannot move: Overlaps with existing reservations', false);
-      return;
-    }
-    
-    // First remove the reservation from the source house
-    this.removeReservationById(this.draggedReservationId);
-    
-    // Then add it to the target house
-    this.addReservationToHouse(
-      houseId, 
-      this.draggedReservationId,
-      newStartDay,
-      newStartMonth,
-      newEndDay,
-      newEndMonth,
-      sourceReservation
-    );
-    
-    // Show success message
-    this.showStatusMessage('Reservation moved successfully!', true);
-    
-    // Force UI update
-    this.changeDetectorRef.detectChanges();
   }
   
   // Handle end of drag operation
@@ -1450,16 +1461,23 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
   removeReservationById(reservationId: string): void {
     this.reservationRows.forEach(row => {
       // Create a copy of the dates array to avoid issues while iterating
-      const datesToRemove = [...row.dates].filter(dateKey => 
-        row.reservations[dateKey] && row.reservations[dateKey].reservationId === reservationId
-      );
+      const datesToRemove: string[] = [];
       
-      // Remove each matching date
-      datesToRemove.forEach(dateKey => {
-        delete row.reservations[dateKey];
-        const index = row.dates.indexOf(dateKey);
-        if (index !== -1) {
-          row.dates.splice(index, 1);
+      // Find all days with this reservation
+      Object.keys(row.reservations).forEach(day => {
+        if (row.reservations[day].reservationId === reservationId) {
+          datesToRemove.push(day);
+        }
+      });
+      
+      // Remove the reservation for each day
+      datesToRemove.forEach(day => {
+        delete row.reservations[day];
+        
+        // Also remove from dates array
+        const dateIndex = row.dates.indexOf(day);
+        if (dateIndex !== -1) {
+          row.dates.splice(dateIndex, 1);
         }
       });
     });
@@ -1506,12 +1524,19 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
       row.reservations[dateKey] = {
         reservationId: reservationId,
         guest: sourceReservation.guest,
+        lastName: sourceReservation.lastName,
+        reservationNumber: sourceReservation.reservationNumber,
+        reservationLength: sourceReservation.reservationLength,
         color: sourceReservation.color,
+        colorTheme: sourceReservation.colorTheme,
+        colorTint: sourceReservation.colorTint,
         phone: sourceReservation.phone,
         adults: sourceReservation.adults,
-        children: sourceReservation.children,
-        extraBeds: sourceReservation.extraBeds,
-        pets: sourceReservation.pets,
+        babies: sourceReservation.babies,
+        cribs: sourceReservation.cribs,
+        dogsSmall: sourceReservation.dogsSmall,
+        dogsMedium: sourceReservation.dogsMedium,
+        dogsLarge: sourceReservation.dogsLarge,
         notes: sourceReservation.notes,
         startDay: startDay,
         startMonth: startMonth,
@@ -1519,7 +1544,11 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
         endMonth: endMonth,
         isFirstDay: isFirstDay,
         isLastDay: isLastDay,
-        house_id: houseId
+        house_id: houseId,
+        hasArrived: sourceReservation.hasArrived,
+        hasDeparted: sourceReservation.hasDeparted,
+        prevConnected: sourceReservation.prevConnected,
+        nextConnected: sourceReservation.nextConnected
       };
       
       // Move to the next day
@@ -1570,6 +1599,35 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     this.dragStatusTimeoutId = setTimeout(() => {
       this.dragStatusVisible = false;
       this.changeDetectorRef.detectChanges();
+    }, 3000);
+  }
+
+  // Get the MobileHome object for a given ReservationRow
+  getMobileHomeForRow(row: ReservationRow): MobileHome {
+    return this.mobileHomes.find(home => home.house_id === row.house_id) || {
+      house_id: row.house_id,
+      housename: row.room,
+      housetype: 1,
+      housetypename: row.type,
+      availabilityid: 1,
+      availabilityname: row.dates.length > 0 ? 'Occupied' : 'Free',
+      housetasks: []
+    };
+  }
+
+  private showDragStatus(message: string, success: boolean): void {
+    this.dragStatusMessage = message;
+    this.dragStatusSuccess = success;
+    this.dragStatusVisible = true;
+    
+    // Clear any existing timeout
+    if (this.dragStatusTimeoutId) {
+      clearTimeout(this.dragStatusTimeoutId);
+    }
+    
+    // Hide the message after 3 seconds
+    this.dragStatusTimeoutId = setTimeout(() => {
+      this.dragStatusVisible = false;
     }, 3000);
   }
 } 

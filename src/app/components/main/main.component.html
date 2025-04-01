@@ -1,0 +1,51 @@
+<div class="main-container">
+  <!-- Loading and Error states -->
+  <div class="status-bar" *ngIf="loading$ | async">
+    <div class="loading">Loading data...</div>
+  </div>
+  
+  <div class="status-bar error" *ngIf="error$ | async as error">
+    <div class="error-message">{{ error }}</div>
+  </div>
+
+  <!-- Data Display -->
+  <div class="data-container" *ngIf="data$ | async as data">
+    <div class="stats-grid">
+      <!-- Summary Cards -->
+      <div class="stat-card">
+        <h3>Houses</h3>
+        <div class="stat-number">{{ data.totalHouses }}</div>
+        <div class="stat-details">
+          <div *ngFor="let type of data.houseTypes">
+            {{ type.house_type_name }}: {{ data.houses | filterByType:'house_type_id':type.house_type_id | count }}
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Tasks</h3>
+        <div class="stat-number">{{ data.totalTasks }}</div>
+        <div class="stat-details">
+          <div *ngFor="let type of data.taskTypes">
+            {{ type.task_type_name }}: {{ data.tasks | filterByType:'task_type_id':type.task_type_id | count }}
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Profiles</h3>
+        <div class="stat-number">{{ data.totalProfiles }}</div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Work Groups</h3>
+        <div class="stat-number">{{ data.totalWorkGroups }}</div>
+      </div>
+    </div>
+
+    <!-- Refresh Button -->
+    <button class="refresh-button" (click)="refresh()">
+      Refresh Data
+    </button>
+  </div>
+</div>
