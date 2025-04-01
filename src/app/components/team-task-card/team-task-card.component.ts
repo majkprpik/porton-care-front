@@ -35,6 +35,24 @@ export class TeamTaskCardComponent {
 
   ngOnInit(){
     this.updateHouseOccupiedStatus();
+    this.supabaseService.listenToChanges(this.task.house || '').on(
+      'postgres_changes',
+      { 
+        event: 'UPDATE',
+        schema: 'porton',
+        table: 'house_availabilities'
+      },
+      async (payload: any) => {
+        console.log('House table change: ', payload);
+        if(payload.table == 'house_availabilities'){
+          let houseNumber = await this.mobileHomesService.getHouseNumberByHouseId(payload.new.house_id);
+          if(this.task.house == houseNumber){
+            console.log('Real-time update received:', payload);
+            this.houseOccupied = !payload.new.has_departed
+          }
+        }
+      }
+    ).subscribe();
   }
 
   getTaskIcon(): string {
