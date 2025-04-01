@@ -574,7 +574,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
 
   getStaffRoles(): string[] {
     const roles = new Set<string>();
-    this.availableStaff.forEach(staff => {
+    this.cleaningStaff.forEach(staff => {
       if (staff.role) { 
         const capitalizedRole = staff.role.charAt(0).toUpperCase() + staff.role.slice(1);
         roles.add(capitalizedRole);

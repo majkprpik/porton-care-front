@@ -202,7 +202,7 @@
         {{ person.firstName }} {{ person.lastName }} 
         <mat-icon id="role-icon">{{ roleIcon[role] }}</mat-icon>
         </div>
-        <div class="placeholder" *ngIf="availableStaff.length === 0">
+        <div class="placeholder" *ngIf="(availableStaff | staffRoles: role).length === 0">
           No available staff members
         </div>
       </div>
