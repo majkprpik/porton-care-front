@@ -120,7 +120,7 @@ export class DamageReportCardComponent {
       return '';
     }
 
-    this.workGroupProfile = await this.workGroupService.getWorkGroupProfileByWorkGroupId(workGroupTask.work_group_id);
+    this.workGroupProfile = await this.workGroupService.getWorkGroupProfilesByWorkGroupId(workGroupTask.work_group_id);
 
     if(!this.workGroupProfile[0]){
       return '';

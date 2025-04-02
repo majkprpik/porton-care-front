@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { LockedTeam, Staff, Home, Task } from '../interfaces/team.interface';
 import { SupabaseService } from './supabase.service';
+import { WorkGroupService } from './work-group.service';
 
 @Injectable({
   providedIn: 'root'
@@ -172,7 +173,10 @@ export class TeamsService {
   private lockedTeams = new BehaviorSubject<LockedTeam[]>([]);
   lockedTeams$ = this.lockedTeams.asObservable();
 
-  constructor(private supabaseService: SupabaseService) {
+  constructor(
+    private supabaseService: SupabaseService,
+    private workGroupService: WorkGroupService,
+  ) {
     // Load teams from Supabase when service initializes
     this.loadTeamsFromSupabase();
   }
@@ -421,7 +425,7 @@ export class TeamsService {
       if (currentTeam.members.length !== newTeam.members.length) {
         return true;
       }
-      
+
       // Check if homes have changed (if both teams have homes)
       if (currentTeam.homes && newTeam.homes && 
           currentTeam.homes.length !== newTeam.homes.length) {
@@ -433,14 +437,19 @@ export class TeamsService {
           currentTeam.tasks.length !== newTeam.tasks.length) {
         return true;
       }
+
+      // console.log(currentTeam.homes && !newTeam.homes)
+      // console.log(!currentTeam.homes && newTeam.homes)
+      // console.log(currentTeam.tasks && !newTeam.tasks)
+      // console.log(!currentTeam.tasks && newTeam.tasks)
       
-      // Check if one has homes and the other has tasks
-      if ((currentTeam.homes && !newTeam.homes) || 
-          (!currentTeam.homes && newTeam.homes) ||
-          (currentTeam.tasks && !newTeam.tasks) ||
-          (!currentTeam.tasks && newTeam.tasks)) {
-        return true;
-      }
+      // // Check if one has homes and the other has tasks
+      // if ((currentTeam.homes && !newTeam.homes) || 
+      //     (!currentTeam.homes && newTeam.homes) ||
+      //     (currentTeam.tasks && !newTeam.tasks) ||
+      //     (!currentTeam.tasks && newTeam.tasks)) {
+      //   return true;
+      // }
       
       // Could add more detailed comparison if needed
     }
@@ -462,256 +471,62 @@ export class TeamsService {
       for (const team of teams) {
         await this.saveTeamToSupabase(team);
       }
+      window.location.reload();
     } catch (error) {
       console.error('Error saving teams to Supabase:', error);
     }
   }
 
   async saveTeamToSupabase(team: LockedTeam) {
-    const supabase = this.supabaseService.getClient();
-    
     try {
-      // Check if team already exists
-      const { data: existingTeam, error: checkError } = await supabase
-        .schema('porton')
-        .from('work_groups')
-        .select('*')
-        .eq('work_group_id', parseInt(team.id))
-        .single();
+      let workGroup = await this.workGroupService.getWorkGroupByWorkGroupId(parseInt(team.id));
       
-      if (checkError && checkError.code !== 'PGRST116') throw checkError;
-      
-      // We'll use multiple operations instead of a transaction
-      // since Supabase doesn't directly support client-side transactions
-      
-      if (existingTeam) {
-        // Update existing team
-        const { error: updateError } = await supabase
-          .schema('porton')
-          .from('work_groups')
-          .update({
-            is_locked: team.isLocked || false
-          })
-          .eq('work_group_id', parseInt(team.id));
-        
-        if (updateError) throw updateError;
+      if (workGroup) {
+        this.workGroupService.lockWorkGroup(workGroup.work_group_id);
       } else {
-        // Insert new team
-        const { data: newTeam, error: insertError } = await supabase
-          .schema('porton')
-          .from('work_groups')
-          .insert({
-            is_locked: team.isLocked || false
-          })
-          .select()
-          .single();
-        
-        if (insertError) throw insertError;
-        
-        // Update the team id with the newly created id
-        team.id = newTeam.work_group_id.toString();
+        workGroup = await this.workGroupService.createWorkGroup();
+        this.workGroupService.lockWorkGroup(workGroup.work_group_id);
       }
-      
-      // Clear existing members
-      const { error: clearMembersError } = await supabase
-        .schema('porton')
-        .from('work_group_profiles')
-        .delete()
-        .eq('work_group_id', parseInt(team.id));
-      
-      if (clearMembersError) throw clearMembersError;
-      
-      // Clear existing tasks
-      const { error: clearTasksError } = await supabase
-        .schema('porton')
-        .from('work_group_tasks')
-        .delete()
-        .eq('work_group_id', parseInt(team.id));
-      
-      if (clearTasksError) throw clearTasksError;
-      
-      // Add members to work_group_profiles
-      if (team.members && team.members.length > 0) {
-        const memberInserts = team.members.map(member => ({
-          work_group_id: parseInt(team.id),
-          profile_id: member.id
-        }));
-        
-        const { error: insertMembersError } = await supabase
-          .schema('porton')
-          .from('work_group_profiles')
-          .insert(memberInserts);
-        
-        if (insertMembersError) throw insertMembersError;
-      }
-      
-      // Add tasks to work_group_tasks
-      if (team.tasks && team.tasks.length > 0) {
-        // First, we need to get task_type_id and task_progress_type_id for each task
-        for (const task of team.tasks) {
-          // Get or create task type
-          let taskTypeId = null;
-          if (task.taskType) {
-            const { data: existingTaskType, error: taskTypeError } = await supabase
-              .schema('porton')
-              .from('task_types')
-              .select('task_type_id')
-              .ilike('task_type_name', task.taskType)
-              .limit(1);
-            
-            if (taskTypeError) throw taskTypeError;
-            
-            if (existingTaskType && existingTaskType.length > 0) {
-              taskTypeId = existingTaskType[0].task_type_id;
-            } else {
-              // Create new task type
-              const { data: newTaskType, error: createTaskTypeError } = await supabase
-                .schema('porton')
-                .from('task_types')
-                .insert({ task_type_name: task.taskType })
-                .select()
-                .single();
-              
-              if (createTaskTypeError) throw createTaskTypeError;
-              
-              if (newTaskType) {
-                taskTypeId = newTaskType.task_type_id;
-              }
-            }
-          }
-          
-          // Get or create progress type
-          let progressTypeId = null;
-          if (task.progressType) {
-            const { data: existingProgressType, error: progressTypeError } = await supabase
-              .schema('porton')
-              .from('task_progress_types')
-              .select('task_progress_type_id')
-              .ilike('task_progress_type_name', task.progressType)
-              .limit(1);
-            
-            if (progressTypeError) throw progressTypeError;
-            
-            if (existingProgressType && existingProgressType.length > 0) {
-              progressTypeId = existingProgressType[0].task_progress_type_id;
-            } else {
-              // Create new progress type
-              const { data: newProgressType, error: createProgressTypeError } = await supabase
-                .schema('porton')
-                .from('task_progress_types')
-                .insert({ task_progress_type_name: task.progressType })
-                .select()
-                .single();
-              
-              if (createProgressTypeError) throw createProgressTypeError;
-              
-              if (newProgressType) {
-                progressTypeId = newProgressType.task_progress_type_id;
-              }
-            }
-          }
-          
-          // Get house_id from house number
-          let houseId = null;
-          if (task.house) {
-            const { data: existingHouse, error: houseError } = await supabase
-              .schema('porton')
-              .from('houses')
-              .select('house_id')
-              .or(`house_number.eq.${task.house},house_name.eq.${task.house}`)
-              .limit(1);
-            
-            if (houseError) throw houseError;
-            
-            if (existingHouse && existingHouse.length > 0) {
-              houseId = existingHouse[0].house_id;
-            }
-          }
-          
-          // Check if task exists
-          const taskId = parseInt(task.id);
-          if (!isNaN(taskId)) {
-            const { data: existingTask, error: taskError } = await supabase
-              .schema('porton')
-              .from('tasks')
-              .select('*')
-              .eq('task_id', taskId)
-              .single();
-            
-            if (taskError && taskError.code !== 'PGRST116') throw taskError;
-            
-            if (existingTask) {
-              // Update existing task
-              const { error: updateTaskError } = await supabase
-                .schema('porton')
-                .from('tasks')
-                .update({
-                  task_type_id: existingTask.taskTypeId,
-                  task_progress_type_id: existingTask.progressTypeId,
-                  house_id: existingTask.houseId
-                })
-                .eq('task_id', taskId);
-              
-              if (updateTaskError) throw updateTaskError;
-            } else {
-              // Create new task
-              const { error: createTaskError } = await supabase
-                .schema('porton')
-                .from('tasks')
-                .insert({
-                  task_id: taskId,
-                  task_type_id: existingTask.taskTypeId,
-                  task_progress_type_id: existingTask.progressTypeId,
-                  house_id: existingTask.houseId
-                });
-              
-              if (createTaskError) throw createTaskError;
-            }
-          }
+
+      let existingWorkGroupTasks = await this.workGroupService.getWorkGroupTasksByWorkGroupId(parseInt(team.id));
+      let existingWorkGroupProfiles = await this.workGroupService.getWorkGroupProfilesByWorkGroupId(parseInt(team.id));
+
+      if(team.tasks?.length == 0){
+        existingWorkGroupTasks.forEach(task => {
+          this.workGroupService.deleteWorkGroupTaskByTaskId(task.task_id);
+        });
+      } else {
+        if(!team.tasks){
+          team.tasks = [];
         }
-        
-        // Now add tasks to work_group_tasks
-        const taskInserts = team.tasks.map(task => ({
-          work_group_id: parseInt(team.id),
-          task_id: parseInt(task.id)
-        }));
-        
-        const { error: insertTasksError } = await supabase
-          .schema('porton')
-          .from('work_group_tasks')
-          .insert(taskInserts);
-        
-        if (insertTasksError) throw insertTasksError;
+
+        const tasksToDelete = existingWorkGroupTasks.filter((task: any) => !team.tasks?.some(t => t.id == task.task_id.toString()));
+        const tasksToAdd = team.tasks.filter(task => !existingWorkGroupTasks.some(t => t.task_id.toString() == task.id));
+      
+        tasksToDelete.forEach(task => {
+          this.workGroupService.deleteWorkGroupTaskByTaskId(task.task_id)
+        });
+
+        tasksToAdd.forEach(task => {
+          this.workGroupService.createWorkGroupTask(workGroup.work_group_id, parseInt(task.id))
+        });
       }
-      // For backward compatibility, also handle homes if tasks are not provided
-      else if (team.homes && team.homes.length > 0) {
-        // First, get house_ids from house_numbers
-        const houseNumbers = team.homes.map(home => home.number).filter(Boolean);
-        
-        if (houseNumbers.length > 0) {
-          const { data: houses, error: housesError } = await supabase
-            .schema('porton')
-            .from('houses')
-            .select('house_id, house_number')
-            .in('house_number', houseNumbers);
-          
-          if (housesError) throw housesError;
-          
-          if (houses && houses.length > 0) {
-            const houseInserts = houses.map(house => ({
-              work_group_id: parseInt(team.id),
-              house_id: house.house_id,
-              // date_assigned: new Date().toISOString()
-            }));
-            
-            const { error: insertHousesError } = await supabase
-              .schema('porton')
-              .from('work_group_houses')
-              .insert(houseInserts);
-            
-            if (insertHousesError) throw insertHousesError;
-          }
-        }
+
+      if (!team.members.length) {
+        existingWorkGroupProfiles.forEach((profile: any) => 
+          this.workGroupService.deleteWorkGroupProfileByProfileId(profile.id)
+        );
+      } else {
+        const profilesToDelete = existingWorkGroupProfiles.filter((profile: any) => !team.members.some(member => member.id == profile.profile_id));
+        const profilesToAdd = team.members.filter(member => !existingWorkGroupProfiles.some((profile: any) => profile.profile_id == member.id));
+      
+        profilesToDelete.forEach((profile: any) => {
+          this.workGroupService.deleteWorkGroupProfileByProfileId(profile.profile_id)
+        });
+      
+        profilesToAdd.forEach(profile => {
+          this.workGroupService.createWorkGroupProfile(workGroup.work_group_id, profile.id)
+        });
       }
     } catch (error) {
       console.error(`Error saving team ${team.id} to Supabase:`, error);

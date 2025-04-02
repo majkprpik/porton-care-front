@@ -150,7 +150,7 @@ export class ProfileService {
     let existingWorkGroupTask = await this.workGroupService.getWorkGroupTasksByTaskId(repairTaskId);
 
     if(Object.keys(existingWorkGroupTask).length > 0){
-      let existingWorkGroupProfile = await this.workGroupService.getWorkGroupProfileByWorkGroupId(existingWorkGroupTask.work_group_id);
+      let existingWorkGroupProfile = await this.workGroupService.getWorkGroupProfilesByWorkGroupId(existingWorkGroupTask.work_group_id);
       return existingWorkGroupProfile[0].profile_id;
     }
     

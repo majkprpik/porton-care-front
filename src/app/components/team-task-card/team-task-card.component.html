@@ -1,6 +1,6 @@
 <div 
     class="team-task-card"   
-    [ngStyle]="{'background-color': hasToBeCleaned() || (task.taskType == 'Čišćenje kućice' && houseOccupied)  ? 'gray' : '#FF6347'}"
+    [ngStyle]="{'background-color': hasToBeCleaned() || ((task.taskType == 'Čišćenje kućice' || task.taskType == 'Čišćenje terase') && houseOccupied) ? 'gray' : '#FF6347'}"
     [ngClass]="{'is-urgent': isUrgent && !isTaskCompleted()}"
 >
   <div class="task-header">
@@ -35,14 +35,17 @@
     </ng-container>
     <!-- Show only Finish button for other cleaning tasks -->
     <ng-container *ngIf="task.taskType !== 'Čišćenje kućice' && !isTaskCompleted()">
-      <button 
-        (click)="finishTask()" 
-        class="btn-finish"    
-        *ngIf="!hasToBeCleaned()"
-      >
-        Završi
-      </button>
-      <span *ngIf="hasToBeCleaned()">Potrebno čišćenje kućice</span>
+      @if (((task.taskType == 'Čišćenje kućice' || task.taskType == 'Čišćenje terase') && houseOccupied)) {
+        <span>Kućica zauzeta</span>
+      } 
+      @else if(hasToBeCleaned()) {
+        <span>Potrebno čišćenje kućice</span>
+      } 
+      @else {
+        <button (click)="finishTask()" class="btn-finish">
+          Završi
+        </button>
+      }
     </ng-container>
     
     <!-- Show status label when task is completed -->

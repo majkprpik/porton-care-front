@@ -9,13 +9,13 @@ export class WorkGroupService {
 
   constructor(private supabaseService: SupabaseService) { }
 
-  async getWorkGroupById(workGroupId: number){
+  async getWorkGroupByWorkGroupId(workGroupId: number): Promise<any>{
     try{
       const { data: existingWorkGroup, error: existingWorkGroupError } = await this.supabaseService.getClient()
         .schema('porton')
         .from('work_groups')
         .select('*')
-        .eq('task_id', workGroupId)
+        .eq('work_group_id', workGroupId)
         .single();
 
       if(existingWorkGroupError) throw existingWorkGroupError;
@@ -23,11 +23,11 @@ export class WorkGroupService {
       return existingWorkGroup;
     } catch (error) {
       console.log(error);
-      return {};
+      return null;
     }
   }
 
-  async getWorkGroupProfileByWorkGroupId(workGroupId: number): Promise<any>{
+  async getWorkGroupProfilesByWorkGroupId(workGroupId: number): Promise<any>{
     try{
       const { data: existingWorkGroup, error: existingWorkGroupError } = await this.supabaseService.getClient()
         .schema('porton')
@@ -40,7 +40,24 @@ export class WorkGroupService {
       return existingWorkGroup;
     } catch (error) {
       console.log(error);
-      return {};
+      return [];
+    }
+  }
+
+  async getWorkGroupTasksByWorkGroupId(workGroupId: number){
+    try{
+      const { data: existingWorkGroupTask, error: existingWorkGroupTaskError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_group_tasks')
+        .select('*')
+        .eq('work_group_id', workGroupId);
+
+      if(existingWorkGroupTaskError) throw existingWorkGroupTaskError;
+
+      return existingWorkGroupTask;
+    } catch (error) {
+      console.log(error);
+      return [];
     }
   }
 
@@ -62,7 +79,7 @@ export class WorkGroupService {
     }
   }
 
-  async createWorkGroup(){
+  async createWorkGroup(): Promise<any>{
     try{
       const { data: newWorkGroup, error: createWorkGroupError } = await this.supabaseService.getClient()
         .schema('porton')
@@ -79,7 +96,7 @@ export class WorkGroupService {
       return newWorkGroup;
     } catch (error) {
       console.log(error);
-      return {};
+      return null;
     }
   }
 
@@ -140,6 +157,40 @@ export class WorkGroupService {
     }
   }
 
+  async deleteWorkGroupProfileByProfileId(profileId: string){
+    try{
+      const { error: deleteWorkGroupProfileError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_group_profiles')
+        .delete()
+        .eq('profile_id', profileId);
+
+      if(deleteWorkGroupProfileError) throw deleteWorkGroupProfileError
+
+      return true;
+    } catch(error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  async deleteWorkGroupTaskByTaskId(taskId: string){
+    try{
+      const { error: deleteWorkGroupTaskError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_group_tasks')
+        .delete()
+        .eq('task_id', taskId);
+
+      if(deleteWorkGroupTaskError) throw deleteWorkGroupTaskError
+
+      return true;
+    } catch(error) {
+      console.log(error);
+      return false;
+    }
+  }
+
   async submitTechnicianForRepairTask(workGroupId: number, profileId: string){
     try{
       const { data: newTechnicianForRepairTask, error: newTechnicianForRepairTaskError } = await this.supabaseService.getClient()
@@ -155,6 +206,27 @@ export class WorkGroupService {
       if(newTechnicianForRepairTaskError) throw newTechnicianForRepairTaskError;
 
       return newTechnicianForRepairTask;
+    } catch (error){
+      console.log(error);
+      return {};
+    }
+  }
+
+  async createWorkGroupProfile(workGroupId: number, profileId: string){
+    try{
+      const { data: newWorkGroupProfile, error: newWorkGroupProfileError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_group_profiles')
+        .insert({ 
+          work_group_id: workGroupId,
+          profile_id: profileId,
+         })
+        .select()
+        .single();
+
+      if(newWorkGroupProfileError) throw newWorkGroupProfileError;
+
+      return newWorkGroupProfile;
     } catch (error){
       console.log(error);
       return {};

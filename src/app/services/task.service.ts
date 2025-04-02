@@ -121,6 +121,42 @@ export class TaskService {
     }
   }
 
+  async getTaskByTaskId(taskId: number){
+    try{
+      const { data: task, error: taskTypeIdError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('tasks')
+        .select('*')
+        .eq('task_id', taskId)
+        .single();
+
+      if(taskTypeIdError) throw taskTypeIdError
+
+      return task;
+    } catch (error) {
+      console.error('Error fetching task type ids', error);
+      return [];
+    }
+  }
+
+  async getTaskTypeByTaskTypeId(taskTypeId: number){
+    try{
+      const { data: task, error: taskTypeIdError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('task_types')
+        .select('*')
+        .eq('task_type_id', taskTypeId)
+        .single();
+
+      if(taskTypeIdError) throw taskTypeIdError
+
+      return task;
+    } catch (error) {
+      console.error('Error fetching task type ids', error);
+      return [];
+    }
+  }
+
   async uploadCommentForTask(taskId: number, comment: string){
     try{
       const { error: commentUploadError } = await this.supabase.getClient()
@@ -213,6 +249,24 @@ export class TaskService {
       if(progressTypeIdError) throw progressTypeIdError
 
       return existingProgressTypeId?.task_progress_type_id;
+    } catch (error) {
+      console.error('Error fetching task type ids', error);
+      return null;
+    }
+  }
+
+  async getTaskProgressTypeByTaskProgressId(taskProgressId: number){
+    try{
+      const { data: taskProgress, error: progressTypeIdError } = await this.supabase.getClient()
+        .schema('porton')
+        .from('task_progress_types')
+        .select('*')
+        .eq('task_progress_type_id', taskProgressId)
+        .single();
+
+      if(progressTypeIdError) throw progressTypeIdError
+
+      return taskProgress;
     } catch (error) {
       console.error('Error fetching task type ids', error);
       return null;

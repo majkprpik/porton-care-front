@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MobileHomesService } from '../../services/mobile-homes.service';
 import { BehaviorSubject } from 'rxjs';
 import { TeamTaskCardComponent } from '../team-task-card/team-task-card.component';
+import { TaskService } from '../../services/task.service';
 
 enum TaskProgressType {
   ASSIGNED = 'Dodijeljeno',
@@ -33,11 +34,13 @@ export class TeamDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private teamsService: TeamsService
+    private teamsService: TeamsService,
+    private supabaseService: SupabaseService
   ) {}
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+
     this.teamsService.lockedTeams$.subscribe((teams) => {
       this.teams = teams;
       this.team = teams.find((t) => t.id === id);
@@ -56,5 +59,29 @@ export class TeamDetailComponent implements OnInit {
         });
       }
     });
+
+    
+    this.supabaseService.listenToChanges(id || '')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'porton',
+        table: 'work_group_tasks'
+      },
+      async (payload: any) => {
+        window.location.reload();
+      }
+    ).on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'porton',
+        table: 'work_group_profiles'
+      },
+      async (payload: any) => {
+        window.location.reload();
+      }
+    ).subscribe();
   }
 }
