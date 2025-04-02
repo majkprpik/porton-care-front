@@ -595,7 +595,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         status: task.status,
         house: task.houseNumber,
         taskType: task.taskTypeName,
-        progressType: task.taskProgressType
+        progressType: task.taskProgressType == 'Nije dodijeljeno' ? 'Dodijeljeno' : task.taskProgressType
       }));
       
       return {
