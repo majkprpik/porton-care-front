@@ -5,6 +5,7 @@ import { LockedTeam, Task } from '../../interfaces/team.interface';
 import { SupabaseService } from '../../services/supabase.service';
 import { TeamsService } from '../../services/teams.service';
 import { MobileHomesService } from '../../services/mobile-homes.service';
+import { TaskService } from '../../services/task.service';
 
 enum TaskProgressType {
   ASSIGNED = 'Dodijeljeno',
@@ -24,18 +25,21 @@ export class TeamTaskCardComponent {
   @Input() teams: any;
   houseOccupied: boolean = false;
   isUrgent = false;
+  messageToShow = '';
 
   constructor(
     private supabaseService: SupabaseService,
     private teamsService: TeamsService,
-    private mobileHomesService: MobileHomesService
+    private mobileHomesService: MobileHomesService,
+    private taskService: TaskService
   ) {
         
   }
 
   ngOnInit(){
     this.updateHouseOccupiedStatus();
-    this.supabaseService.listenToChanges(this.task.house || '').on(
+    this.supabaseService.listenToChanges(this.task.house || '')
+    .on(
       'postgres_changes',
       { 
         event: 'UPDATE',
@@ -43,20 +47,19 @@ export class TeamTaskCardComponent {
         table: 'house_availabilities'
       },
       async (payload: any) => {
-        console.log('House table change: ', payload);
-        if(payload.table == 'house_availabilities'){
-          let houseNumber = await this.mobileHomesService.getHouseNumberByHouseId(payload.new.house_id);
-          if(this.task.house == houseNumber){
-            console.log('Real-time update received:', payload);
-            this.houseOccupied = !payload.new.has_departed
-          }
+        let houseNumber = await this.mobileHomesService.getHouseNumberByHouseId(payload.new.house_id);
+        if(this.task.house == houseNumber) {
+          this.houseOccupied = !payload.new.has_departed;
         }
       }
-    ).subscribe();
+    )
+    .subscribe();
   }
 
-  getTaskIcon(): string {
+  getTaskIcon(): string{
     if (!this.task.taskType) return 'task_alt';
+
+    // let taskTypeName = await this.taskService.getTaskTypeByTaskTypeId(parseInt(this.task.taskType));
     
     const taskType = this.task.taskType.toLowerCase();
     if (taskType.includes('čišćenje') && taskType.includes('terase')) {
@@ -91,7 +94,7 @@ export class TeamTaskCardComponent {
     console.log(
       `Started cleaning house ${this.task.number}, status: ${this.task.progressType}`
     );
-    this.updateTeam();
+    // this.updateTeam();
     this.updateTaskProgressInSupabase(this.task);
   }
 
@@ -100,7 +103,7 @@ export class TeamTaskCardComponent {
     console.log(
       `Paused cleaning house ${this.task.number}, status: ${this.task.progressType}`
     );
-    this.updateTeam();
+    // this.updateTeam();
     this.updateTaskProgressInSupabase(this.task);
   }
 
@@ -109,18 +112,8 @@ export class TeamTaskCardComponent {
     console.log(
       `Finished cleaning house ${this.task.number}, status: ${this.task.progressType}`
     );
-    this.updateTeam();
+    // this.updateTeam();
     this.updateTaskProgressInSupabase(this.task);
-  }
-
-  private updateTeam() {
-    if (this.team) {
-      const allTeams = this.teamsService.getLockedTeams();
-      const updatedTeams = allTeams.map((t) =>
-        t.id === this.team?.id ? this.team : t
-      );
-      this.teamsService.saveLockedTeams(updatedTeams);
-    }
   }
 
   private async updateTaskProgressInSupabase(task: Task) {

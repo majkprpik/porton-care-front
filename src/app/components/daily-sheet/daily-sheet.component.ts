@@ -596,7 +596,10 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       const tasks: Task[] = team.tasks.map(task => ({
         id: task.taskId.toString(),
         number: task.houseNumber,
-        status: task.status
+        status: task.status,
+        house: task.houseNumber,
+        taskType: task.taskTypeName,
+        progressType: task.taskProgressType
       }));
       
       return {
@@ -679,7 +682,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       console.log('Teams published and saved to Supabase');
       
       // Show success message
-      alert('Successfully published teams and locked all houses!');
+      // alert('Successfully published teams and locked all houses!');
     } catch (error) {
       console.error('Error publishing teams:', error);
       alert('Error publishing teams. Please try again.');
