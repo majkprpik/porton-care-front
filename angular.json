@@ -51,6 +51,7 @@
                   "maximumError": "150kb"
                 }
               ],
+              "sourceMap": true,
               "outputHashing": "all"
             },
             "development": {
@@ -100,5 +101,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
