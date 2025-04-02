@@ -119,8 +119,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     private teamsService: TeamsService,
     private taskService: TaskService,
     private dialog: MatDialog,
-    private workGroupService: WorkGroupService,
-    private router: Router
+    private workGroupService: WorkGroupService
   ) {}
 
   async ngOnInit() {
@@ -515,9 +514,6 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         
         // Add to our tracking set to prevent duplicates when the subscription updates
         this.loadedTeamIds.add(savedTeam.id);
-        
-        // Add to the assigned teams
-        this.assignedTeams.push(savedComponentTeam);
         
         // Update the team counter
         this.teamCounter = Math.max(this.teamCounter, parseInt(savedTeam.id) + 1);
