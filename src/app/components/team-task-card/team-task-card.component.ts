@@ -29,7 +29,6 @@ export class TeamTaskCardComponent {
 
   constructor(
     private supabaseService: SupabaseService,
-    private teamsService: TeamsService,
     private mobileHomesService: MobileHomesService,
     private taskService: TaskService
   ) {
@@ -53,13 +52,25 @@ export class TeamTaskCardComponent {
         }
       }
     )
+    .on(
+      'postgres_changes',
+      { 
+        event: 'UPDATE',
+        schema: 'porton',
+        table: 'tasks'
+      },
+      async (payload: any) => {
+        let taskProgress = await this.taskService.getTaskProgressTypeByTaskProgressId(payload.new.task_progress_type_id);
+        if(taskProgress.task_progress_type_name == 'Završeno'){
+          window.location.reload();
+        }
+      }
+    )
     .subscribe();
   }
 
   getTaskIcon(): string{
     if (!this.task.taskType) return 'task_alt';
-
-    // let taskTypeName = await this.taskService.getTaskTypeByTaskTypeId(parseInt(this.task.taskType));
     
     const taskType = this.task.taskType.toLowerCase();
     if (taskType.includes('čišćenje') && taskType.includes('terase')) {
