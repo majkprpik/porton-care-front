@@ -52,6 +52,7 @@
                 }
               ],
               "sourceMap": true,
+              "optimization": false,
               "outputHashing": "all"
             },
             "development": {
