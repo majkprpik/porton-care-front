@@ -159,7 +159,6 @@
               class="member-card"
               *ngFor="let member of team.members"
               cdkDrag
-              (click)="logData(roleIcon[member.role], member.role)"
             >
               {{ member.firstName }} {{ member.lastName }}
               <mat-icon id="role-icon">{{ roleIcon[member.role] }}</mat-icon>

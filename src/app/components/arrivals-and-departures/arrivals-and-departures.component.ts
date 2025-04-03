@@ -39,7 +39,6 @@ export class ArrivalsAndDeparturesComponent {
   getTodaysArrivals(){
     this.mobileHomesService.getHomesWithTodaysStartDate().then(async (homes) => {
       this.arrivals = await Promise.all(homes.map(async (home) => {
-        console.log('Arrivals: ' + home.house_id + ' ' + home.house_availability_start_date);
         const house_number = await this.mobileHomesService.getHouseNumberByHouseId(home.house_id);
         return { ...home, house_number };
       }));
@@ -56,7 +55,6 @@ export class ArrivalsAndDeparturesComponent {
   getTodaysDepartures() {
     this.mobileHomesService.getHomesWithYesterdaysEndDate().then(async (homes) => {
       this.departures = await Promise.all(homes.map(async (home) => {
-        console.log('Departures: ' + home.house_id + ' ' + home.house_availability_end_date);
         const house_number = await this.mobileHomesService.getHouseNumberByHouseId(home.house_id);
         return { ...home, house_number };
       }));

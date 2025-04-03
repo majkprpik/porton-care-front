@@ -67,7 +67,6 @@ export class DamageReportCardComponent {
 
         this.images = await Promise.all(fetchedImages.map(async (image: any) => {
           const url = await this.storageService.getPublicUrlForImage(`task-${this.houseTask.taskId}/${image.name}`);
-          console.log('Generated URL:', url); 
           return { name: image.name, url };
         }));
     } catch (error) {
@@ -192,7 +191,6 @@ export class DamageReportCardComponent {
   }
 
   openCamera() {
-    console.log('Opening default camera app...');
     this.fileInput.nativeElement.click();
   }
 

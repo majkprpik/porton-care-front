@@ -64,15 +64,10 @@ export class DamageReportsComponent {
 
   async getAllProfilesByRole(role: string){
     this.maintenanceProfiles = await this.profileService.getAllProfilesByRole(role);
-    console.log(this.maintenanceProfiles);
   }
 
   isCommented(comment: string){
     return comment.split('\n')[1] ? true : false;
-  }
-
-  taskRepaired(){
-    console.log('Task repaired man!!');
   }
 
   onHouseRepaired(event: { taskId: number; isRepaired: boolean }){

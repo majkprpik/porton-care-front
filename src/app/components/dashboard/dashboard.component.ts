@@ -211,7 +211,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Real implementation for later:
     this.mobileHomesService.getHomesForDate(today)
       .then(homes => {
-        console.log('Fetched homes:', homes);
         this.mobileHomes = homes;
         this.filteredMobileHomes = [...homes]; // Initialize filtered homes
       });

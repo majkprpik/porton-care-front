@@ -69,7 +69,6 @@ export class RepairReportComponent {
     // Real implementation for later:
     this.mobileHomesService.getHomesForDate(today)
       .then(homes => {
-        console.log('Fetched homes:', homes);
         this.mobileHomes = homes;
         this.filteredMobileHomes = [...this.mobileHomes];
       });
@@ -88,7 +87,6 @@ export class RepairReportComponent {
   async onSubmit() {
     if (this.report.description && this.report.location) {
       let createdTask = await this.createRepairTaskForHouse();
-      console.log(this.report);
       if(createdTask && this.imagesToUpload.length > 0){
         this.uploadImages(createdTask);
       }
@@ -122,7 +120,6 @@ export class RepairReportComponent {
   }
 
   openCamera() {
-    console.log('Opening default camera app...');
     this.fileInput.nativeElement.click();
   }
 

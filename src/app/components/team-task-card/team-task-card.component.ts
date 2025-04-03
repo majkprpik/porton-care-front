@@ -102,27 +102,17 @@ export class TeamTaskCardComponent {
 
   startTask() {
     this.task.progressType = TaskProgressType.IN_PROGRESS;
-    console.log(
-      `Started cleaning house ${this.task.number}, status: ${this.task.progressType}`
-    );
-    // this.updateTeam();
     this.updateTaskProgressInSupabase(this.task);
   }
 
   pauseTask() {
     this.task.progressType = TaskProgressType.ASSIGNED;
-    console.log(
-      `Paused cleaning house ${this.task.number}, status: ${this.task.progressType}`
-    );
     // this.updateTeam();
     this.updateTaskProgressInSupabase(this.task);
   }
 
   finishTask() {
     this.task.progressType = TaskProgressType.COMPLETED;
-    console.log(
-      `Finished cleaning house ${this.task.number}, status: ${this.task.progressType}`
-    );
     // this.updateTeam();
     this.updateTaskProgressInSupabase(this.task);
   }

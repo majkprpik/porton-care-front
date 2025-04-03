@@ -44,8 +44,6 @@ export class TaskService {
         .single();
 
       if (error) throw error;
-      
-      console.log('Fetched data:', data);
 
       return data;
     } catch (error) {
@@ -68,7 +66,6 @@ export class TaskService {
 
       this.mobileHomesService.getHomesForDate(today)
         .then(homes => {
-          console.log('Fetched homes:', homes);
           this.mobileHomes = homes;
         });
 
@@ -77,9 +74,6 @@ export class TaskService {
       const houseIdList = existingHouseIds.map(house => house.house_id);
       const homes = await this.mobileHomesService.getHomesForDate(today);
       mobileHomesForRepair = homes.filter(home => houseIdList.includes(home.house_id));
-      
-      console.log("Mobile homes for repair: ");
-      console.log(mobileHomesForRepair);
 
       return mobileHomesForRepair;
     } catch (error) {
@@ -96,8 +90,6 @@ export class TaskService {
         .select('*')
 
       if (houseIdError) throw houseIdError;
-      
-      console.log('Task types:', taskTypes);
 
       return taskTypes;
     } catch (error) {
@@ -117,8 +109,6 @@ export class TaskService {
         .eq('task_type_id', taskTypeId)
 
       if (houseIdError) throw houseIdError;
-      
-      console.log('Taks ids:', existingHouseIds);
 
       return existingHouseIds;
     } catch (error) {

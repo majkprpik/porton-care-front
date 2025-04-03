@@ -118,7 +118,6 @@ export class AuthService {
         
         if (data.user) {
           userIds.push(data.user.id);
-          console.log(`Created user: ${email}`);
         }
       }
       

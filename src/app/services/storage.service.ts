@@ -23,8 +23,7 @@ export class StorageService {
         .storage
         .from('damage-reports-images')
         .upload(filePath, compressedImage);
-      
-      console.log('Upload response: ' + data);
+        
       if (storeImageError) throw storeImageError;
 
       const publicUrl = this.supabase.getClient()

@@ -18,9 +18,6 @@ export class MobileHomesService {
         .select('*');
 
       if (error) throw error;
-      
-      console.log('Fetched data:', data);
-
       // Return the data directly as it already matches our interface
       return data || [];
     } catch (error) {
@@ -41,8 +38,6 @@ export class MobileHomesService {
         .eq('house_availability_start_date', specificDateStr)
 
       if (error) throw error;
-      
-      console.log('Fetched houses for today: ', data);
 
       return data || [];
     } catch (error) {
@@ -67,8 +62,6 @@ export class MobileHomesService {
         .eq('house_availability_end_date', specificDateStr)
 
       if (error) throw error;
-      
-      console.log('Fetched houses for today: ', data);
 
       return data || [];
     } catch (error) {
@@ -88,7 +81,6 @@ export class MobileHomesService {
 
       if (error) throw error;
 
-      console.log('Updated house availability:', data);
       return data;
     } catch (error) {
       console.error('Error updating house availability:', error);
@@ -119,8 +111,7 @@ export class MobileHomesService {
         .eq('house_availability_id', houseAvailabilityId);
 
       if (error) throw error;
-
-      console.log('Updated house availability:', data);
+      
     } catch (error) {
       console.error('Error updating house availability:', error);
     }
@@ -149,8 +140,6 @@ export class MobileHomesService {
         .eq('house_availability_id', houseAvailabilityId);
 
       if (error) throw error;
-
-      console.log('Updated house availability:', data);
     }
     catch (error) {
       console.error('Error updating house availability:', error);
@@ -210,8 +199,6 @@ export class MobileHomesService {
                 ...houseTask,
             }))
       );
-      
-      console.log('Houses with repair tasks:', housesWithRepairTasks);
 
       return housesWithRepairTasks;
     } catch (error) {
@@ -397,8 +384,6 @@ export class MobileHomesService {
           if (insertError) throw insertError;
         }
       }
-      
-      console.log(`House ${houseId} locked successfully`);
     } catch (error) {
       console.error(`Error locking house ${houseId}:`, error);
       throw error;
@@ -445,8 +430,6 @@ export class MobileHomesService {
         console.error('Error updating task status:', updateError);
         throw updateError;
       }
-      
-      console.log(`Task ${taskId} updated to status: ${newStatus}`);
     } catch (error) {
       console.error(`Error updating task ${taskId}:`, error);
       throw error;

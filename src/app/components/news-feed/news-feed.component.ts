@@ -54,14 +54,12 @@ export class NewsFeedComponent implements OnInit {
 
   // Method to refresh the activity feed
   refreshFeed(): void {
-    console.log('Refreshing activity feed...');
     this.loadActivities();
   }
 
   // Method to load activities from a service (in a real app)
   private loadActivities(): void {
     // In a real app, this would call a service to fetch activities from the backend
-    console.log('Loading activities...');
     // For now, we're using the sample data defined above
   }
 }

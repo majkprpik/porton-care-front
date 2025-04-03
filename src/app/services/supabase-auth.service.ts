@@ -46,8 +46,6 @@ export class SupabaseAuthService {
           continue;
         }
 
-        console.log(`Created user ${user.email} with ID: ${data.user?.id}`);
-
         // Insert user role into profiles table
         // const { error: profileError } = await this.supabase
         //   .from('profiles')

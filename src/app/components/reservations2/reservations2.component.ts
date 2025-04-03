@@ -86,7 +86,7 @@ interface DragGhostData {
   styleUrl: './reservations2.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Reservations2Component implements OnInit, OnDestroy, AfterContentInit {
+export class Reservations2Component implements OnInit, OnDestroy {
   // Dates for columns
   dates: string[] = [];
   displayedColumns: string[] = ['room'];
@@ -191,14 +191,8 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
 
   constructor(
     private reservationsService: ReservationsService,
-    private changeDetectorRef: ChangeDetectorRef,
-    private ngZone: NgZone
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
-
-  ngAfterContentInit(): void {
-    console.log("Time diff: ");
-    console.log(new Date().getMilliseconds() - this.time.getMilliseconds())
-  }
 
   ngOnInit(): void {
     this.generateYearCalendar();
@@ -1212,17 +1206,13 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
   
   // Handle start of dragging a reservation
   onReservationDragStart(houseId: number, date: string, event: DragEvent): void {
-    console.log('Drag start event triggered', houseId, date);
     
     // Only allow dragging from the first day of a reservation
     const reservation = this.getReservation(houseId, date);
     if (!reservation || !reservation.isFirstDay || !event.dataTransfer) {
-      console.log('Drag prevented: not first day or no dataTransfer', reservation);
       event.preventDefault();
       return;
     }
-    
-    console.log('Valid drag start for reservation', reservation.reservationId);
     
     // Set drag data
     this.draggedReservationId = reservation.reservationId;
@@ -1301,7 +1291,6 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     
     // Check if this would be a valid drop
     const isValid = this.isValidDropTarget(houseId, date);
-    console.log('Drag enter', { houseId, date, isValid });
     
     // Add appropriate visual class
     const cell = event.target as HTMLElement;
@@ -1392,7 +1381,6 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
   // Helper method to check if a drop target is valid
   isValidDropTarget(houseId: number, date: string): boolean {
     if (!this.draggedStartDate || !this.draggedEndDate || !this.draggedDuration) {
-      console.log('Invalid drop: missing drag data');
       return false;
     }
     
@@ -1407,13 +1395,11 @@ export class Reservations2Component implements OnInit, OnDestroy, AfterContentIn
     
     // Same house as origin? (not invalid, but no point in allowing it)
     if (houseId === this.draggedFromHouseId) {
-      console.log('Same house drop - not invalid but not useful');
       return false;
     }
     
     // Check if the new date range is valid
     const hasOverlap = this.hasOverlappingReservations(houseId, newStartDate, newEndDate, this.draggedReservationId || undefined);
-    console.log('Drop target validation:', { houseId, date, hasOverlap, draggedDuration: this.draggedDuration });
     return !hasOverlap;
   }
   

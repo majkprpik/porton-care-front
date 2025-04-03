@@ -48,8 +48,6 @@ export class TeamDetailComponent implements OnInit {
       if (this.team && !this.team.tasks) {
         this.team.tasks = [];
       }
-
-      console.log(this.team);
       // Ensure all tasks have a progressType
       if (this.team?.tasks) {
         this.team.tasks.forEach((task) => {

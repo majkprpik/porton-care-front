@@ -139,7 +139,6 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   async getAllTaskTypes(){
     this.taskService.getAllTaskTypes()
     .then(taskTypes => {
-      console.log('Fetched task types:', taskTypes);
       this.taskTypes = taskTypes.filter(taskType => taskType.task_type_name != 'Punjenje' && taskType.task_type_name != 'Popravak');
       this.filteredTaskTypes = [...this.taskTypes];
       this.filteredTaskTypes.forEach(taskType => {
@@ -407,9 +406,6 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         this.teamStatus[teamId] = 'edited'; 
       }
 
-      console.log(this.availableStaff);
-      console.log(this.assignedTeams);
-
       // Handle the transfer
       transferArrayItem(
         event.previousContainer.data,
@@ -635,7 +631,6 @@ export class DailySheetComponent implements OnInit, OnDestroy {
               .then(() => {
                 // Update local task card's progress type
                 task.taskProgressType = 'Dodijeljeno';
-                console.log(`Task ${task.taskId} marked as "Dodijeljeno"`);
               })
               .catch(error => {
                 console.error(`Error updating task ${task.taskId} status:`, error);
@@ -674,8 +669,6 @@ export class DailySheetComponent implements OnInit, OnDestroy {
       
       // Refresh teams from Supabase to ensure consistency
       await this.teamsService.refreshTeams();
-      
-      console.log('Teams published and saved to Supabase');
       
       // Show success message
       // alert('Successfully published teams and locked all houses!');
@@ -722,10 +715,5 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         }
       }
     });
-  }
-
-  logData(data1: any, data2: any){
-    console.log("Data 1" + data1);
-    console.log("Data 2" + data2);
   }
 }

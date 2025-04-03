@@ -85,7 +85,6 @@ export class ReportUnscheduledTaskComponent {
 
     this.mobileHomesService.getHomesForDate(today)
     .then(homes => {
-      console.log('Fetched homes:', homes);
       this.mobileHomes = homes;
       this.filteredMobileHomes = [...this.mobileHomes];
     });
@@ -106,7 +105,6 @@ export class ReportUnscheduledTaskComponent {
   async getAllTaskTypes(){
     this.taskService.getAllTaskTypes()
     .then(taskTypes => {
-      console.log('Fetched task types:', taskTypes);
       this.taskTypes = taskTypes.filter(taskType => taskType.task_type_name != 'Punjenje' && taskType.task_type_name != 'Popravak');
       this.filteredTaskTypes = [...this.taskTypes];
     });
