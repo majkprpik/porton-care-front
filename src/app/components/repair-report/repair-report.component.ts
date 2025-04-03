@@ -97,7 +97,7 @@ export class RepairReportComponent {
   }
 
   async createRepairTaskForHouse(){
-    let createdTask = await this.taskService.createTaskForHouse(this.report.location, this.report.description, 'Popravak');
+    let createdTask = await this.taskService.createTaskForHouse(this.report.location, this.report.description, 'Popravak', false);
     let createdWorkGroup = await this.workGroupService.createWorkGroup();
     let createdWorkGroupTask = await this.workGroupService.createWorkGroupTask(createdWorkGroup.work_group_id, createdTask.task_id);
 

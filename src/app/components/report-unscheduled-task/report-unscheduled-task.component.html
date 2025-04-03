@@ -57,7 +57,7 @@
         <button mat-raised-button
                 color="primary"
                 type="submit"
-                [disabled]="!report.description || !report.location">
+                [disabled]="!report.location && !report.taskType">
           Prijavi zadatak
         </button>
       </form>

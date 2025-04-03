@@ -61,8 +61,7 @@ export class ReportUnscheduledTaskComponent {
     private location: Location,
     private router: Router,
     private mobileHomesService: MobileHomesService,
-    private taskService: TaskService,
-    private workGroupService: WorkGroupService
+    private taskService: TaskService
   ) {}
 
   ngOnInit(){
@@ -74,10 +73,9 @@ export class ReportUnscheduledTaskComponent {
     this.filterTaskTypes();
   }
 
-  async onSubmit() {
-    if (this.report.description && this.report.location && this.report.taskType) {
-      let createdTask = await this.createTaskForHouse();
-      console.log(this.report);
+  onSubmit() {
+    if (this.report.location && this.report.taskType) {
+      this.taskService.createTaskForHouse(this.report.location, this.report.description, this.report.taskType, true);
       this.router.navigate(['/']);
     }
   }
@@ -103,16 +101,6 @@ export class ReportUnscheduledTaskComponent {
         home.housename.toLowerCase().includes(search.toLowerCase())
       );
     });
-  }
-
-  async createTaskForHouse(){
-    let createdTask = await this.taskService.createTaskForHouse(this.report.location, this.report.description, this.report.taskType);
-    let createdWorkGroup = await this.workGroupService.createWorkGroup();
-    let createdWorkGroupTask = await this.workGroupService.createWorkGroupTask(createdWorkGroup.work_group_id, createdTask.task_id);
-
-    if(createdTask && createdWorkGroup && createdWorkGroupTask){
-      return createdTask;
-    }
   }
 
   async getAllTaskTypes(){

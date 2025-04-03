@@ -18,10 +18,16 @@ export class TaskService {
 
   }
 
-  async createTaskForHouse(houseId: string, description: string, taskTypeName: string){
+  async createTaskForHouse(houseId: string, description: string, taskTypeName: string, isAssigned: boolean){
     try {
       let taskTypeId = await this.getTaskTypeIdByTaskName(taskTypeName);
-      let taskProgressTypeId = await this.getTaskProgressTypeIdByTaskProgressTypeName('Nije dodijeljeno');
+      let taskProgressTypeId;
+
+      if(isAssigned){
+        taskProgressTypeId = await this.getTaskProgressTypeIdByTaskProgressTypeName('Dodijeljeno');
+      } else {
+        taskProgressTypeId = await this.getTaskProgressTypeIdByTaskProgressTypeName('Nije dodijeljeno');
+      }
 
       const { data, error } = await this.supabase.getClient()
         .schema('porton')
