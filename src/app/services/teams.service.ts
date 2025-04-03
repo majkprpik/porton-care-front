@@ -471,7 +471,6 @@ export class TeamsService {
       for (const team of teams) {
         await this.saveTeamToSupabase(team);
       }
-      window.location.reload();
     } catch (error) {
       console.error('Error saving teams to Supabase:', error);
     }

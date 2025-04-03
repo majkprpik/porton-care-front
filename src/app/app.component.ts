@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { StatsHeaderComponent } from './components/stats-header/stats-header.component';
 import { ProfileService } from './services/profile.service';
 import { HelperService } from './services/helper.service';
+import { SupabaseService } from './services/supabase.service';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,8 @@ export class AppComponent {
     private authService: AuthService,
     private router: Router,
     private profileService: ProfileService,
-    public helperService: HelperService
+    public helperService: HelperService,
+    private supabaseService: SupabaseService
   ) {
     this.router.events.subscribe(() => {
       this.isCanvasV2Route = this.router.url.includes('/infinite-canvas');
@@ -57,6 +59,8 @@ export class AppComponent {
     this.helperService.dimBackground.subscribe(res => {
       this.isBackgroundDimmed = res;
     })
+
+    this.supabaseService.listenToDatabaseChanges();
   }
 
   toggleMenu() {

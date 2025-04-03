@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { LockedTeam, Task } from '../../interfaces/team.interface';
 import { SupabaseService } from '../../services/supabase.service';
-import { TeamsService } from '../../services/teams.service';
 import { MobileHomesService } from '../../services/mobile-homes.service';
-import { TaskService } from '../../services/task.service';
 
 enum TaskProgressType {
   ASSIGNED = 'Dodijeljeno',
@@ -30,43 +28,22 @@ export class TeamTaskCardComponent {
   constructor(
     private supabaseService: SupabaseService,
     private mobileHomesService: MobileHomesService,
-    private taskService: TaskService
+    private cdr: ChangeDetectorRef
   ) {
         
   }
 
   ngOnInit(){
+    this.cdr.detectChanges();
     this.updateHouseOccupiedStatus();
-    this.supabaseService.listenToChanges(this.task.house || '')
-    .on(
-      'postgres_changes',
-      { 
-        event: 'UPDATE',
-        schema: 'porton',
-        table: 'house_availabilities'
-      },
-      async (payload: any) => {
-        let houseNumber = await this.mobileHomesService.getHouseNumberByHouseId(payload.new.house_id);
+    this.supabaseService.$houseAvailabilitiesUpdate.subscribe(async res => {
+      if(res){
+        let houseNumber = await this.mobileHomesService.getHouseNumberByHouseId(res.new.house_id);
         if(this.task.house == houseNumber) {
-          this.houseOccupied = !payload.new.has_departed;
-        }
+          this.houseOccupied = !res.new.has_departed;
+        }        
       }
-    )
-    .on(
-      'postgres_changes',
-      { 
-        event: 'UPDATE',
-        schema: 'porton',
-        table: 'tasks'
-      },
-      async (payload: any) => {
-        let taskProgress = await this.taskService.getTaskProgressTypeByTaskProgressId(payload.new.task_progress_type_id);
-        if(taskProgress.task_progress_type_name == 'Završeno'){
-          window.location.reload();
-        }
-      }
-    )
-    .subscribe();
+    });
   }
 
   getTaskIcon(): string{

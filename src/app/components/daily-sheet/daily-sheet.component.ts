@@ -21,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DeleteTeamModalComponent } from '../delete-team-modal/delete-team-modal.component';
 import { WorkGroupService } from '../../services/work-group.service';
 import { Router } from '@angular/router';
+import { SupabaseService } from '../../services/supabase.service';
 
 // Create a new interface for task cards
 interface TaskCard {
@@ -119,7 +120,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     private teamsService: TeamsService,
     private taskService: TaskService,
     private dialog: MatDialog,
-    private workGroupService: WorkGroupService
+    private workGroupService: WorkGroupService,
+    private supabaseService: SupabaseService
   ) {}
 
   async ngOnInit() {
@@ -127,6 +129,10 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     this.loadExistingTeams();
     this.getAllTaskTypes();
     this.availableStaff;
+
+    this.supabaseService.$tasksUpdate.subscribe(res => {
+      console.log(res);
+    });
   }
 
   ngOnDestroy() {
