@@ -129,7 +129,7 @@
           >
             <div 
               class="task-card"
-              *ngFor="let task of team.tasks"
+              *ngFor="let task of team.tasks | tasksSort"
               cdkDrag
               [class.task-finished]="task.taskProgressType == 'Završeno'"
             >

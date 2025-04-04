@@ -1,3 +1,4 @@
+import { WorkGroupTask } from './../../services/data.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MobileHomesService } from '../../services/mobile-homes.service';
@@ -23,6 +24,7 @@ import { WorkGroupService } from '../../services/work-group.service';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
 import { DataService } from '../../services/data.service';
+import { TasksSortPipe } from '../../pipes/tasks-sort.pipe';
 
 // Create a new interface for task cards
 interface TaskCard {
@@ -39,6 +41,7 @@ interface TaskCard {
   status: string;
   mobileHome: MobileHome; // Reference to the parent mobile home
   originalTaskListId: string; // Add this property
+  index?: number | null; // Add this property
 }
 
 interface Team {
@@ -61,7 +64,8 @@ interface Team {
     MatFormFieldModule,
     MatSelectModule,   
     MatOptionModule,
-    StaffRolesPipe
+    StaffRolesPipe,
+    TasksSortPipe
   ],
   templateUrl: './daily-sheet.component.html',
   styleUrls: ['./daily-sheet.component.scss']
@@ -101,6 +105,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     'Checkin': 'input',
   }
   taskProgressTypes: any;
+  workGroupTasks: any;
 
   // Computed property to get available staff (not assigned to any team)
   get availableStaff(): CleaningPerson[] {
@@ -128,14 +133,18 @@ export class DailySheetComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    await this.loadTodayData();
-    this.loadExistingTeams();
-    this.getAllTaskTypes();
-    this.availableStaff;
+    this.dataService.workGroupTasks$.subscribe((workGroupTasks) => {
+      this.workGroupTasks = workGroupTasks;
+    });
 
     this.dataService.taskProgressTypes$.subscribe((progressTypes) => {
       this.taskProgressTypes = progressTypes;
     });
+
+    await this.loadTodayData();
+    this.loadExistingTeams();
+    this.getAllTaskTypes();
+    this.availableStaff;
 
     this.supabaseService.$tasksUpdate.subscribe(res => {
       if(res && res.eventType == 'UPDATE'){
@@ -215,6 +224,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
         if (home.housetasks) {
           home.housetasks.forEach((task, index) => {
             if(task.taskTypeName != 'Punjenje' && task.taskTypeName != 'Popravak'){
+              let workGroupTask = this.workGroupTasks.find((workGroupTask: any) => workGroupTask.task_id == task.taskId);
+
               this.taskCards.push({
                 id: `${home.house_id}-${task.taskId}`,
                 houseId: home.house_id,
@@ -228,7 +239,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
                 endTime: task.endTime,
                 status: home.status?.toString() || home.availabilityname || '',
                 mobileHome: home,
-                originalTaskListId: `tasks-list-${task.taskTypeName}` // Set the original task list ID
+                originalTaskListId: `tasks-list-${task.taskTypeName}`, // Set the original task list ID
+                index: workGroupTask ? workGroupTask.index : null // Set the index if available
               });
             }
           });

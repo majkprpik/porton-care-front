@@ -27,6 +27,22 @@ export class WorkGroupService {
     }
   }
 
+  async getAllWorkGroups(): Promise<any>{
+    try{
+      const { data: existingWorkGroups, error: existingWorkGroupsError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_groups')
+        .select('*');
+
+      if(existingWorkGroupsError) throw existingWorkGroupsError;
+
+      return existingWorkGroups;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
   async getWorkGroupProfilesByWorkGroupId(workGroupId: number): Promise<any>{
     try{
       const { data: existingWorkGroup, error: existingWorkGroupError } = await this.supabaseService.getClient()
@@ -137,6 +153,25 @@ export class WorkGroupService {
     } catch (error){
       console.log(error);
       return {};
+    }
+  }
+
+  async updateWorkGroupTaskIndex(taskId: number, index: number){
+    try{
+      const { error: updateTaskError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_group_tasks')
+        .update({
+          index: index
+        })
+        .eq('task_id', taskId);
+
+      if(updateTaskError) throw updateTaskError
+
+      return true;
+    } catch(error) {
+      console.log(error);
+      return false;
     }
   }
 

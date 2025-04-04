@@ -10,6 +10,8 @@ import { TaskService } from '../../services/task.service';
 import { MobileHomesService } from '../../services/mobile-homes.service';
 import { DataService } from '../../services/data.service';
 import { combineLatest } from 'rxjs';
+import { TasksSortPipe } from '../../pipes/tasks-sort.pipe';
+import { WorkGroupService } from '../../services/work-group.service';
 
 enum TaskProgressType {
   ASSIGNED = 'Dodijeljeno',
@@ -23,7 +25,8 @@ enum TaskProgressType {
   imports: [
     CommonModule, 
     MatIconModule,
-    TeamTaskCardComponent
+    TeamTaskCardComponent,
+    TasksSortPipe,
   ],
   templateUrl: './team-detail.component.html',
   styleUrls: ['./team-detail.component.scss'],
@@ -36,13 +39,15 @@ export class TeamDetailComponent implements OnInit {
   progressTypes: any;
   houses: any;
   profiles: any;
+  workGroupTasks: any;
 
   constructor(
     private route: ActivatedRoute,
     private teamsService: TeamsService,
     private supabaseService: SupabaseService,
     private taskService: TaskService,
-    private dataService: DataService
+    private dataService: DataService,
+    private workGroupService: WorkGroupService
   ) {}
 
   ngOnInit() {
@@ -52,12 +57,14 @@ export class TeamDetailComponent implements OnInit {
       this.dataService.taskTypes$,
       this.dataService.taskProgressTypes$,
       this.dataService.houses$,
-      this.dataService.profiles$
-    ]).subscribe(([taskTypes, progressTypes, houses, profiles]) => {
+      this.dataService.profiles$,
+      this.dataService.workGroupTasks$,
+    ]).subscribe(([taskTypes, progressTypes, houses, profiles, workGroupTasks]) => {
       this.taskTypes = taskTypes;
       this.progressTypes = progressTypes;
       this.houses = houses;
-      this.profiles = profiles
+      this.profiles = profiles;
+      this.workGroupTasks = workGroupTasks;
     });
 
     this.teamsService.lockedTeams$.subscribe((teams) => {
@@ -73,18 +80,28 @@ export class TeamDetailComponent implements OnInit {
           if (!task.progressType) {
             task.progressType = TaskProgressType.ASSIGNED;
           }
+
+          let workGroupTask = this.workGroupTasks.find((workGroupTask: any) => workGroupTask.task_id == task.id);
+
+          if(workGroupTask){
+            if(task.id == workGroupTask.task_id){
+              task.index = workGroupTask.index;
+            }
+          }
         });
       }
     });
 
     this.supabaseService.$workGroupTasksUpdate.subscribe(async res => {
       if(res && res.eventType == 'INSERT'){
+        this.workGroupTasks.push(res.new);
         let task = await this.taskService.getTaskByTaskId(res.new.task_id);
 
         let team = this.teams.find((team: any) => team.id == res.new.work_group_id.toString());
         let houseNumber = this.houses.find((house: any) => house.house_id == task.house_id);
         let taskType = this.taskTypes.find((taskType: any) => taskType.task_type_id == task.task_type_id);
         let progressType = this.progressTypes.find((progressType: any) => progressType.task_progress_type_id == task.task_progress_type_id);
+        let workGroupTask = this.workGroupTasks.find((workGroupTask: any) => workGroupTask.work_group_id == team.id);
 
         if(!team.tasks.find((task: any) => task.id == res.new.task_id)){
           let newTask: Task = {
@@ -94,14 +111,16 @@ export class TeamDetailComponent implements OnInit {
             status: '',
             taskType: taskType.task_type_name,
             progressType: progressType.task_progress_type_name,
+            index: workGroupTask.index,
           }
-          
-          team.tasks.push(newTask);
+
+          team.tasks = [...team.tasks, newTask];
         }
       } else if(res && res.eventType == 'DELETE'){
         let team = this.teams.find((team: any) => team.id == res.old.work_group_id.toString());
         if(team){
           team.tasks = team.tasks.filter((task: any) => task.id != res.old.task_id);
+          this.workGroupTasks = this.workGroupTasks.filter((task: any) => task.task_id != res.old.task_id);
         }
       }
     });

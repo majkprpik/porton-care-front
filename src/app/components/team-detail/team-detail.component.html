@@ -13,7 +13,7 @@
     <h3>Zadaci</h3>
     <div class="homes-grid">
       <div 
-        *ngFor="let task of team.tasks" 
+        *ngFor="let task of team.tasks | tasksSort" 
       >
         <app-team-task-card
           [task]="task"

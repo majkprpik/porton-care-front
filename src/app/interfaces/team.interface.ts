@@ -15,6 +15,7 @@ export interface Task {
   house?: string;
   taskType?: string;
   progressType?: string;
+  index?: number | null;
 }
 
 export interface LockedTeam {

@@ -507,9 +507,13 @@ export class TeamsService {
         });
 
         tasksToAdd.forEach(task => {
-          this.workGroupService.createWorkGroupTask(workGroup.work_group_id, parseInt(task.id))
+          this.workGroupService.createWorkGroupTask(workGroup.work_group_id, parseInt(task.id));
         });
       }
+
+      team.tasks.forEach((task, index) => {
+        this.workGroupService.updateWorkGroupTaskIndex(parseInt(task.id), index);
+      });
 
       if (!team.members.length) {
         existingWorkGroupProfiles.forEach((profile: any) => 
