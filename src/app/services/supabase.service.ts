@@ -73,12 +73,6 @@ export class SupabaseService {
     return data;
   }
 
-  listenToChanges(houseNumber: string) {
-    const channel = this.supabase.channel('realtime:porton' + houseNumber);
-
-    return channel;
-  }
-
   listenToDatabaseChanges(){
     this.supabase.channel('realtime:porton')
     .on(
