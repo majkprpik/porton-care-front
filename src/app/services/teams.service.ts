@@ -586,6 +586,10 @@ export class TeamsService {
     this.saveLockedTeams(this.defaultTeams);
   }
 
+  updateLockedTeams(teams: LockedTeam[]) {
+    this.lockedTeams.next(teams);
+  }	
+
   // Add a public method to refresh teams from Supabase
   async refreshTeams() {
     await this.loadTeamsFromSupabase();

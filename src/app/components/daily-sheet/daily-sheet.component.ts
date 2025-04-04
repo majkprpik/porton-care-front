@@ -22,6 +22,7 @@ import { DeleteTeamModalComponent } from '../delete-team-modal/delete-team-modal
 import { WorkGroupService } from '../../services/work-group.service';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
+import { DataService } from '../../services/data.service';
 
 // Create a new interface for task cards
 interface TaskCard {
@@ -99,6 +100,7 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     'Checkout': 'exit_to_app',
     'Checkin': 'input',
   }
+  taskProgressTypes: any;
 
   // Computed property to get available staff (not assigned to any team)
   get availableStaff(): CleaningPerson[] {
@@ -121,7 +123,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     private taskService: TaskService,
     private dialog: MatDialog,
     private workGroupService: WorkGroupService,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private dataService: DataService
   ) {}
 
   async ngOnInit() {
@@ -130,8 +133,26 @@ export class DailySheetComponent implements OnInit, OnDestroy {
     this.getAllTaskTypes();
     this.availableStaff;
 
+    this.dataService.taskProgressTypes$.subscribe((progressTypes) => {
+      this.taskProgressTypes = progressTypes;
+    });
+
     this.supabaseService.$tasksUpdate.subscribe(res => {
-      console.log(res);
+      if(res && res.eventType == 'UPDATE'){
+        let task;
+
+        for (let team of this.assignedTeams) {
+          task = team.tasks.find((task: any) => task.taskId == res.new.task_id);
+          if (task) {
+            break;
+          }
+        }
+
+        if(task){
+          let taskProgressType = this.taskProgressTypes.find((taskType: any) => taskType.task_progress_type_id == res.new.task_progress_type_id);
+          task.taskProgressType = taskProgressType.task_progress_type_name;
+        }
+      }
     });
   }
 
@@ -633,16 +654,18 @@ export class DailySheetComponent implements OnInit, OnDestroy {
           // Update each task's progress type to "Dodijeljeno"
           for (const task of teamObj.tasks) {
             // Update task progress type in Supabase
-            const updatePromise = this.mobileHomesService.updateTaskStatus(task.taskId, 'Dodijeljeno')
-              .then(() => {
-                // Update local task card's progress type
-                task.taskProgressType = 'Dodijeljeno';
-              })
-              .catch(error => {
-                console.error(`Error updating task ${task.taskId} status:`, error);
-              });
-            
-            updateTaskPromises.push(updatePromise);
+            if(task.taskProgressType == 'Nije dodijeljeno'){
+              const updatePromise = this.mobileHomesService.updateTaskStatus(task.taskId, 'Dodijeljeno')
+                .then(() => {
+                  // Update local task card's progress type
+                  task.taskProgressType = 'Dodijeljeno';
+                })
+                .catch(error => {
+                  console.error(`Error updating task ${task.taskId} status:`, error);
+                });
+              
+              updateTaskPromises.push(updatePromise);
+            }
           }
         }
       }
@@ -662,6 +685,8 @@ export class DailySheetComponent implements OnInit, OnDestroy {
               uniqueHouseIds.add(houseTask.houseId);
             }
           });
+
+          this.teamStatus[team.id] = 'published';
           
           // Lock each house
           for (const houseId of uniqueHouseIds) {

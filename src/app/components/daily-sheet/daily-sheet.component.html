@@ -37,6 +37,7 @@
         *ngFor="let task of taskCards"
         cdkDrag
         [ngClass]="{'task-available': task.taskProgressType === 'Nije dodijeljeno'}"
+        [class.task-finished]="task.taskProgressType == 'Završeno'"
       >
       <div class="task-number">{{ task.houseNumber }}</div>
       <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>
@@ -69,6 +70,7 @@
             class="task-card"
             *ngFor="let task of taskCards | tasksFilter: [filteredTaskType.task_type_name]"
             cdkDrag
+            [class.task-finished]="task.taskProgressType == 'Završeno'"
           >
             <div class="task-number">{{ task.houseNumber }}</div>
             <mat-icon class="task-indicator">{{ getTaskIndicator(task) }}</mat-icon>

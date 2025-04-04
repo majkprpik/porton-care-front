@@ -86,16 +86,18 @@ export class TeamDetailComponent implements OnInit {
         let taskType = this.taskTypes.find((taskType: any) => taskType.task_type_id == task.task_type_id);
         let progressType = this.progressTypes.find((progressType: any) => progressType.task_progress_type_id == task.task_progress_type_id);
 
-        let newTask: Task = {
-          id: task.task_id.toString(),
-          number: task.task_id.toString(),
-          house: houseNumber.house_number,
-          status: '',
-          taskType: taskType.task_type_name,
-          progressType: progressType.task_progress_type_name,
+        if(!team.tasks.find((task: any) => task.id == res.new.task_id)){
+          let newTask: Task = {
+            id: task.task_id.toString(),
+            number: task.task_id.toString(),
+            house: houseNumber.house_number,
+            status: '',
+            taskType: taskType.task_type_name,
+            progressType: progressType.task_progress_type_name,
+          }
+          
+          team.tasks.push(newTask);
         }
-        
-        team.tasks.push(newTask);
       } else if(res && res.eventType == 'DELETE'){
         let team = this.teams.find((team: any) => team.id == res.old.work_group_id.toString());
         if(team){
@@ -109,12 +111,14 @@ export class TeamDetailComponent implements OnInit {
         let team = this.teams.find((team: any) => team.id == res.new.work_group_id.toString());
         let profile = this.profiles.find((profile: any) => profile.id == res.new.profile_id);
 
-        let newStaff: Staff = {
-          id: res.new.profile_id,
-          name: profile.first_name + ' ' + profile.last_name,
+        if(!team.members.find((member: any) => member.id == res.new.profile_id)){
+          let newStaff: Staff = {
+            id: res.new.profile_id,
+            name: profile.first_name + ' ' + profile.last_name,
+          }
+  
+          team.members.push(newStaff);
         }
-
-        team.members.push(newStaff);
       } else if(res && res.eventType == 'DELETE'){
         let team = this.teams.find((team: any) => team.id == res.old.work_group_id.toString());
         if(team){

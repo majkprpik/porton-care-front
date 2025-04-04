@@ -13,6 +13,7 @@ export class SupabaseService {
   $tasksUpdate = new BehaviorSubject<any>('');
   $workGroupTasksUpdate = new BehaviorSubject<any>('');
   $workGroupProfiles = new BehaviorSubject<any>('');
+  $workGroups = new BehaviorSubject<any>('');
 
   constructor() {
     this.supabase = createClient(
@@ -116,6 +117,17 @@ export class SupabaseService {
       async (payload: any) => {
         this.$workGroupProfiles.next(payload);
       }
-    ).subscribe();
+    ).on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'porton',
+        table: 'work_groups'
+      },
+      async (payload: any) => {
+        this.$workGroups.next(payload);
+      }
+    )
+    .subscribe();
   }
 }
