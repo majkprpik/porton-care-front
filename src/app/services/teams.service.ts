@@ -513,7 +513,7 @@ export class TeamsService {
 
       if (!team.members.length) {
         existingWorkGroupProfiles.forEach((profile: any) => 
-          this.workGroupService.deleteWorkGroupProfileByProfileId(profile.id)
+          this.workGroupService.deleteWorkGroupProfileByProfileId(profile.profile_id)
         );
       } else {
         const profilesToDelete = existingWorkGroupProfiles.filter((profile: any) => !team.members.some(member => member.id == profile.profile_id));
