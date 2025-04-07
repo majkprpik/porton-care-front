@@ -135,7 +135,7 @@ export class WorkGroupService {
     }
   }
 
-  async createWorkGroupTask(workGroupId: number, taskId: number){
+  async createWorkGroupTask(workGroupId: number, taskId: number, index: number){
     try{
       const { data: newWorkGroupTask, error: createWorkGroupTaskError } = await this.supabaseService.getClient()
         .schema('porton')
@@ -143,6 +143,7 @@ export class WorkGroupService {
         .insert({ 
           work_group_id: workGroupId,
           task_id: taskId,
+          index: index,
          })
         .select()
         .single();
@@ -192,13 +193,14 @@ export class WorkGroupService {
     }
   }
 
-  async deleteWorkGroupProfileByProfileId(profileId: string){
+  async deleteWorkGroupProfile(profileId: string, workGroupId: number){
     try{
       const { error: deleteWorkGroupProfileError } = await this.supabaseService.getClient()
         .schema('porton')
         .from('work_group_profiles')
         .delete()
-        .eq('profile_id', profileId);
+        .eq('profile_id', profileId)
+        .eq('work_group_id', workGroupId);
 
       if(deleteWorkGroupProfileError) throw deleteWorkGroupProfileError
 
@@ -209,13 +211,31 @@ export class WorkGroupService {
     }
   }
 
-  async deleteWorkGroupTaskByTaskId(taskId: string){
+  async deleteWorkGroupTask(taskId: number, workGroupId: number){
     try{
       const { error: deleteWorkGroupTaskError } = await this.supabaseService.getClient()
         .schema('porton')
         .from('work_group_tasks')
         .delete()
-        .eq('task_id', taskId);
+        .eq('task_id', taskId)
+        .eq('work_group_id', workGroupId);
+
+      if(deleteWorkGroupTaskError) throw deleteWorkGroupTaskError
+
+      return true;
+    } catch(error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  async deleteAllWorkGroupTasksByWorkGroupId(workGroupId: number){
+    try{
+      const { error: deleteWorkGroupTaskError } = await this.supabaseService.getClient()
+        .schema('porton')
+        .from('work_group_tasks')
+        .delete()
+        .eq('work_group_id', workGroupId);
 
       if(deleteWorkGroupTaskError) throw deleteWorkGroupTaskError
 

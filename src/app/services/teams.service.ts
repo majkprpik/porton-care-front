@@ -487,48 +487,36 @@ export class TeamsService {
         this.workGroupService.lockWorkGroup(workGroup.work_group_id);
       }
 
-      let existingWorkGroupTasks = await this.workGroupService.getWorkGroupTasksByWorkGroupId(parseInt(team.id));
       let existingWorkGroupProfiles = await this.workGroupService.getWorkGroupProfilesByWorkGroupId(parseInt(team.id));
 
       if(team.tasks?.length == 0){
-        existingWorkGroupTasks.forEach(task => {
-          this.workGroupService.deleteWorkGroupTaskByTaskId(task.task_id);
-        });
+        await this.workGroupService.deleteAllWorkGroupTasksByWorkGroupId(workGroup.work_group_id);
       } else {
         if(!team.tasks){
           team.tasks = [];
         }
 
-        const tasksToDelete = existingWorkGroupTasks.filter((task: any) => !team.tasks?.some(t => t.id == task.task_id.toString()));
-        const tasksToAdd = team.tasks.filter(task => !existingWorkGroupTasks.some(t => t.task_id.toString() == task.id));
-      
-        tasksToDelete.forEach(task => {
-          this.workGroupService.deleteWorkGroupTaskByTaskId(task.task_id)
-        });
+        await this.workGroupService.deleteAllWorkGroupTasksByWorkGroupId(workGroup.work_group_id);
 
-        tasksToAdd.forEach(task => {
-          this.workGroupService.createWorkGroupTask(workGroup.work_group_id, parseInt(task.id));
+        team.tasks.forEach((task, index) => {
+          this.workGroupService.createWorkGroupTask(workGroup.work_group_id, parseInt(task.id), index);
         });
       }
 
-      team.tasks.forEach((task, index) => {
-        this.workGroupService.updateWorkGroupTaskIndex(parseInt(task.id), index);
-      });
-
       if (!team.members.length) {
         existingWorkGroupProfiles.forEach((profile: any) => 
-          this.workGroupService.deleteWorkGroupProfileByProfileId(profile.profile_id)
+          this.workGroupService.deleteWorkGroupProfile(profile.profile_id, workGroup.work_group_id)
         );
       } else {
         const profilesToDelete = existingWorkGroupProfiles.filter((profile: any) => !team.members.some(member => member.id == profile.profile_id));
         const profilesToAdd = team.members.filter(member => !existingWorkGroupProfiles.some((profile: any) => profile.profile_id == member.id));
       
         profilesToDelete.forEach((profile: any) => {
-          this.workGroupService.deleteWorkGroupProfileByProfileId(profile.profile_id)
+          this.workGroupService.deleteWorkGroupProfile(profile.profile_id, workGroup.work_group_id);
         });
       
         profilesToAdd.forEach(profile => {
-          this.workGroupService.createWorkGroupProfile(workGroup.work_group_id, profile.id)
+          this.workGroupService.createWorkGroupProfile(workGroup.work_group_id, profile.id);
         });
       }
     } catch (error) {

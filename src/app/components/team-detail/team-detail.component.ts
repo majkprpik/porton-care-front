@@ -101,7 +101,7 @@ export class TeamDetailComponent implements OnInit {
         let houseNumber = this.houses.find((house: any) => house.house_id == task.house_id);
         let taskType = this.taskTypes.find((taskType: any) => taskType.task_type_id == task.task_type_id);
         let progressType = this.progressTypes.find((progressType: any) => progressType.task_progress_type_id == task.task_progress_type_id);
-        let workGroupTask = this.workGroupTasks.find((workGroupTask: any) => workGroupTask.work_group_id == team.id);
+        let workGroupTask = this.workGroupTasks.find((workGroupTask: any) => workGroupTask.task_id == task.task_id);
 
         if(!team.tasks.find((task: any) => task.id == res.new.task_id)){
           let newTask: Task = {
@@ -141,7 +141,7 @@ export class TeamDetailComponent implements OnInit {
       } else if(res && res.eventType == 'DELETE'){
         let team = this.teams.find((team: any) => team.id == res.old.work_group_id.toString());
         if(team){
-          team.members = team.members.filter((member: any) => member.id == res.old.profile_id);
+          team.members = team.members.filter((member: any) => member.id != res.old.profile_id);
         }
       }
     });
